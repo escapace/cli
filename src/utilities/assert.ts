@@ -149,7 +149,7 @@ const assertions = {
   },
   command(
     value: unknown,
-    model?: { state: CommandState; log: CommandActions[] }
+    model?: { state: CommandState; log: CommandActions }
   ): asserts value is Command {
     const state = extract(value as Command)[SYMBOL_STATE]
 
@@ -189,7 +189,7 @@ const assertions = {
   },
   input(
     value: unknown,
-    model: { state: CommandState; log: CommandActions[] }
+    model: { state: CommandState; log: CommandActions }
   ): asserts value is Input {
     const state = extract(value as Input)[SYMBOL_STATE]
 

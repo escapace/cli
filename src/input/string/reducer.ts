@@ -6,7 +6,7 @@ import { Actions, State } from './types'
 
 export const reducer = (
   values: InitialStringValue[],
-  model: { state: State; log: Actions[] }
+  model: { state: State; log: Actions }
 ) => {
   if (isEmpty(values)) {
     return model.state.default

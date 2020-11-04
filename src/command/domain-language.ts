@@ -21,7 +21,7 @@ import {
   TypeAction
 } from './types'
 
-export const fluentReducer = (log: Actions[]): State => {
+export const fluentReducer = (log: Actions): State => {
   const reference = (find(
     log,
     (action) => action.type === TypeAction.Reference

@@ -53,7 +53,7 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
 
 type ValuesInput<
   T extends Actions,
-  U = $.Cast<Payload<T, TypeAction.Input>, Input>[typeof SYMBOL_STATE]
+  U = $.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>[typeof SYMBOL_STATE]
 > = $.Cast<
   UnionToIntersection<
     U extends { reference: infer X; reducer: infer Y }
@@ -65,7 +65,10 @@ type ValuesInput<
 
 type ValuesCommand<
   T extends Actions,
-  U = $.Cast<Payload<T, TypeAction.Subcommand>, Command>[typeof SYMBOL_STATE]
+  U = $.Cast<
+    Payload<$.Values<T>, TypeAction.Subcommand>,
+    Command
+  >[typeof SYMBOL_STATE]
 > = U extends {
   // UnionToIntersection<
   type: typeof SYMBOL_COMMAND
@@ -78,7 +81,7 @@ type ValuesCommand<
 // >
 
 type Values<T extends Actions> = $.If<
-  $.Is.Never<Payload<T, TypeAction.Input, never>>,
+  $.Is.Never<Payload<$.Values<T>, TypeAction.Input, never>>,
   ValuesCommand<T>,
   ValuesInput<T>
 >
@@ -121,13 +124,14 @@ export interface ActionReducer<T = unknown> {
   payload: CommandReducer<T>
 }
 
-export type Actions =
+export type Actions = Array<
   | ActionDescription
   | ActionInput
   | ActionName
   | ActionReducer
   | ActionReference
   | ActionSubcommand
+>
 
 export interface Interface<T extends Model<State, Actions>>
   extends FluentInterface<T> {
@@ -141,7 +145,7 @@ export interface Interface<T extends Model<State, Actions>>
   input: <
     U extends Input,
     A extends Input[typeof SYMBOL_STATE] = $.Cast<
-      Payload<T['log'], TypeAction.Input>,
+      Payload<$.Values<T['log']>, TypeAction.Input>,
       Input
     >[typeof SYMBOL_STATE],
     B extends Input[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE]
@@ -161,7 +165,7 @@ export interface Interface<T extends Model<State, Actions>>
   subcommand: <
     U extends Command,
     A extends Command[typeof SYMBOL_STATE] = $.Cast<
-      Payload<T['log'], TypeAction.Subcommand>,
+      Payload<$.Values<T['log']>, TypeAction.Subcommand>,
       Command
     >[typeof SYMBOL_STATE],
     B extends Command[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE]
@@ -266,26 +270,28 @@ declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
     [COMMAND_INTERFACE]: Interface<$.Cast<A, Model<State>>>
     [COMMAND_SPECIFICATION]: Specification<$.Cast<A, Model<State>>>
-    [COMMAND_REDUCER]: Reducer<$.Cast<A, Action>>
+    [COMMAND_REDUCER]: Reducer<$.Cast<A, Action[]>>
   }
 }
 
-export interface Reducer<T extends Action> {
+export interface Reducer<T extends Action[]> {
   [TypeAction.Reference]: {
-    reference: Payload<T, TypeAction.Reference>
+    reference: Payload<$.Values<T>, TypeAction.Reference>
   }
   [TypeAction.Name]: {
-    names: Array<Payload<T, TypeAction.Name>>
+    names: Array<Payload<$.Values<T>, TypeAction.Name>>
   }
   [TypeAction.Description]: {
     description: string
   }
   [TypeAction.Subcommand]: {
     isEmpty: false
-    commands: Array<$.Cast<Payload<T, TypeAction.Subcommand>, Command>>
+    commands: Array<
+      $.Cast<Payload<$.Values<T>, TypeAction.Subcommand>, Command>
+    >
     options: Array<
       $.Cast<
-        Payload<T, TypeAction.Subcommand>,
+        Payload<$.Values<T>, TypeAction.Subcommand>,
         Command
       >[typeof SYMBOL_STATE] extends {
         options: Array<infer X>
@@ -295,7 +301,7 @@ export interface Reducer<T extends Action> {
     >
     variables: Array<
       $.Cast<
-        Payload<T, TypeAction.Subcommand>,
+        Payload<$.Values<T>, TypeAction.Subcommand>,
         Command
       >[typeof SYMBOL_STATE] extends {
         variables: Array<infer X>
@@ -304,36 +310,42 @@ export interface Reducer<T extends Action> {
         : never
     >
     reducer: $.If<
-      $.Is.Never<Payload<T, TypeAction.Reducer>>,
+      $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
       CommandReducer<ValuesCommand<T>>,
-      Payload<T, TypeAction.Reducer>
+      Payload<$.Values<T>, TypeAction.Reducer>
     >
   }
   [TypeAction.Input]: {
     isEmpty: false
-    inputs: Array<$.Cast<Payload<T, TypeAction.Input>, Input>>
+    inputs: Array<$.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>>
     options: Array<
-      $.Cast<Payload<T, TypeAction.Input>, Input>[typeof SYMBOL_STATE] extends {
+      $.Cast<
+        Payload<$.Values<T>, TypeAction.Input>,
+        Input
+      >[typeof SYMBOL_STATE] extends {
         options: Array<infer X>
       }
         ? X
         : never
     >
     variables: Array<
-      $.Cast<Payload<T, TypeAction.Input>, Input>[typeof SYMBOL_STATE] extends {
+      $.Cast<
+        Payload<$.Values<T>, TypeAction.Input>,
+        Input
+      >[typeof SYMBOL_STATE] extends {
         variables: Array<infer X>
       }
         ? X
         : never
     >
     reducer: $.If<
-      $.Is.Never<Payload<T, TypeAction.Reducer>>,
+      $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
       CommandReducer<ValuesInput<T>>,
-      Payload<T, TypeAction.Reducer>
+      Payload<$.Values<T>, TypeAction.Reducer>
     >
   }
   [TypeAction.Reducer]: {
-    reducer: Payload<T, TypeAction.Reducer>
+    reducer: Payload<$.Values<T>, TypeAction.Reducer>
   }
 }
 

@@ -59,11 +59,9 @@ export interface ActionOption<
   payload: FunctionTable<T, U>
 }
 
-export type Actions =
-  | ActionDefault
-  | ActionDescription
-  | ActionOption
-  | ActionReference
+export type Actions = Array<
+  ActionDefault | ActionDescription | ActionOption | ActionReference
+>
 
 export interface Interface<T extends Model<State, Actions>>
   extends FluentInterface<T> {
@@ -153,22 +151,22 @@ declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
     [INPUT_COUNT_INTERFACE]: Interface<$.Cast<A, Model<State>>>
     [INPUT_COUNT_SPECIFICATION]: Specification<$.Cast<A, Model<State>>>
-    [INPUT_COUNT_REDUCER]: Reducer<$.Cast<A, Action>>
+    [INPUT_COUNT_REDUCER]: Reducer<$.Cast<A, Action[]>>
   }
 }
 
-export interface Reducer<T extends Action> {
+export interface Reducer<T extends Action[]> {
   [TypeAction.Reference]: {
-    reference: Payload<T, TypeAction.Reference>
+    reference: Payload<$.Values<T>, TypeAction.Reference>
   }
   [TypeAction.Description]: {
     description: string
   }
   [TypeAction.Default]: {
-    default: Payload<T, TypeAction.Default>
+    default: Payload<$.Values<T>, TypeAction.Default>
   }
   [TypeAction.Option]: {
-    options: Payload<T, TypeAction.Option> extends {
+    options: Payload<$.Values<T>, TypeAction.Option> extends {
       increase: infer P
       decrease: infer Q
     }
@@ -202,5 +200,5 @@ export type InputCountReducer<
   U extends Model<State, Actions> = Model<State, Actions>
 > = (
   values: Values<U>,
-  model: { state: U['state']; log: Array<U['log']> }
+  model: { state: U['state']; log: U['log'] }
 ) => T | Promise<T>

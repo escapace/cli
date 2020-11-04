@@ -74,7 +74,7 @@ export interface ActionOption<T extends string = string> {
   }
 }
 
-export type Actions =
+export type Actions = Array<
   | ActionChoices
   | ActionDefault
   | ActionDescription
@@ -82,6 +82,7 @@ export type Actions =
   | ActionReference
   | ActionRepeat
   | ActionVariable
+>
 
 export type LookupChoices<T extends Model<State, Actions>> = $.Values<
   T['state']['choices']
@@ -208,44 +209,50 @@ declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
     [INPUT_CHOICE_INTERFACE]: Interface<$.Cast<A, Model<State>>>
     [INPUT_CHOICE_SPECIFICATION]: Specification<$.Cast<A, Model<State>>>
-    [INPUT_CHOICE_REDUCER]: Reducer<$.Cast<A, Action>>
+    [INPUT_CHOICE_REDUCER]: Reducer<$.Cast<A, Action[]>>
   }
 }
 
-export interface Reducer<T extends Action> {
+export interface Reducer<T extends Action[]> {
   [TypeAction.Reference]: {
-    reference: Payload<T, TypeAction.Reference>
+    reference: Payload<$.Values<T>, TypeAction.Reference>
   }
   [TypeAction.Description]: {
     description: string
   }
   [TypeAction.Choices]: {
-    choices: Payload<T, TypeAction.Choices>
+    choices: Payload<$.Values<T>, TypeAction.Choices>
     reducer: GenericInputChoiceReducer<
-      $.Values<Payload<T, TypeAction.Choices>> | undefined
+      $.Values<Payload<$.Values<T>, TypeAction.Choices>> | undefined
     >
   }
   [TypeAction.Repeat]: {
     repeat: true
-    reducer: GenericInputChoiceReducer<Payload<T, TypeAction.Choices>>
+    reducer: GenericInputChoiceReducer<Payload<$.Values<T>, TypeAction.Choices>>
   }
   [TypeAction.Default]: {
-    default: Payload<T, TypeAction.Default>
+    default: Payload<$.Values<T>, TypeAction.Default>
     reducer: $.If<
-      $.Is.Never<Payload<T, TypeAction.Repeat>>,
-      GenericInputChoiceReducer<$.Values<Payload<T, TypeAction.Choices>>>,
-      GenericInputChoiceReducer<Payload<T, TypeAction.Choices>>
+      $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
+      GenericInputChoiceReducer<
+        $.Values<Payload<$.Values<T>, TypeAction.Choices>>
+      >,
+      GenericInputChoiceReducer<Payload<$.Values<T>, TypeAction.Choices>>
     >
   }
   [TypeAction.Option]: {
     options: Array<
-      Payload<T, TypeAction.Option> extends { name: infer U } ? U : never
+      Payload<$.Values<T>, TypeAction.Option> extends { name: infer U }
+        ? U
+        : never
     >
     isEmpty: false
   }
   [TypeAction.Variable]: {
     variables: Array<
-      Payload<T, TypeAction.Variable> extends { name: infer U } ? U : never
+      Payload<$.Values<T>, TypeAction.Variable> extends { name: infer U }
+        ? U
+        : never
     >
     isEmpty: false
   }

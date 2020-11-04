@@ -68,12 +68,13 @@ export interface ActionOption<
   payload: TruthTable<T, U>
 }
 
-export type Actions =
+export type Actions = Array<
   | ActionDefault
   | ActionDescription
   | ActionOption
   | ActionReference
   | ActionVariable
+>
 
 export interface Interface<T extends Model<State, Actions>>
   extends FluentInterface<T> {
@@ -142,6 +143,7 @@ export interface InitialState extends SharedInitialState {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface Specification<_ extends Model<State>> {
   [TypeAction.Reference]: {
     [Options.Type]: typeof TypeAction.Reference
@@ -193,23 +195,23 @@ declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
     [INPUT_BOOLEAN_INTERFACE]: Interface<$.Cast<A, Model<State>>>
     [INPUT_BOOLEAN_SPECIFICATION]: Specification<$.Cast<A, Model<State>>>
-    [INPUT_BOOLEAN_REDUCER]: Reducer<$.Cast<A, Action>>
+    [INPUT_BOOLEAN_REDUCER]: Reducer<$.Cast<A, Action[]>>
   }
 }
 
-export interface Reducer<T extends Action> {
+export interface Reducer<T extends Action[]> {
   [TypeAction.Reference]: {
-    reference: Payload<T, TypeAction.Reference>
+    reference: Payload<$.Values<T>, TypeAction.Reference>
   }
   [TypeAction.Description]: {
     description: string
   }
   [TypeAction.Default]: {
-    default: Payload<T, TypeAction.Default>
+    default: Payload<$.Values<T>, TypeAction.Default>
     reducer: InputBooleanReducer<boolean>
   }
   [TypeAction.Option]: {
-    options: Payload<T, TypeAction.Option> extends {
+    options: Payload<$.Values<T>, TypeAction.Option> extends {
       true: infer P
       false: infer Q
     }
@@ -218,7 +220,7 @@ export interface Reducer<T extends Action> {
     isEmpty: false
   }
   [TypeAction.Variable]: {
-    variables: Payload<T, TypeAction.Variable> extends {
+    variables: Payload<$.Values<T>, TypeAction.Variable> extends {
       true: infer P
       false: infer Q
     }
@@ -261,5 +263,5 @@ export type InputBooleanReducer<
   U extends Model<State, Actions> = Model<State, Actions>
 > = (
   values: Values<U>,
-  model: { state: U['state']; log: Array<U['log']> }
+  model: { state: U['state']; log: U['log'] }
 ) => T | Promise<T>

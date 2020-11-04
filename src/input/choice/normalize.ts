@@ -8,7 +8,7 @@ import { assign, map } from 'lodash-es'
 
 export const normalize = (
   values: InitialStringValue[],
-  model: { state: State; log: Actions[] }
+  model: { state: State; log: Actions }
 ) =>
   n({
     mode: NormalizeMode.String,

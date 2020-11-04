@@ -74,7 +74,7 @@ export interface ActionOption<T extends string = string> {
   }
 }
 
-export type Actions =
+export type Actions = Array<
   | ActionDefault
   | ActionDescription
   | ActionReducer
@@ -82,6 +82,7 @@ export type Actions =
   | ActionReference
   | ActionRepeat
   | ActionVariable
+>
 
 export type LookupDefault<T extends Model<State, Actions>> = $.If<
   $.Equal<T['state']['repeat'], true>,
@@ -202,13 +203,13 @@ declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
     [INPUT_STRING_INTERFACE]: Interface<$.Cast<A, Model<State>>>
     [INPUT_STRING_SPECIFICATION]: Specification<$.Cast<A, Model<State>>>
-    [INPUT_STRING_REDUCER]: Reducer<$.Cast<A, Action>>
+    [INPUT_STRING_REDUCER]: Reducer<$.Cast<A, Action[]>>
   }
 }
 
-export interface Reducer<T extends Action> {
+export interface Reducer<T extends Action[]> {
   [TypeAction.Reference]: {
-    reference: Payload<T, TypeAction.Reference>
+    reference: Payload<$.Values<T>, TypeAction.Reference>
   }
   [TypeAction.Description]: {
     description: string
@@ -218,25 +219,29 @@ export interface Reducer<T extends Action> {
     reducer: GenericInputStringReducer<string[]>
   }
   [TypeAction.Default]: {
-    default: Payload<T, TypeAction.Default>
+    default: Payload<$.Values<T>, TypeAction.Default>
     reducer: $.If<
-      $.Is.Never<Payload<T, TypeAction.Repeat>>,
+      $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
       GenericInputStringReducer<string>,
       GenericInputStringReducer<string[]>
     >
   }
   [TypeAction.Reducer]: {
-    reducer: Payload<T, TypeAction.Reducer>
+    reducer: Payload<$.Values<T>, TypeAction.Reducer>
   }
   [TypeAction.Option]: {
     options: Array<
-      Payload<T, TypeAction.Option> extends { name: infer U } ? U : never
+      Payload<$.Values<T>, TypeAction.Option> extends { name: infer U }
+        ? U
+        : never
     >
     isEmpty: false
   }
   [TypeAction.Variable]: {
     variables: Array<
-      Payload<T, TypeAction.Variable> extends { name: infer U } ? U : never
+      Payload<$.Values<T>, TypeAction.Variable> extends { name: infer U }
+        ? U
+        : never
     >
     isEmpty: false
   }
@@ -275,7 +280,7 @@ export type InputStringReducer<
   U extends Model<State, Actions> = Model<State, Actions>
 > = (
   values: Values<U>,
-  model: { state: U['state']; log: Array<U['log']> }
+  model: { state: U['state']; log: U['log'] }
 ) => T | Promise<T>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

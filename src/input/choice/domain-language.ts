@@ -19,7 +19,7 @@ import {
 import { settingsVariable } from '../../constants'
 import { reducer } from './reducer'
 
-export const fluentReducer = (log: Actions[]): State => {
+export const fluentReducer = (log: Actions): State => {
   const reference = (find(
     log,
     (action) => action.type === TypeAction.Reference
