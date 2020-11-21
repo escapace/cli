@@ -6,7 +6,7 @@
   "bugs": "https://github.com/escapace/cli/issues",
   "dependencies": {
     "@escapace/fluent": "^3.0.0",
-    "@escapace/typelevel": "^0.6.2",
+    "@escapace/typelevel": "^1.0.0",
     "arg": "^4.1.3",
     "tslib": "^2.0.3"
   },
