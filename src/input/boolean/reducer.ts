@@ -1,7 +1,7 @@
 import { InputBooleanReducer } from './types'
 import { isEmpty, map, uniq } from 'lodash-es'
 import { InputType } from '../../types'
-import { message } from '../../utilities/message'
+import { message } from '../../utility/message'
 
 const invert = (value: boolean, pass: boolean) => (value ? pass : !pass)
 const toBool = (value: string) => /^(yes|y|true|t|on|1)$/i.test(value)

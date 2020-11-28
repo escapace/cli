@@ -46,8 +46,8 @@ describe('input/choice/reducer', () => {
     assert.equal(spy.callCount, 1)
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      reference: 'cmd',
-      value: { _: [], choice: ['DD'] }
+      _: [],
+      choice: ['DD']
     })
 
     await cmd({ argv: ['command', '-c', 'CC'], env: { CHOICE: 'AA:BB' } })
@@ -55,8 +55,8 @@ describe('input/choice/reducer', () => {
     assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      reference: 'cmd',
-      value: { _: [], choice: ['CC', 'AA', 'BB'] }
+      _: [],
+      choice: ['CC', 'AA', 'BB']
     })
   })
 

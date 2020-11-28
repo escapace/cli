@@ -2,7 +2,7 @@ import {
   normalize as n,
   NormalizeMode,
   InitialStringValue
-} from '../../utilities/normalize'
+} from '../../utility/normalize'
 import { State, Actions, TypeAction } from './types'
 import { assign, map } from 'lodash-es'
 

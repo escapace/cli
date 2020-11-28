@@ -1,0 +1,27 @@
+- title: Software Development
+  content:
+    - src/software-development/business-strategy-context-analysis/000-business-strategy-context-analysis-header.md
+    - src/software-development/business-strategy-context-analysis/001-context-map.md
+    - src/software-development/business-strategy-context-analysis/002-business-intent.md
+    - src/software-development/business-strategy-context-analysis/003-product-definition.md
+    - src/software-development/business-strategy-context-analysis/004-performance-measures.md
+    - src/software-development/content-strategy/000-content-strategy-header.md
+    - src/software-development/content-strategy/001-content-governance.md
+    - src/software-development/content-strategy/002-content-creation.md
+    - src/software-development/content-strategy/003-micro-transactional-copy.md
+    - src/software-development/information-architecture/000-information-architecture-header.md
+    - src/software-development/information-architecture/001-information-relationship.md
+    - src/software-development/information-architecture/001-information-organization.md
+    - src/software-development/marketing/000-marketing-header.md
+    - src/software-development/marketing/001-competitor-analysis.md
+    - src/software-development/marketing/002-naming.md
+    - src/software-development/marketing/003-pitch.md
+    - src/software-development/usability-engineering/000-usability-engineering-header.md
+    - src/software-development/usability-engineering/001-accessibility-requirements.md
+    - src/software-development/usability-engineering/002-research-strategy.md
+    - src/software-development/usability-engineering/003-user-research-discovery.md
+    - src/software-development/usability-engineering/004-synthesis.md
+    - src/software-development/usability-engineering/005-user-research-design.md
+    - src/software-development/user-experience-design/000-user-experience-design-header.md
+    - src/software-development/user-experience-design/001-user-experience-brief.md
+    - src/software-development/user-experience-design/002-jobs-to-be-done.md

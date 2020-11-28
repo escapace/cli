@@ -1,7 +1,7 @@
 import { builder, Options } from '@escapace/fluent'
 import { filter, find, some, map, assign, keys } from 'lodash-es'
 import { Reference, SYMBOL_INPUT_BOOLEAN } from '../../types'
-import { assert } from '../../utilities/assert'
+import { assert } from '../../utility/assert'
 import { reducer } from './reducer'
 import {
   ActionDefault,

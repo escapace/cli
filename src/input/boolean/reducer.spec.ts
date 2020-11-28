@@ -45,8 +45,8 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 1)
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      reference: 'cmd',
-      value: { _: [], bool: false }
+      _: [],
+      bool: false
     })
 
     await cmd({ argv: ['command', '--yes'], env: {} })
@@ -54,8 +54,8 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      reference: 'cmd',
-      value: { _: [], bool: true }
+      _: [],
+      bool: true
     })
 
     await cmd({ argv: ['command'], env: { YES: 'true' } })
@@ -63,8 +63,8 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 3)
 
     assert.deepEqual(spy.getCall(2).args[0], {
-      reference: 'cmd',
-      value: { _: [], bool: true }
+      _: [],
+      bool: true
     })
 
     await cmd({ argv: ['command', '--no'], env: {} })
@@ -72,8 +72,8 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 4)
 
     assert.deepEqual(spy.getCall(3).args[0], {
-      reference: 'cmd',
-      value: { _: [], bool: false }
+      _: [],
+      bool: false
     })
 
     await cmd({ argv: ['command'], env: { NO: 'TRUE' } })
@@ -81,8 +81,8 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 5)
 
     assert.deepEqual(spy.getCall(4).args[0], {
-      reference: 'cmd',
-      value: { _: [], bool: false }
+      _: [],
+      bool: false
     })
 
     await cmd({ argv: ['command'], env: { NO: 'FALSE' } })
@@ -90,8 +90,8 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 6)
 
     assert.deepEqual(spy.getCall(5).args[0], {
-      reference: 'cmd',
-      value: { _: [], bool: true }
+      _: [],
+      bool: true
     })
   })
 

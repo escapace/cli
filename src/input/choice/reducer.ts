@@ -4,8 +4,8 @@ import {
   normalize,
   NormalizeMode,
   InitialStringValue
-} from '../../utilities/normalize'
-import { message } from '../../utilities/message'
+} from '../../utility/normalize'
+import { message } from '../../utility/message'
 
 export const reducer = (
   values: InitialStringValue[],

@@ -2,13 +2,13 @@ import { command } from './domain-language'
 
 import { SYMBOL_LOG, SYMBOL_STATE, log, state } from '@escapace/fluent'
 import { assert } from 'chai'
-import { SYMBOL_COMMAND, LookupModel } from '../types'
+import { SYMBOL_COMMAND } from '../types'
 // import { TypeAction } from './types'
 import { reducer } from './reducer'
-import { TypeAction, CommandReducer } from './types'
+import { TypeAction, LookupReducer } from './types'
 import { boolean } from '../input/boolean/domain-language'
 import { count } from '../input/count/domain-language'
-import { extract } from '../utilities/extract'
+import { extract } from '../utility/extract'
 
 describe('command', () => {
   it('domain-language', () => {
@@ -93,7 +93,13 @@ describe('command', () => {
 
     const test3 = test2.description('desc')
 
-    assert.hasAllKeys(test3, [SYMBOL_LOG, SYMBOL_STATE, 'input', 'subcommand'])
+    assert.hasAllKeys(test3, [
+      SYMBOL_LOG,
+      SYMBOL_STATE,
+      'input',
+      'subcommand',
+      'reducer'
+    ])
 
     assert.deepEqual(log(test3), [
       {
@@ -183,9 +189,7 @@ describe('command', () => {
     })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const inputReducer: CommandReducer<any, LookupModel<typeof test4>> = (
-      values
-    ) => values
+    const inputReducer: LookupReducer<typeof test4, any> = (values) => values
 
     const test5 = test4.reducer(inputReducer)
 
@@ -297,9 +301,8 @@ describe('command', () => {
     })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const subcommandReducer: CommandReducer<any, LookupModel<typeof test6>> = (
+    const subcommandReducer: LookupReducer<typeof test6, any> = (values) =>
       values
-    ) => values
 
     const test7 = test6.reducer(subcommandReducer)
 
@@ -347,6 +350,49 @@ describe('command', () => {
       reducer: subcommandReducer,
       reference,
       variables: [...state(commandA).variables]
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const simpleReducer: LookupReducer<typeof test3, any> = (value) => value
+
+    const test8 = test3.reducer(simpleReducer)
+
+    assert.hasAllKeys(test8, [SYMBOL_LOG, SYMBOL_STATE])
+
+    assert.deepEqual(log(test8), [
+      {
+        type: TypeAction.Reducer,
+        payload: simpleReducer
+      },
+      {
+        type: TypeAction.Description,
+        payload: 'desc'
+      },
+      {
+        type: TypeAction.Name,
+        payload: 'qwe'
+      },
+      {
+        type: TypeAction.Name,
+        payload: 'abc'
+      },
+      {
+        type: TypeAction.Reference,
+        payload: reference
+      }
+    ])
+
+    assert.deepEqual(state(test8), {
+      type: SYMBOL_COMMAND,
+      commands: [],
+      description: 'desc',
+      inputs: [],
+      isEmpty: false,
+      names: ['qwe', 'abc'],
+      options: [],
+      reducer: simpleReducer,
+      reference,
+      variables: []
     })
   })
 })

@@ -23,9 +23,9 @@ import {
   SYMBOL_INPUT_COUNT,
   SYMBOL_INPUT_STRING
 } from '../types'
-import { extract } from '../utilities/extract'
+import { extract } from '../utility/extract'
 import { ActionInput, Command, Input, TypeAction } from './types'
-import { assert } from '../utilities/assert'
+import { assert } from '../utility/assert'
 
 // TODO: Better return type in TypeScript 4.0
 // Array<Array<Command | Input>>
@@ -71,25 +71,25 @@ interface Choice {
 const iterate = (root: Command): Choice[] => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const next = <U extends Command>(
-    model: U,
-    obj: Choice = { models: [], commands: [], spec: {} }
+    command: U,
+    choice: Choice = { models: [], commands: [], spec: {} }
   ): Choice[] => {
-    if (model[SYMBOL_STATE].commands.length !== 0) {
-      return flatMap(model[SYMBOL_STATE].names, (name) =>
-        flatMap(model[SYMBOL_STATE].commands, (value) =>
+    if (command[SYMBOL_STATE].commands.length !== 0) {
+      return flatMap(command[SYMBOL_STATE].names, (name) =>
+        flatMap(command[SYMBOL_STATE].commands, (value) =>
           next(value, {
-            ...obj,
-            commands: [...obj.commands, name],
-            models: union(obj.models, [model])
+            ...choice,
+            commands: [...choice.commands, name],
+            models: union(choice.models, [command])
           })
         )
       )
     } else {
-      return map(model[SYMBOL_STATE].names, (name) => ({
-        ...obj,
-        commands: [...obj.commands, name],
-        models: union(obj.models, [model]),
-        spec: spec(model)
+      return map(command[SYMBOL_STATE].names, (name) => ({
+        ...choice,
+        commands: [...choice.commands, name],
+        models: union(choice.models, [command]),
+        spec: spec(command)
       }))
     }
   }
@@ -207,10 +207,15 @@ export const compose = <T extends Command>(command: T) => {
 
       const current = task.models[task.models.length - index]
 
-      const valueNext = {
-        reference: current[SYMBOL_STATE].reference,
-        value: valuePrevious
-      }
+      const valueNext =
+        index === 1
+          ? assign({}, valuePrevious)
+          : {
+              reference:
+                task.models[task.models.length - index + 1][SYMBOL_STATE]
+                  .reference,
+              value: valuePrevious
+            }
 
       // TODO: error handling
       valuePrevious = await current[SYMBOL_STATE].reducer(valueNext, {

@@ -45,8 +45,8 @@ describe('input/count/reducer', () => {
     assert.equal(spy.callCount, 1)
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      reference: 'cmd',
-      value: { _: [], count: 2 }
+      _: [],
+      count: 2
     })
 
     await cmd({ argv: ['command', '-vv', '--quiet', '-v'], env: {} })
@@ -54,8 +54,8 @@ describe('input/count/reducer', () => {
     assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      reference: 'cmd',
-      value: { _: [], count: 2 }
+      _: [],
+      count: 2
     })
   })
 })

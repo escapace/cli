@@ -1,8 +1,8 @@
 import { builder, Options } from '@escapace/fluent'
 import { filter, find, some, assign, map, keys } from 'lodash-es'
 import { Reference, SYMBOL_INPUT_COUNT } from '../../types'
-import { assert } from '../../utilities/assert'
-import { fallback } from '../../utilities/fallback'
+import { assert } from '../../utility/assert'
+import { fallback } from '../../utility/fallback'
 import { reducer } from './reducer'
 import {
   ActionDefault,

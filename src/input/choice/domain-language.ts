@@ -1,8 +1,8 @@
 import { builder, Options } from '@escapace/fluent'
 import { defaults, filter, find, map, some, isArray, uniq } from 'lodash-es'
 import { Reference, SYMBOL_INPUT_CHOICE, SettingsVariable } from '../../types'
-import { assert } from '../../utilities/assert'
-import { fallback } from '../../utilities/fallback'
+import { assert } from '../../utility/assert'
+import { fallback } from '../../utility/fallback'
 import {
   ActionChoices,
   ActionDefault,

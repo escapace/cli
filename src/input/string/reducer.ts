@@ -1,6 +1,6 @@
 import { isEmpty, map, uniq } from 'lodash-es'
-import { message } from '../../utilities/message'
-import { InitialStringValue } from '../../utilities/normalize'
+import { message } from '../../utility/message'
+import { InitialStringValue } from '../../utility/normalize'
 import { normalize } from './normalize'
 import { Actions, State } from './types'
 

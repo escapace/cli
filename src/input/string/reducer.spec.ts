@@ -68,8 +68,8 @@ describe('input/string/reducer', () => {
     assert.equal(spy.callCount, 1)
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      reference: 'cmd',
-      value: { _: [], string: ['Yay'] }
+      _: [],
+      string: ['Yay']
     })
 
     await cmd({
@@ -80,8 +80,8 @@ describe('input/string/reducer', () => {
     assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      reference: 'cmd',
-      value: { _: [], string: ['!', 'Hello', 'World'] }
+      _: [],
+      string: ['!', 'Hello', 'World']
     })
   })
 
@@ -93,8 +93,8 @@ describe('input/string/reducer', () => {
     assert.equal(spy.callCount, 1)
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      reference: 'cmd',
-      value: { _: [], string: 'hello:world' }
+      _: [],
+      string: 'hello:world'
     })
   })
 
@@ -146,8 +146,8 @@ describe('input/string/reducer', () => {
     assert.deepEqual(spy.getCall(0).args[0], value)
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      reference: 'cmd',
-      value: { _: [], string: value }
+      _: [],
+      string: value
     })
   })
 })

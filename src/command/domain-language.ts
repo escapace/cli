@@ -1,9 +1,9 @@
 import { builder, Options, SYMBOL_STATE } from '@escapace/fluent'
 import { filter, find, map, reduce, some, union } from 'lodash-es'
 import { Reference, SYMBOL_COMMAND } from '../types'
-import { assert } from '../utilities/assert'
-import { extract } from '../utilities/extract'
-import { fallback } from '../utilities/fallback'
+import { assert } from '../utility/assert'
+import { extract } from '../utility/extract'
+import { fallback } from '../utility/fallback'
 import { reducer } from './reducer'
 import {
   ActionDescription,
@@ -43,7 +43,8 @@ export const fluentReducer = (log: Actions): State => {
       log,
       (action) =>
         action.type === TypeAction.Input ||
-        action.type === TypeAction.Subcommand
+        action.type === TypeAction.Subcommand ||
+        action.type === TypeAction.Reducer
     )
 
   const { variables, options } = reduce(
@@ -189,7 +190,7 @@ export const command = builder<Settings>([
   {
     [Options.Type]: TypeAction.Reducer,
     [Options.Dependencies]: [TypeAction.Description],
-    [Options.Enabled]: (_, { isEmpty }) => !isEmpty,
+    // [Options.Enabled]: (_, { isEmpty }) => !isEmpty,
     [Options.Keys]: ['reducer'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
