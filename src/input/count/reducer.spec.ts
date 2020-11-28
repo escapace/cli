@@ -40,7 +40,7 @@ describe('input/count/reducer', () => {
   it('input', async () => {
     const { spy, cmd } = factory()
 
-    await cmd({ argv: ['command'], env: {} })
+    await cmd({ argv: [], env: {} })
 
     assert.equal(spy.callCount, 1)
 
@@ -49,7 +49,7 @@ describe('input/count/reducer', () => {
       count: 2
     })
 
-    await cmd({ argv: ['command', '-vv', '--quiet', '-v'], env: {} })
+    await cmd({ argv: ['-vv', '--quiet', '-v'], env: {} })
 
     assert.equal(spy.callCount, 2)
 

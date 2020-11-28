@@ -40,7 +40,7 @@ describe('input/boolean/reducer', () => {
   it('input', async () => {
     const { spy, cmd } = factory()
 
-    await cmd({ argv: ['command'], env: {} })
+    await cmd({ argv: [], env: {} })
 
     assert.equal(spy.callCount, 1)
 
@@ -49,7 +49,7 @@ describe('input/boolean/reducer', () => {
       bool: false
     })
 
-    await cmd({ argv: ['command', '--yes'], env: {} })
+    await cmd({ argv: ['--yes'], env: {} })
 
     assert.equal(spy.callCount, 2)
 
@@ -58,7 +58,7 @@ describe('input/boolean/reducer', () => {
       bool: true
     })
 
-    await cmd({ argv: ['command'], env: { YES: 'true' } })
+    await cmd({ argv: [], env: { YES: 'true' } })
 
     assert.equal(spy.callCount, 3)
 
@@ -67,7 +67,7 @@ describe('input/boolean/reducer', () => {
       bool: true
     })
 
-    await cmd({ argv: ['command', '--no'], env: {} })
+    await cmd({ argv: ['--no'], env: {} })
 
     assert.equal(spy.callCount, 4)
 
@@ -76,7 +76,7 @@ describe('input/boolean/reducer', () => {
       bool: false
     })
 
-    await cmd({ argv: ['command'], env: { NO: 'TRUE' } })
+    await cmd({ argv: [], env: { NO: 'TRUE' } })
 
     assert.equal(spy.callCount, 5)
 
@@ -85,7 +85,7 @@ describe('input/boolean/reducer', () => {
       bool: false
     })
 
-    await cmd({ argv: ['command'], env: { NO: 'FALSE' } })
+    await cmd({ argv: [], env: { NO: 'FALSE' } })
 
     assert.equal(spy.callCount, 6)
 
@@ -99,18 +99,15 @@ describe('input/boolean/reducer', () => {
     const { cmd } = factory()
     const message = /conflicting/i
 
+    await assert.isRejected(cmd({ argv: ['--yes', '--no'], env: {} }), message)
+
     await assert.isRejected(
-      cmd({ argv: ['command', '--yes', '--no'], env: {} }),
+      cmd({ argv: ['--yes'], env: { NO: 'true' } }),
       message
     )
 
     await assert.isRejected(
-      cmd({ argv: ['command', '--yes'], env: { NO: 'true' } }),
-      message
-    )
-
-    await assert.isRejected(
-      cmd({ argv: ['command', '--no'], env: { YES: 'true' } }),
+      cmd({ argv: ['--no'], env: { YES: 'true' } }),
       message
     )
   })

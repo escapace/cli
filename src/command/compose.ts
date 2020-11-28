@@ -74,23 +74,43 @@ const iterate = (root: Command): Choice[] => {
     command: U,
     choice: Choice = { models: [], commands: [], spec: {} }
   ): Choice[] => {
-    if (command[SYMBOL_STATE].commands.length !== 0) {
-      return flatMap(command[SYMBOL_STATE].names, (name) =>
-        flatMap(command[SYMBOL_STATE].commands, (value) =>
+    if (command === root) {
+      if (command[SYMBOL_STATE].commands.length !== 0) {
+        return flatMap(command[SYMBOL_STATE].commands, (value) =>
           next(value, {
             ...choice,
-            commands: [...choice.commands, name],
+            commands: [...choice.commands],
             models: union(choice.models, [command])
           })
         )
-      )
+      } else {
+        return [
+          {
+            ...choice,
+            commands: [...choice.commands],
+            models: union(choice.models, [command]),
+            spec: spec(command)
+          }
+        ]
+      }
     } else {
-      return map(command[SYMBOL_STATE].names, (name) => ({
-        ...choice,
-        commands: [...choice.commands, name],
-        models: union(choice.models, [command]),
-        spec: spec(command)
-      }))
+      if (command[SYMBOL_STATE].commands.length !== 0) {
+        return flatMap(command[SYMBOL_STATE].names, (name) =>
+          flatMap(command[SYMBOL_STATE].commands, (value) =>
+            next(value, {
+              ...choice,
+              commands: [...choice.commands, name],
+              models: union(choice.models, [command])
+            })
+          )
+        )
+      } else {
+        return map(command[SYMBOL_STATE].names, (name) => ({
+          commands: [...choice.commands, name],
+          models: union(choice.models, [command]),
+          spec: spec(command)
+        }))
+      }
     }
   }
 
@@ -150,6 +170,8 @@ export const compose = <T extends Command>(command: T) => {
       { ...settings },
       { env: process.env, argv: process.argv.slice(2) }
     )
+
+    // _settings.argv.unshift(root[SYMBOL_STATE].names[0])
 
     const task = lookup(choices, _settings)
 

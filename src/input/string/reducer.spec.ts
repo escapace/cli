@@ -63,7 +63,7 @@ describe('input/string/reducer', () => {
   it('repeat', async () => {
     const { spy, cmd } = factory(ModeFactory.Repeat)
 
-    await cmd({ argv: ['command'], env: {} })
+    await cmd({ argv: [], env: {} })
 
     assert.equal(spy.callCount, 1)
 
@@ -73,7 +73,7 @@ describe('input/string/reducer', () => {
     })
 
     await cmd({
-      argv: ['command', '--str', '!'],
+      argv: ['--str', '!'],
       env: { STRING: 'Hello:World' }
     })
 
@@ -88,7 +88,7 @@ describe('input/string/reducer', () => {
   it('default', async () => {
     const { spy, cmd } = factory()
 
-    await cmd({ argv: ['command'], env: { STRING: 'hello:world' } })
+    await cmd({ argv: [], env: { STRING: 'hello:world' } })
 
     assert.equal(spy.callCount, 1)
 
@@ -103,7 +103,7 @@ describe('input/string/reducer', () => {
 
     await assert.isRejected(
       cmd({
-        argv: ['command', '-s', 'Hello'],
+        argv: ['-s', 'Hello'],
         env: { STRING: 'World' }
       }),
       /conflicting input/i
@@ -114,7 +114,7 @@ describe('input/string/reducer', () => {
     const { spy, cmd } = factory(ModeFactory.Reducer)
 
     await cmd({
-      argv: ['command', '-s', 'abc', '--str', 'zxc'],
+      argv: ['-s', 'abc', '--str', 'zxc'],
       env: { STRING: 'hello:world' }
     })
 

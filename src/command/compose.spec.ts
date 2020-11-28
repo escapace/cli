@@ -129,7 +129,7 @@ describe('..,', () => {
     const { kitchen, spy } = setup()
 
     await compose(kitchen)({
-      argv: ['kitchen', 'omakase', 'an argument', 'second argument']
+      argv: ['omakase', 'an argument', 'second argument']
     })
 
     assert.equal(spy.callCount, 2)
@@ -149,12 +149,21 @@ describe('..,', () => {
     })
   })
 
+  // it('takeout with no options', async () => {
+  //   const { kitchen, spy } = setup()
+  //
+  //   await compose(kitchen)({
+  //     argv: []
+  //   })
+  //
+  //   assert.equal(spy.callCount, 0)
+  // })
+
   it('takoeut', async () => {
     const { kitchen, spy } = setup()
 
     await compose(kitchen)({
       argv: [
-        'kitchen',
         'takeout',
         '-s',
         'seafood',

@@ -41,7 +41,7 @@ describe('input/choice/reducer', () => {
   it('input', async () => {
     const { spy, cmd } = factory()
 
-    await cmd({ argv: ['command'], env: {} })
+    await cmd({ argv: [], env: {} })
 
     assert.equal(spy.callCount, 1)
 
@@ -50,7 +50,7 @@ describe('input/choice/reducer', () => {
       choice: ['DD']
     })
 
-    await cmd({ argv: ['command', '-c', 'CC'], env: { CHOICE: 'AA:BB' } })
+    await cmd({ argv: ['-c', 'CC'], env: { CHOICE: 'AA:BB' } })
 
     assert.equal(spy.callCount, 2)
 
@@ -65,7 +65,7 @@ describe('input/choice/reducer', () => {
 
     await assert.isRejected(
       cmd({
-        argv: ['command', '-c', 'FF', '--choice', 'QQ'],
+        argv: ['-c', 'FF', '--choice', 'QQ'],
         env: { CHOICE: 'ZZ:XX' }
       }),
       /unexpected input/i
@@ -77,7 +77,7 @@ describe('input/choice/reducer', () => {
 
     await assert.isRejected(
       cmd({
-        argv: ['command'],
+        argv: [],
         env: { CHOICE: 'CC:DD' }
       }),
       /unexpected input/i
@@ -85,7 +85,7 @@ describe('input/choice/reducer', () => {
 
     await assert.isRejected(
       cmd({
-        argv: ['command', '-c', 'DD', '-c', 'AA'],
+        argv: ['-c', 'DD', '-c', 'AA'],
         env: { CHOICE: 'CC' }
       }),
       /conflicting input/i
