@@ -68,53 +68,62 @@ interface Choice {
   spec: Spec
 }
 
-const iterate = (root: Command): Choice[] => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const next = <U extends Command>(
-    command: U,
-    choice: Choice = { models: [], commands: [], spec: {} }
-  ): Choice[] => {
-    if (command === root) {
-      if (command[SYMBOL_STATE].commands.length !== 0) {
-        return flatMap(command[SYMBOL_STATE].commands, (value) =>
-          next(value, {
-            ...choice,
-            commands: [...choice.commands],
-            models: union(choice.models, [command])
-          })
-        )
-      } else {
-        return [
-          {
-            ...choice,
-            commands: [...choice.commands],
-            models: union(choice.models, [command]),
-            spec: spec(command)
-          }
-        ]
-      }
-    } else {
-      if (command[SYMBOL_STATE].commands.length !== 0) {
-        return flatMap(command[SYMBOL_STATE].names, (name) =>
-          flatMap(command[SYMBOL_STATE].commands, (value) =>
-            next(value, {
-              ...choice,
-              commands: [...choice.commands, name],
-              models: union(choice.models, [command])
-            })
-          )
-        )
-      } else {
-        return map(command[SYMBOL_STATE].names, (name) => ({
-          commands: [...choice.commands, name],
+type Iterate = (command: Command, choice?: Choice) => Choice[]
+
+const walkSubcommands = (command: Command, choice: Choice, name?: string) =>
+  flatMap(command[SYMBOL_STATE].commands, (value) =>
+    iterate(value, {
+      spec: choice.spec,
+      commands:
+        name === undefined ? [...choice.commands] : [...choice.commands, name],
+      models: union(choice.models, [command])
+    })
+  )
+
+enum Index {
+  RootCommandWithSubcommands,
+  RootCommandWithoutSubcommands,
+  CommandWithSubcommands,
+  CommandWithoutSubcommands
+}
+
+const iterate: Iterate = (command, _choice) => {
+  const isRoot = _choice === undefined
+  const choice: Choice = isRoot
+    ? { models: [], commands: [], spec: {} }
+    : (_choice as Choice)
+  const hasSubcommands = command[SYMBOL_STATE].commands.length !== 0
+
+  const index = isRoot
+    ? hasSubcommands
+      ? Index.RootCommandWithSubcommands
+      : Index.RootCommandWithoutSubcommands
+    : hasSubcommands
+    ? Index.CommandWithSubcommands
+    : Index.CommandWithoutSubcommands
+
+  switch (index) {
+    case Index.RootCommandWithSubcommands:
+      return walkSubcommands(command, choice)
+    case Index.CommandWithSubcommands:
+      return flatMap(command[SYMBOL_STATE].names, (name) =>
+        walkSubcommands(command, choice, name)
+      )
+    case Index.RootCommandWithoutSubcommands:
+      return [
+        {
+          commands: choice.commands,
           models: union(choice.models, [command]),
           spec: spec(command)
-        }))
-      }
-    }
+        }
+      ]
+    case Index.CommandWithoutSubcommands:
+      return map(command[SYMBOL_STATE].names, (name) => ({
+        commands: [...choice.commands, name],
+        models: union(choice.models, [command]),
+        spec: spec(command)
+      }))
   }
-
-  return next(root)
 }
 
 interface Task {
@@ -164,6 +173,8 @@ export const compose = <T extends Command>(command: T) => {
 
   const root = extract(command)
   const choices = iterate(root)
+
+  // console.log(choices)
 
   return async (settings: Partial<Settings> = {}): Promise<void> => {
     const _settings = defaults(
