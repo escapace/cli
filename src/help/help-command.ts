@@ -1,6 +1,6 @@
-import { command } from './domain-language'
+import { command } from '../command/domain-language'
 
-export const help = command()
+export const helpCommand = command()
   .reference('@escapace/cli/help')
   .name('help')
   .description('help')

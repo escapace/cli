@@ -1,4 +1,4 @@
-export { compose } from './command/compose'
+export { compose } from './compose'
 export { command } from './command/domain-language'
 // export { Command, CommandReducer } from './command/types'
 

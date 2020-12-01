@@ -3,7 +3,7 @@
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
 import { spy as Spy } from 'sinon'
-import { compose } from '../../command/compose'
+import { compose } from '../../compose'
 import { command } from '../../command/domain-language'
 import { string } from './domain-language'
 

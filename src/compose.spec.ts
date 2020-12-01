@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { assert } from 'chai'
 import { spy as Spy } from 'sinon'
-import { choice } from '../input/choice/domain-language'
-import { count } from '../input/count/domain-language'
+import { choice } from './input/choice/domain-language'
+import { count } from './input/count/domain-language'
 import { compose } from './compose'
-import { command } from './domain-language'
+import { command } from './command/domain-language'
 
 enum TypeExample {
   GRILLED_VEGETABLES = 'GRILLED_VEGETABLES',

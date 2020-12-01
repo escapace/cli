@@ -22,10 +22,12 @@ import {
   SYMBOL_INPUT_CHOICE,
   SYMBOL_INPUT_COUNT,
   SYMBOL_INPUT_STRING
-} from '../types'
-import { extract } from '../utility/extract'
-import { ActionInput, Command, Input, TypeAction } from './types'
-import { assert } from '../utility/assert'
+} from './types'
+import { extract } from './utility/extract'
+import { ActionInput, Command, Input, TypeAction } from './command/types'
+import { assert } from './utility/assert'
+import { injectHelpInput } from './help/inject-help-input'
+import { injectHelpCommand } from './help/inject-help-command'
 
 // TODO: Better return type in TypeScript 4.0
 // Array<Array<Command | Input>>
@@ -45,8 +47,8 @@ const match = (input: Input): string | Handler | [Handler] => {
   }
 }
 
-const spec = (model: Command): Spec => {
-  const log = model[SYMBOL_LOG]
+const spec = (command: Command): Spec => {
+  const log = command[SYMBOL_LOG]
 
   return assign(
     {},
@@ -80,7 +82,7 @@ const walkSubcommands = (command: Command, choice: Choice, name?: string) =>
     })
   )
 
-enum Index {
+enum CommandType {
   RootCommandWithSubcommands,
   RootCommandWithoutSubcommands,
   CommandWithSubcommands,
@@ -94,34 +96,34 @@ const iterate: Iterate = (command, _choice) => {
     : (_choice as Choice)
   const hasSubcommands = command[SYMBOL_STATE].commands.length !== 0
 
-  const index = isRoot
+  const commandType = isRoot
     ? hasSubcommands
-      ? Index.RootCommandWithSubcommands
-      : Index.RootCommandWithoutSubcommands
+      ? CommandType.RootCommandWithSubcommands
+      : CommandType.RootCommandWithoutSubcommands
     : hasSubcommands
-    ? Index.CommandWithSubcommands
-    : Index.CommandWithoutSubcommands
+    ? CommandType.CommandWithSubcommands
+    : CommandType.CommandWithoutSubcommands
 
-  switch (index) {
-    case Index.RootCommandWithSubcommands:
-      return walkSubcommands(command, choice)
-    case Index.CommandWithSubcommands:
+  switch (commandType) {
+    case CommandType.RootCommandWithSubcommands:
+      return walkSubcommands(injectHelpCommand(command), choice)
+    case CommandType.CommandWithSubcommands:
       return flatMap(command[SYMBOL_STATE].names, (name) =>
-        walkSubcommands(command, choice, name)
+        walkSubcommands(injectHelpCommand(command), choice, name)
       )
-    case Index.RootCommandWithoutSubcommands:
+    case CommandType.RootCommandWithoutSubcommands:
       return [
         {
           commands: choice.commands,
           models: union(choice.models, [command]),
-          spec: spec(command)
+          spec: spec(injectHelpInput(command))
         }
       ]
-    case Index.CommandWithoutSubcommands:
+    case CommandType.CommandWithoutSubcommands:
       return map(command[SYMBOL_STATE].names, (name) => ({
         commands: [...choice.commands, name],
         models: union(choice.models, [command]),
-        spec: spec(command)
+        spec: spec(injectHelpInput(command))
       }))
   }
 }
@@ -170,19 +172,15 @@ const lookup = (choices: Choice[], settings: Settings): Task | undefined => {
 
 export const compose = <T extends Command>(command: T) => {
   assert.command(command)
+  const choices = iterate(extract(command))
 
-  const root = extract(command)
-  const choices = iterate(root)
-
-  // console.log(choices)
+  console.log(choices)
 
   return async (settings: Partial<Settings> = {}): Promise<void> => {
     const _settings = defaults(
       { ...settings },
       { env: process.env, argv: process.argv.slice(2) }
     )
-
-    // _settings.argv.unshift(root[SYMBOL_STATE].names[0])
 
     const task = lookup(choices, _settings)
 
@@ -193,7 +191,7 @@ export const compose = <T extends Command>(command: T) => {
 
     const command = task.models.slice(-1)[0]
 
-    // TODO: error handling?
+    // TODO: input reducer error handling
     const valuesInput = await Promise.all(
       // eslint-disable-next-line @typescript-eslint/promise-function-async
       map(command[SYMBOL_STATE].inputs, (input) => {
@@ -250,7 +248,7 @@ export const compose = <T extends Command>(command: T) => {
               value: valuePrevious
             }
 
-      // TODO: error handling
+      // TODO: command reducer error handling
       valuePrevious = await current[SYMBOL_STATE].reducer(valueNext, {
         state: current[SYMBOL_STATE],
         log: current[SYMBOL_LOG]
