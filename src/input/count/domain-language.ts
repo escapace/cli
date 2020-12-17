@@ -102,28 +102,12 @@ export const count = builder<Settings>([
     })
   },
   {
-    [Options.Type]: TypeAction.Default,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['default'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
-    [Options.Interface]: (dispatch) => ({
-      default(value: number) {
-        assert.number(value)
-
-        return dispatch<ActionDefault>({
-          type: TypeAction.Default,
-          payload: value
-        })
-      }
-    })
-  },
-  {
     [Options.Type]: TypeAction.Option,
     [Options.Dependencies]: [TypeAction.Description],
     [Options.Keys]: ['option'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
+    [Options.Conflicts]: [TypeAction.Default],
     [Options.Interface]: (dispatch, _, { options }) => ({
       option(...value: [string | undefined, string | undefined]) {
         assert.inputDichotomousOption(value, options)
@@ -134,6 +118,23 @@ export const count = builder<Settings>([
             increase: value[0],
             decrease: value[1]
           }
+        })
+      }
+    })
+  },
+  {
+    [Options.Type]: TypeAction.Default,
+    [Options.Dependencies]: [TypeAction.Option],
+    [Options.Keys]: ['default'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Interface]: (dispatch) => ({
+      default(value: number) {
+        assert.number(value)
+
+        return dispatch<ActionDefault>({
+          type: TypeAction.Default,
+          payload: value
         })
       }
     })

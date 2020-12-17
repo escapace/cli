@@ -52,7 +52,7 @@ describe('input/count', () => {
 
     const test2 = test1.description('ABC')
 
-    assert.hasAllKeys(test2, [SYMBOL_LOG, SYMBOL_STATE, 'default', 'option'])
+    assert.hasAllKeys(test2, [SYMBOL_LOG, SYMBOL_STATE, 'option'])
 
     assert.deepEqual(state(test2), {
       type: SYMBOL_INPUT_COUNT,
@@ -71,31 +71,37 @@ describe('input/count', () => {
       { type: TypeAction.Reference, payload: reference }
     ])
 
-    const test3 = test2.default(10)
+    const test3 = test2.option('-v', '-q')
 
-    assert.hasAllKeys(test3, [SYMBOL_LOG, SYMBOL_STATE, 'option'])
+    assert.hasAllKeys(test3, [SYMBOL_LOG, SYMBOL_STATE, 'option', 'default'])
 
     assert.deepEqual(state(test3), {
       type: SYMBOL_INPUT_COUNT,
-      default: 10,
+      default: 0,
       description: 'ABC',
-      isEmpty: true,
-      options: [],
+      isEmpty: false,
+      options: ['-v', '-q'],
       reducer,
-      table: {},
+      table: { '-v': 1, '-q': -1 },
       reference,
       variables: []
     })
 
     assert.deepEqual(log(test3), [
-      { type: TypeAction.Default, payload: 10 },
+      {
+        type: TypeAction.Option,
+        payload: {
+          increase: '-v',
+          decrease: '-q'
+        }
+      },
       { type: TypeAction.Description, payload: 'ABC' },
       { type: TypeAction.Reference, payload: reference }
     ])
 
-    const test4 = test3.option('-v', '-q')
+    const test4 = test3.default(10)
 
-    assert.hasAllKeys(test4, [SYMBOL_LOG, SYMBOL_STATE, 'option'])
+    assert.hasAllKeys(test4, [SYMBOL_LOG, SYMBOL_STATE])
 
     assert.deepEqual(state(test4), {
       type: SYMBOL_INPUT_COUNT,
@@ -110,6 +116,7 @@ describe('input/count', () => {
     })
 
     assert.deepEqual(log(test4), [
+      { type: TypeAction.Default, payload: 10 },
       {
         type: TypeAction.Option,
         payload: {
@@ -117,7 +124,6 @@ describe('input/count', () => {
           decrease: '-q'
         }
       },
-      { type: TypeAction.Default, payload: 10 },
       { type: TypeAction.Description, payload: 'ABC' },
       { type: TypeAction.Reference, payload: reference }
     ])

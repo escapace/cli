@@ -128,20 +128,20 @@ export interface Specification<_ extends Model<State>> {
     [Options.Conflicts]: never
   }
 
-  [TypeAction.Default]: {
-    [Options.Type]: typeof TypeAction.Default
-    [Options.Once]: $.True
-    [Options.Dependencies]: typeof TypeAction.Description
-    [Options.Keys]: 'default'
-    [Options.Enabled]: $.True
-    [Options.Conflicts]: never
-  }
-
   [TypeAction.Option]: {
     [Options.Type]: typeof TypeAction.Option
     [Options.Once]: $.False
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Keys]: 'option'
+    [Options.Enabled]: $.True
+    [Options.Conflicts]: typeof TypeAction.Default
+  }
+
+  [TypeAction.Default]: {
+    [Options.Type]: typeof TypeAction.Default
+    [Options.Once]: $.True
+    [Options.Dependencies]: typeof TypeAction.Option
+    [Options.Keys]: 'default'
     [Options.Enabled]: $.True
     [Options.Conflicts]: never
   }
