@@ -11,17 +11,15 @@ import {
 } from '@escapace/fluent'
 
 import {
-  SYMBOL_COMMAND,
+  Input,
+  LookupModel,
   Reference,
-  SharedState,
+  SYMBOL_COMMAND,
+  UnionToIntersection,
+  Unwrap,
   SharedInitialState,
-  LookupModel
+  SharedState
 } from '../types'
-
-import { InputBoolean } from '../input/boolean/types'
-import { InputChoice } from '../input/choice/types'
-import { InputCount } from '../input/count/types'
-import { InputString } from '../input/string/types'
 
 export declare const COMMAND_INTERFACE: unique symbol
 export declare const COMMAND_SPECIFICATION: unique symbol
@@ -35,22 +33,6 @@ export enum TypeAction {
   Reference,
   Subcommand
 }
-
-export type Input = InputBoolean | InputChoice | InputCount | InputString
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Unwrap<T> = T extends (...args: any) => infer U
-  ? U extends PromiseLike<infer R>
-    ? R
-    : U
-  : never
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-  k: infer I
-) => void
-  ? I
-  : never
 
 type ValuesInput<
   T extends Actions,
@@ -71,15 +53,12 @@ type ValuesCommand<
     Command
   >[typeof SYMBOL_STATE]
 > = U extends {
-  // UnionToIntersection<
   type: typeof SYMBOL_COMMAND
   reference: infer X
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reducer: CommandReducer<infer Y, any>
 }
   ? { reference: $.Cast<X, Reference>; value: Y }
   : never
-// >
 
 type Values<T extends Actions> = $.If<
   $.Is.Never<Payload<$.Values<T>, TypeAction.Input, never>>,

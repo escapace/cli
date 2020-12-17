@@ -294,5 +294,4 @@ export interface InputChoice
 //   model: { state: U['state']; log: Array<U['log']> }
 // ) => T | Promise<T>
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type GenericInputChoiceReducer<T = unknown> = (...args: any[]) => T

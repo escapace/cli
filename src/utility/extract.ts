@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   FluentInterface,
   Model,
@@ -37,6 +35,5 @@ export const extract = <I extends FluentInterface<Model<any, any>>>(
   return {
     [SYMBOL_STATE]: state(object),
     [SYMBOL_LOG]: log(object)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
 }

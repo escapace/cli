@@ -1,13 +1,13 @@
 import { InputType, SettingsVariable } from '../types'
 import { map, flatMap } from 'lodash'
 
-interface GenericOption<T> {
+export interface GenericOption<T> {
   type: InputType.Option
   name: string
   value: T
 }
 
-interface GenericVariable<T> {
+export interface GenericVariable<T> {
   type: InputType.Variable
   name: string
   value: T
@@ -59,7 +59,6 @@ export function normalize(
 export function normalize(
   options: NormalizeStringOptions | NormalizeNumberOptions
 ): NormalizedStringValue[] | NormalizedNumberValue[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return flatMap<any, any>(
     options.values,
     (initial: InitialStringValue | InitialNumberValue) => {

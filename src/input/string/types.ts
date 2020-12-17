@@ -130,7 +130,7 @@ export interface State extends SharedState {
 export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_STRING
   default: undefined
-  reducer: GenericInputStringReducer<string | string[] | undefined>
+  reducer: GenericInputStringReducer<string | undefined>
   repeat: false
 }
 
@@ -283,5 +283,4 @@ export type InputStringReducer<
   model: { state: U['state']; log: U['log'] }
 ) => T | Promise<T>
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type GenericInputStringReducer<T = unknown> = (...args: any[]) => T

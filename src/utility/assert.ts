@@ -17,23 +17,28 @@ import {
 } from 'lodash-es'
 
 import {
-  ActionInput as CommandActionInput,
   Actions as CommandActions,
   ActionSubcommand as CommandActionSubcommand,
   Command,
-  Input,
   State as CommandState,
   TypeAction as CommandTypeAction
 } from '../command/types'
 
 import {
+  Actions as InputGroupActions,
+  State as InputGroupState
+} from '../input/group/types'
+
+import {
+  Input,
   Reference,
   SettingsVariable,
   SYMBOL_COMMAND,
   SYMBOL_INPUT_BOOLEAN,
   SYMBOL_INPUT_CHOICE,
   SYMBOL_INPUT_COUNT,
-  SYMBOL_INPUT_STRING
+  SYMBOL_INPUT_STRING,
+  SYMBOL_INPUT_GROUP
 } from '../types'
 
 import { extract } from './extract'
@@ -189,7 +194,10 @@ const assertions = {
   },
   input(
     value: unknown,
-    model: { state: CommandState; log: CommandActions }
+    model: {
+      state: CommandState | InputGroupState
+      log: CommandActions | InputGroupActions
+    }
   ): asserts value is Input {
     const state = extract(value as Input)[SYMBOL_STATE]
 
@@ -199,23 +207,21 @@ const assertions = {
           SYMBOL_INPUT_BOOLEAN,
           SYMBOL_INPUT_CHOICE,
           SYMBOL_INPUT_COUNT,
-          SYMBOL_INPUT_STRING
+          SYMBOL_INPUT_STRING,
+          SYMBOL_INPUT_GROUP
         ],
         state.type
       ) && !state.isEmpty,
       'Assertion Error'
     )
 
-    const inputs = filter(
-      model.log,
-      (action) => action.type === CommandTypeAction.Input
-    ) as CommandActionInput[]
+    const inputs = model.state.inputs
 
     ok(
       !includes(
         [
           model.state.reference,
-          ...map(inputs, (value) => value.payload[SYMBOL_STATE].reference)
+          ...map(inputs, (value) => value[SYMBOL_STATE].reference)
         ],
         state.reference
       ),

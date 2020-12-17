@@ -15,16 +15,24 @@ import {
   union
 } from 'lodash-es'
 import {
+  Input,
   InputType,
   Reference,
+  SettingsEnvironment,
   Settings,
+  SYMBOL_INPUT_GROUP,
   SYMBOL_INPUT_BOOLEAN,
   SYMBOL_INPUT_CHOICE,
   SYMBOL_INPUT_COUNT,
   SYMBOL_INPUT_STRING
 } from './types'
+
+import { InputGroup } from './input/group/types'
+
 import { extract } from './utility/extract'
-import { ActionInput, Command, Input, TypeAction } from './command/types'
+
+import { ActionInput, Command, TypeAction } from './command/types'
+
 import { assert } from './utility/assert'
 import { injectHelpInput } from './help/inject-help-input'
 import { injectHelpCommand } from './help/inject-help-command'
@@ -32,7 +40,9 @@ import { injectHelpCommand } from './help/inject-help-command'
 // TODO: Better return type in TypeScript 4.0
 // Array<Array<Command | Input>>
 
-const match = (input: Input): string | Handler | [Handler] => {
+const match = (
+  input: Exclude<Input, InputGroup>
+): string | Handler | [Handler] => {
   const state = input[SYMBOL_STATE]
 
   switch (state.type) {
@@ -47,6 +57,19 @@ const match = (input: Input): string | Handler | [Handler] => {
   }
 }
 
+const nextSpec = (input: Input): Spec[] => {
+  if (input[SYMBOL_STATE].type === SYMBOL_INPUT_GROUP) {
+    return flatMap((input as InputGroup)[SYMBOL_STATE].inputs, (value) =>
+      nextSpec(value)
+    )
+  } else {
+    const type = match(input as Exclude<Input, InputGroup>)
+    const options = input[SYMBOL_STATE].options
+
+    return map(options, (option) => ({ [option]: type }))
+  }
+}
+
 const spec = (command: Command): Spec => {
   const log = command[SYMBOL_LOG]
 
@@ -54,12 +77,7 @@ const spec = (command: Command): Spec => {
     {},
     ...map(
       filter(log, ({ type }) => type === TypeAction.Input) as ActionInput[],
-      ({ payload }): Spec => {
-        const type = match(payload)
-        const options = payload[SYMBOL_STATE].options
-
-        return assign({}, ...map(options, (option) => ({ [option]: type })))
-      }
+      ({ payload }): Spec => assign({}, ...nextSpec(payload))
     )
   )
 }
@@ -71,16 +89,6 @@ interface Choice {
 }
 
 type Iterate = (command: Command, choice?: Choice) => Choice[]
-
-const walkSubcommands = (command: Command, choice: Choice, name?: string) =>
-  flatMap(command[SYMBOL_STATE].commands, (value) =>
-    iterate(value, {
-      spec: choice.spec,
-      commands:
-        name === undefined ? [...choice.commands] : [...choice.commands, name],
-      models: union(choice.models, [command])
-    })
-  )
 
 enum CommandType {
   RootCommandWithSubcommands,
@@ -104,12 +112,27 @@ const iterate: Iterate = (command, _choice) => {
     ? CommandType.CommandWithSubcommands
     : CommandType.CommandWithoutSubcommands
 
+  const walkSubcommands = (name?: string) => {
+    const _command = injectHelpCommand(command)
+
+    return flatMap(_command[SYMBOL_STATE].commands, (value) =>
+      iterate(value, {
+        spec: choice.spec,
+        commands:
+          name === undefined
+            ? [...choice.commands]
+            : [...choice.commands, name],
+        models: union(choice.models, [_command])
+      })
+    )
+  }
+
   switch (commandType) {
     case CommandType.RootCommandWithSubcommands:
-      return walkSubcommands(injectHelpCommand(command), choice)
+      return walkSubcommands()
     case CommandType.CommandWithSubcommands:
       return flatMap(command[SYMBOL_STATE].names, (name) =>
-        walkSubcommands(injectHelpCommand(command), choice, name)
+        walkSubcommands(name)
       )
     case CommandType.RootCommandWithoutSubcommands:
       return [
@@ -129,20 +152,23 @@ const iterate: Iterate = (command, _choice) => {
 }
 
 interface Task {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options: Record<string, any>
   variables: Record<string, string | undefined>
   arguments: string[]
   models: Command[]
 }
 
-const lookup = (choices: Choice[], settings: Settings): Task | undefined => {
+const lookup = (
+  choices: Choice[],
+  settings: SettingsEnvironment
+): Task | undefined => {
   let task: Task | undefined
   let index = 0
 
   while (index < choices.length) {
     const choice = choices[index]
 
+    // TODO: do spec here
     const options = arg(choice.spec, {
       permissive: true,
       argv: settings.argv
@@ -170,22 +196,29 @@ const lookup = (choices: Choice[], settings: Settings): Task | undefined => {
   return task
 }
 
-export const compose = <T extends Command>(command: T) => {
+export const compose = <T extends Command>(
+  command: T,
+  settings: Partial<Settings> = {}
+) => {
   assert.command(command)
-  const choices = iterate(extract(command))
 
-  console.log(choices)
+  defaults({ ...settings }, {})
 
-  return async (settings: Partial<Settings> = {}): Promise<void> => {
-    const _settings = defaults(
-      { ...settings },
+  const choices = iterate(extract(command), undefined)
+
+  return async (
+    environemntSettings: Partial<SettingsEnvironment> = {}
+  ): Promise<void> => {
+    const _environmentSettings = defaults(
+      { ...environemntSettings },
       { env: process.env, argv: process.argv.slice(2) }
     )
 
-    const task = lookup(choices, _settings)
+    const task = lookup(choices, _environmentSettings)
 
     if (task === undefined) {
       // TODO: define no match behaviour
+      // TODO: help by default
       return
     }
 
@@ -194,7 +227,7 @@ export const compose = <T extends Command>(command: T) => {
     // TODO: input reducer error handling
     const valuesInput = await Promise.all(
       // eslint-disable-next-line @typescript-eslint/promise-function-async
-      map(command[SYMBOL_STATE].inputs, (input) => {
+      map(command[SYMBOL_STATE].inputs, async (input) => {
         const state = input[SYMBOL_STATE]
         const log = input[SYMBOL_LOG]
 
@@ -213,24 +246,15 @@ export const compose = <T extends Command>(command: T) => {
           )
         ]
 
-        const fn: Function = input[SYMBOL_STATE].reducer
+        const result = await input[SYMBOL_STATE].reducer(values, { state, log })
 
-        return new Promise((resolve, reject) => {
-          try {
-            const value = fn(values, { state, log })
-
-            resolve(value)
-          } catch (e) {
-            reject(e)
-          }
-        }).then((value) => ({
-          [input[SYMBOL_STATE].reference as Reference]: value
-        }))
+        return {
+          [input[SYMBOL_STATE].reference as Reference]: result
+        }
       })
     )
 
     let index = 0
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let valuePrevious: any = assign({ _: task.arguments }, ...valuesInput)
 
     while (index < task.models.length) {

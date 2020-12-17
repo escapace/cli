@@ -1,6 +1,6 @@
 import { builder, Options, SYMBOL_STATE } from '@escapace/fluent'
 import { filter, find, map, reduce, some, union } from 'lodash-es'
-import { Reference, SYMBOL_COMMAND } from '../types'
+import { Reference, SYMBOL_COMMAND, Input } from '../types'
 import { assert } from '../utility/assert'
 import { extract } from '../utility/extract'
 import { fallback } from '../utility/fallback'
@@ -15,7 +15,6 @@ import {
   ActionSubcommand,
   Command,
   CommandReducer,
-  Input,
   Settings,
   State,
   TypeAction

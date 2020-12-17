@@ -6,7 +6,6 @@ import { message } from '../../utility/message'
 const invert = (value: boolean, pass: boolean) => (value ? pass : !pass)
 const toBool = (value: string) => /^(yes|y|true|t|on|1)$/i.test(value)
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const reducer: InputBooleanReducer<any> = (
   values,
   { state }

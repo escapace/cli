@@ -188,7 +188,6 @@ describe('command', () => {
       variables: [...state(booleanA).variables]
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const inputReducer: LookupReducer<typeof test4, any> = (values) => values
 
     const test5 = test4.reducer(inputReducer)
@@ -300,7 +299,6 @@ describe('command', () => {
       variables: [...state(commandA).variables]
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const subcommandReducer: LookupReducer<typeof test6, any> = (values) =>
       values
 
@@ -352,7 +350,6 @@ describe('command', () => {
       variables: [...state(commandA).variables]
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const simpleReducer: LookupReducer<typeof test3, any> = (value) => value
 
     const test8 = test3.reducer(simpleReducer)
