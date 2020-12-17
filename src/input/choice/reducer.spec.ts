@@ -15,10 +15,10 @@ const factory = (repeat = true) => {
   const parent = choice()
     .reference('choice')
     .description('choice')
-    .choices('AA', 'BB', 'CC', 'DD')
     .option('--choice')
     .option('-c')
     .variable('CHOICE')
+    .choices('AA', 'BB', 'CC', 'DD')
 
   const cmd = compose(
     command()

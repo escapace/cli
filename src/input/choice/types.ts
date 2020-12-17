@@ -140,7 +140,7 @@ export interface InitialState extends SharedInitialState {
   repeat: false
 }
 
-export interface Specification<_ extends Model<State>> {
+export interface Specification<T extends Model<State>> {
   [TypeAction.Reference]: {
     [Options.Type]: typeof TypeAction.Reference
     [Options.Once]: $.True
@@ -159,12 +159,32 @@ export interface Specification<_ extends Model<State>> {
     [Options.Conflicts]: never
   }
 
+  [TypeAction.Option]: {
+    [Options.Type]: typeof TypeAction.Option
+    [Options.Once]: $.False
+    [Options.Dependencies]: typeof TypeAction.Description
+    [Options.Keys]: 'option'
+    [Options.Enabled]: $.True
+    [Options.Conflicts]: typeof TypeAction.Choices
+  }
+
+  [TypeAction.Variable]: {
+    [Options.Type]: typeof TypeAction.Variable
+    [Options.Once]: $.False
+    [Options.Dependencies]: typeof TypeAction.Description
+    [Options.Keys]: 'variable'
+    [Options.Enabled]: $.True
+    [Options.Conflicts]: typeof TypeAction.Choices
+  }
+
   [TypeAction.Choices]: {
     [Options.Type]: typeof TypeAction.Choices
     [Options.Once]: $.True
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Keys]: 'choices'
-    [Options.Enabled]: $.True
+    [Options.Enabled]: $.Not<
+      $.Is.Never<Extract<$.Values<T['log']>, ActionVariable | ActionOption>>
+    >
     [Options.Conflicts]: never
   }
 
@@ -185,24 +205,6 @@ export interface Specification<_ extends Model<State>> {
     [Options.Enabled]: $.True
     [Options.Conflicts]: never
   }
-
-  [TypeAction.Option]: {
-    [Options.Type]: typeof TypeAction.Option
-    [Options.Once]: $.False
-    [Options.Dependencies]: typeof TypeAction.Choices
-    [Options.Keys]: 'option'
-    [Options.Enabled]: $.True
-    [Options.Conflicts]: never
-  }
-
-  [TypeAction.Variable]: {
-    [Options.Type]: typeof TypeAction.Variable
-    [Options.Once]: $.False
-    [Options.Dependencies]: typeof TypeAction.Choices
-    [Options.Keys]: 'variable'
-    [Options.Enabled]: $.True
-    [Options.Conflicts]: never
-  }
 }
 
 declare module '@escapace/typelevel/hkt' {
@@ -220,11 +222,26 @@ export interface Reducer<T extends Action[]> {
   [TypeAction.Description]: {
     description: string
   }
+  [TypeAction.Option]: {
+    options: Array<
+      Payload<$.Values<T>, TypeAction.Option> extends { name: infer U }
+        ? U
+        : never
+    >
+  }
+  [TypeAction.Variable]: {
+    variables: Array<
+      Payload<$.Values<T>, TypeAction.Variable> extends { name: infer U }
+        ? U
+        : never
+    >
+  }
   [TypeAction.Choices]: {
     choices: Payload<$.Values<T>, TypeAction.Choices>
     reducer: GenericInputChoiceReducer<
       $.Values<Payload<$.Values<T>, TypeAction.Choices>> | undefined
     >
+    isEmpty: false
   }
   [TypeAction.Repeat]: {
     repeat: true
@@ -239,22 +256,6 @@ export interface Reducer<T extends Action[]> {
       >,
       GenericInputChoiceReducer<Payload<$.Values<T>, TypeAction.Choices>>
     >
-  }
-  [TypeAction.Option]: {
-    options: Array<
-      Payload<$.Values<T>, TypeAction.Option> extends { name: infer U }
-        ? U
-        : never
-    >
-    isEmpty: false
-  }
-  [TypeAction.Variable]: {
-    variables: Array<
-      Payload<$.Values<T>, TypeAction.Variable> extends { name: infer U }
-        ? U
-        : never
-    >
-    isEmpty: false
   }
 }
 

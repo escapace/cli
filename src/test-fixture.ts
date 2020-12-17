@@ -20,14 +20,16 @@ export const testFixture = () => {
   const grilledVegetables = choice()
     .reference(TypeFixture.GRILLED_VEGETABLES)
     .description('Favorite recipes for grilled veggies.')
-    .choices('elote', 'cauliflower', 'hasselback-potatoes', 'vegetable-skewers')
     .option('--grilled-vegetables')
+    .choices('elote', 'cauliflower', 'hasselback-potatoes', 'vegetable-skewers')
 
   const salad = choice()
     .reference(TypeFixture.SALAD)
     .description(
       'Fruit salads, fresh vegetable salads, and all the other combinations which make healthy taste so delicious.'
     )
+    .option('--salad')
+    .option('-s')
     .choices(
       'greek',
       'watermelon-feta',
@@ -37,8 +39,6 @@ export const testFixture = () => {
       'potato',
       'seafood'
     )
-    .option('--salad')
-    .option('-s')
     .default('greek')
 
   const brunch = command()

@@ -46,11 +46,7 @@ export const fluentReducer = (log: Actions): State => {
 
   const isEmpty =
     log.length === 0 ||
-    !some(
-      log,
-      (action) =>
-        action.type === TypeAction.Option || action.type === TypeAction.Variable
-    )
+    !some(log, (action) => action.type === TypeAction.Choices)
 
   const options = map(
     filter(log, ({ type }) => type === TypeAction.Option) as ActionOption[],
@@ -111,11 +107,60 @@ export const choice = builder<Settings>([
     })
   },
   {
+    [Options.Type]: TypeAction.Option,
+    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Keys]: ['option'],
+    [Options.Once]: false,
+    [Options.Reducer]: fluentReducer,
+    [Options.Conflicts]: [TypeAction.Choices],
+    [Options.Interface]: (dispatch, _, { options }) => ({
+      option(value: string) {
+        assert.option(value, options)
+
+        return dispatch<ActionOption>({
+          type: TypeAction.Option,
+          payload: {
+            name: value
+          }
+        })
+      }
+    })
+  },
+  {
+    [Options.Type]: TypeAction.Variable,
+    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Keys]: ['variable'],
+    [Options.Once]: false,
+    [Options.Reducer]: fluentReducer,
+    [Options.Conflicts]: [TypeAction.Choices],
+    [Options.Interface]: (dispatch, _, { variables }) => ({
+      variable(value: string, settings: Partial<SettingsVariable> = {}) {
+        assert.variable(value, variables)
+        assert.variableSettings(settings)
+
+        return dispatch<ActionVariable>({
+          type: TypeAction.Variable,
+          payload: {
+            name: value,
+            settings: defaults({}, settings, settingsVariable)
+          }
+        })
+      }
+    })
+  },
+  {
     [Options.Type]: TypeAction.Choices,
     [Options.Dependencies]: [TypeAction.Description],
     [Options.Keys]: ['choices'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
+    [Options.Enabled]: (log) =>
+      some(
+        log,
+        (action) =>
+          action.type === TypeAction.Option ||
+          action.type === TypeAction.Variable
+      ),
     [Options.Interface]: (dispatch) => ({
       choices(...value: string[]) {
         assert.strings(value)
@@ -156,46 +201,6 @@ export const choice = builder<Settings>([
         return dispatch<ActionDefault>({
           type: TypeAction.Default,
           payload: isArray(value) ? uniq(value) : value
-        })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Option,
-    [Options.Dependencies]: [TypeAction.Choices],
-    [Options.Keys]: ['option'],
-    [Options.Once]: false,
-    [Options.Reducer]: fluentReducer,
-    [Options.Interface]: (dispatch, _, { options }) => ({
-      option(value: string) {
-        assert.option(value, options)
-
-        return dispatch<ActionOption>({
-          type: TypeAction.Option,
-          payload: {
-            name: value
-          }
-        })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Variable,
-    [Options.Dependencies]: [TypeAction.Choices],
-    [Options.Keys]: ['variable'],
-    [Options.Once]: false,
-    [Options.Reducer]: fluentReducer,
-    [Options.Interface]: (dispatch, _, { variables }) => ({
-      variable(value: string, settings: Partial<SettingsVariable> = {}) {
-        assert.variable(value, variables)
-        assert.variableSettings(settings)
-
-        return dispatch<ActionVariable>({
-          type: TypeAction.Variable,
-          payload: {
-            name: value,
-            settings: defaults({}, settings, settingsVariable)
-          }
         })
       }
     })

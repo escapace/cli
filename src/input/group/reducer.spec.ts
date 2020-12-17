@@ -22,11 +22,11 @@ const factory = (mode: ModeFactory = ModeFactory.WithReducer) => {
   const inputA = choice()
     .reference('choice')
     .description('choice')
+    .option('-c')
+    .option('--choice')
     .choices('A', 'B', 'C')
     .repeat()
     .default(['A'])
-    .option('-c')
-    .option('--choice')
 
   const inputB = boolean()
     .reference('boolean')
