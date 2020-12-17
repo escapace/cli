@@ -117,28 +117,12 @@ export const boolean = builder<Settings>([
     })
   },
   {
-    [Options.Type]: TypeAction.Default,
-    [Options.Keys]: ['default'],
-    [Options.Once]: true,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Reducer]: fluentReducer,
-    [Options.Interface]: (dispatch) => ({
-      default(value: boolean) {
-        assert.boolean(value)
-
-        return dispatch<ActionDefault>({
-          type: TypeAction.Default,
-          payload: value
-        })
-      }
-    })
-  },
-  {
     [Options.Type]: TypeAction.Option,
     [Options.Dependencies]: [TypeAction.Description],
     [Options.Keys]: ['option'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
+    [Options.Conflicts]: [TypeAction.Default],
     [Options.Interface]: (dispatch, _, state) => ({
       option(...value: [string | undefined, string | undefined]) {
         assert.inputDichotomousOption(value, state.options)
@@ -159,6 +143,7 @@ export const boolean = builder<Settings>([
     [Options.Keys]: ['variable'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
+    [Options.Conflicts]: [TypeAction.Default],
     [Options.Interface]: (dispatch, _, state) => ({
       variable(...value: [string | undefined, string | undefined]) {
         assert.inputBooleanVariable(value, state.variables)
@@ -169,6 +154,23 @@ export const boolean = builder<Settings>([
             true: value[0],
             false: value[1]
           }
+        })
+      }
+    })
+  },
+  {
+    [Options.Type]: TypeAction.Default,
+    [Options.Keys]: ['default'],
+    [Options.Once]: true,
+    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Reducer]: fluentReducer,
+    [Options.Interface]: (dispatch) => ({
+      default(value: boolean) {
+        assert.boolean(value)
+
+        return dispatch<ActionDefault>({
+          type: TypeAction.Default,
+          payload: value
         })
       }
     })

@@ -140,7 +140,7 @@ describe('input/boolean', () => {
 
     const test4 = test3.default(false)
 
-    assert.hasAllKeys(test4, [SYMBOL_LOG, SYMBOL_STATE, 'option', 'variable'])
+    assert.hasAllKeys(test4, [SYMBOL_LOG, SYMBOL_STATE])
 
     assert.deepEqual(state(test4), {
       type: SYMBOL_INPUT_BOOLEAN,
