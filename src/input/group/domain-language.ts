@@ -1,18 +1,22 @@
 import { builder, Options, SYMBOL_STATE } from '@escapace/fluent'
 import { filter, find, map, flatMap } from 'lodash-es'
-import { Reference, SYMBOL_INPUT_GROUP, Input } from '../../types'
+import {
+  Reference,
+  SYMBOL_INPUT_GROUP,
+  Input,
+  GenericReducer
+} from '../../types'
 import { assert } from '../../utility/assert'
-import { fallback } from '../../utility/fallback'
 import { normalize } from './normalize'
-import { reducer } from './reducer'
+import { reducer as reducerDefault } from './reducer'
 import { extract } from '../../utility/extract'
+import { GenericOption, GenericVariable } from '../../utility/normalize'
 import {
   ActionDescription,
   ActionReducer,
   ActionInput,
   ActionReference,
   Actions,
-  GenericInputGroupReducer,
   Settings,
   State,
   TypeAction
@@ -39,12 +43,18 @@ export const fluentReducer = (log: Actions): State => {
   const options = flatMap(inputs, (value) => value[SYMBOL_STATE].options)
   const variables = flatMap(inputs, (value) => value[SYMBOL_STATE].variables)
 
-  const _reducer: GenericInputGroupReducer = fallback(
-    reducer,
-    (find(log, (action) => action.type === TypeAction.Reducer) as
-      | ActionReducer
-      | undefined)?.payload
-  )
+  const reducerMaybe = (find(
+    log,
+    (action) => action.type === TypeAction.Reducer
+  ) as ActionReducer | undefined)?.payload
+
+  const reducer: GenericReducer =
+    reducerMaybe === undefined
+      ? reducerDefault
+      : async (
+          values: Array<GenericOption<any> | GenericVariable<any>>,
+          model: { state: State; log: Actions }
+        ) => reducerMaybe(await normalize(values, model), model)
 
   return {
     type: SYMBOL_INPUT_GROUP,
@@ -52,7 +62,7 @@ export const fluentReducer = (log: Actions): State => {
     inputs,
     isEmpty,
     options,
-    reducer: _reducer,
+    reducer,
     reference,
     variables
   }
@@ -124,8 +134,8 @@ export const group = builder<Settings>([
 
         return dispatch<ActionReducer>({
           type: TypeAction.Reducer,
-          payload: async (values, model) =>
-            value(await normalize(values, model), model)
+          // TODO: do this in the reducer
+          payload: value as GenericReducer
         })
       }
     })

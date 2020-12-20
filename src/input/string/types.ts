@@ -13,8 +13,10 @@ import {
   SYMBOL_INPUT_STRING,
   Reference,
   SettingsVariable,
+  GenericReducer,
   InputType,
   SharedState,
+  LookupModel,
   SharedInitialState
 } from '../../types'
 
@@ -123,14 +125,14 @@ export interface Settings {
 export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_STRING
   default: string | string[] | undefined
-  reducer: GenericInputStringReducer
+  reducer: GenericReducer
   repeat: boolean
 }
 
 export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_STRING
   default: undefined
-  reducer: GenericInputStringReducer<string | undefined>
+  reducer: GenericReducer<string | undefined>
   repeat: false
 }
 
@@ -153,31 +155,16 @@ export interface Specification<T extends Model<State>> {
     [Options.Conflicts]: never
   }
 
-  [TypeAction.Repeat]: {
-    [Options.Type]: typeof TypeAction.Repeat
-    [Options.Once]: $.True
-    [Options.Dependencies]: typeof TypeAction.Description
-    [Options.Keys]: 'repeat'
-    [Options.Enabled]: $.True
-    [Options.Conflicts]: typeof TypeAction.Default | typeof TypeAction.Reducer
-  }
-
-  [TypeAction.Default]: {
-    [Options.Type]: typeof TypeAction.Default
-    [Options.Once]: $.True
-    [Options.Dependencies]: typeof TypeAction.Description
-    [Options.Keys]: 'default'
-    [Options.Enabled]: $.True
-    [Options.Conflicts]: typeof TypeAction.Reducer
-  }
-
   [TypeAction.Option]: {
     [Options.Type]: typeof TypeAction.Option
     [Options.Once]: $.False
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Keys]: 'option'
     [Options.Enabled]: $.True
-    [Options.Conflicts]: typeof TypeAction.Reducer
+    [Options.Conflicts]:
+      | typeof TypeAction.Reducer
+      | typeof TypeAction.Repeat
+      | typeof TypeAction.Default
   }
 
   [TypeAction.Variable]: {
@@ -186,6 +173,27 @@ export interface Specification<T extends Model<State>> {
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Keys]: 'variable'
     [Options.Enabled]: $.True
+    [Options.Conflicts]:
+      | typeof TypeAction.Reducer
+      | typeof TypeAction.Repeat
+      | typeof TypeAction.Default
+  }
+
+  [TypeAction.Repeat]: {
+    [Options.Type]: typeof TypeAction.Repeat
+    [Options.Once]: $.True
+    [Options.Dependencies]: typeof TypeAction.Description
+    [Options.Keys]: 'repeat'
+    [Options.Enabled]: $.Equal<T['state']['isEmpty'], false>
+    [Options.Conflicts]: typeof TypeAction.Default | typeof TypeAction.Reducer
+  }
+
+  [TypeAction.Default]: {
+    [Options.Type]: typeof TypeAction.Default
+    [Options.Once]: $.True
+    [Options.Dependencies]: typeof TypeAction.Description
+    [Options.Keys]: 'default'
+    [Options.Enabled]: $.Equal<T['state']['isEmpty'], false>
     [Options.Conflicts]: typeof TypeAction.Reducer
   }
 
@@ -195,7 +203,7 @@ export interface Specification<T extends Model<State>> {
     [Options.Dependencies]: never
     [Options.Enabled]: $.Equal<T['state']['isEmpty'], false>
     [Options.Keys]: 'reducer'
-    [Options.Conflicts]: never
+    [Options.Conflicts]: typeof TypeAction.Default
   }
 }
 
@@ -207,6 +215,20 @@ declare module '@escapace/typelevel/hkt' {
   }
 }
 
+export type ReducerReducer<T extends Action[]> = $.If<
+  $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
+  $.If<
+    $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
+    $.If<
+      $.Is.Never<Payload<$.Values<T>, TypeAction.Default>>,
+      GenericReducer<string | undefined>,
+      GenericReducer<string>
+    >,
+    GenericReducer<string[]>
+  >,
+  GenericReducer<ReturnType<Payload<$.Values<T>, TypeAction.Reducer>>>
+>
+
 export interface Reducer<T extends Action[]> {
   [TypeAction.Reference]: {
     reference: Payload<$.Values<T>, TypeAction.Reference>
@@ -216,18 +238,16 @@ export interface Reducer<T extends Action[]> {
   }
   [TypeAction.Repeat]: {
     repeat: true
-    reducer: GenericInputStringReducer<string[]>
+    reducer: ReducerReducer<T>
   }
   [TypeAction.Default]: {
     default: Payload<$.Values<T>, TypeAction.Default>
-    reducer: $.If<
-      $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
-      GenericInputStringReducer<string>,
-      GenericInputStringReducer<string[]>
-    >
+    reducer: ReducerReducer<T>
   }
   [TypeAction.Reducer]: {
-    reducer: Payload<$.Values<T>, TypeAction.Reducer>
+    reducer: GenericReducer<
+      ReturnType<Payload<$.Values<T>, TypeAction.Reducer>>
+    >
   }
   [TypeAction.Option]: {
     options: Array<
@@ -283,4 +303,7 @@ export type InputStringReducer<
   model: { state: U['state']; log: U['log'] }
 ) => T | Promise<T>
 
-export type GenericInputStringReducer<T = unknown> = (...args: any[]) => T
+export type LookupReducer<
+  T extends FluentInterface<Model<State, Actions>>,
+  U
+> = InputStringReducer<U, LookupModel<T>>

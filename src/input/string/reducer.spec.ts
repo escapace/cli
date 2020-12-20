@@ -25,6 +25,7 @@ const factory = (mode: ModeFactory = ModeFactory.Default) => {
     .option('-s')
     .variable('STRING')
 
+  // TODO: default doesn't make sense with reducer
   const withRepeat = parent.repeat().default(['Yay'])
 
   const withReducer = parent.repeat().reducer((values, model) => {

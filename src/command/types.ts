@@ -15,6 +15,7 @@ import {
   LookupModel,
   Reference,
   SYMBOL_COMMAND,
+  GenericReducer,
   UnionToIntersection,
   Unwrap,
   SharedInitialState,
@@ -55,7 +56,7 @@ type ValuesCommand<
 > = U extends {
   type: typeof SYMBOL_COMMAND
   reference: infer X
-  reducer: CommandReducer<infer Y, any>
+  reducer: GenericReducer<infer Y>
 }
   ? { reference: $.Cast<X, Reference>; value: Y }
   : never
@@ -110,7 +111,7 @@ export interface ActionInput<T extends Input = Input> {
 
 export interface ActionReducer<T = unknown> {
   type: TypeAction.Reducer
-  payload: CommandReducer<T>
+  payload: GenericReducer<T>
 }
 
 export type Actions = Array<
@@ -301,7 +302,7 @@ export interface Reducer<T extends Action[]> {
     >
     reducer: $.If<
       $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
-      CommandReducer<ValuesCommand<T>>,
+      GenericReducer<ValuesCommand<T>>,
       Payload<$.Values<T>, TypeAction.Reducer>
     >
   }
@@ -330,7 +331,7 @@ export interface Reducer<T extends Action[]> {
     >
     reducer: $.If<
       $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
-      CommandReducer<ValuesInput<T>>,
+      GenericReducer<ValuesInput<T>>,
       Payload<$.Values<T>, TypeAction.Reducer>
     >
   }

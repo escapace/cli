@@ -12,7 +12,7 @@ export const SYMBOL_INPUT_STRING = Symbol.for('ESCAPACE_CLI_INPUT_STRING')
 export const SYMBOL_INPUT_GROUP = Symbol.for('ESCAPACE_CLI_INPUT_GROUP')
 export const SYMBOL_COMMAND = Symbol.for('ESCAPACE_CLI_COMMAND')
 
-export type Reference = string | number
+export type Reference = string | number | symbol
 
 // TODO: do we need a generic here
 export interface SettingsVariable<T extends string = string> {
@@ -71,3 +71,5 @@ export type UnionToIntersection<U> = (
 ) extends (k: infer I) => void
   ? I
   : never
+
+export type GenericReducer<T = unknown> = (...args: any[]) => T

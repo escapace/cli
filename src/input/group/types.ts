@@ -14,6 +14,7 @@ import {
   Input,
   Reference,
   SYMBOL_INPUT_GROUP,
+  GenericReducer,
   SharedInitialState,
   SharedState,
   UnionToIntersection,
@@ -43,7 +44,7 @@ export interface ActionDescription {
 
 export interface ActionReducer<T = unknown> {
   type: TypeAction.Reducer
-  payload: GenericInputGroupReducer<T>
+  payload: GenericReducer<T>
 }
 
 export interface ActionInput<T extends Input = Input> {
@@ -97,13 +98,13 @@ export interface Settings {
 export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_GROUP
   inputs: Input[]
-  reducer: GenericInputGroupReducer
+  reducer: GenericReducer
 }
 
 export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_GROUP
   inputs: []
-  reducer: GenericInputGroupReducer
+  reducer: GenericReducer
 }
 
 export interface Specification<_ extends Model<State>> {
@@ -182,7 +183,7 @@ export interface Reducer<T extends Action[]> {
         : never
     >
     isEmpty: false
-    reducer: GenericInputGroupReducer<Values<T>>
+    reducer: GenericReducer<Values<T>>
   }
   [TypeAction.Reducer]: {
     reducer: Payload<$.Values<T>, TypeAction.Reducer>
@@ -215,5 +216,3 @@ export type InputGroupReducer<
   values: Values<U['log']>,
   model: { state: U['state']; log: U['log'] }
 ) => T | Promise<T>
-
-export type GenericInputGroupReducer<T = unknown> = (...args: any[]) => T

@@ -3,9 +3,9 @@ import { defaults, filter, find, map, some } from 'lodash-es'
 import { settingsVariable } from '../../constants'
 import { Reference, SettingsVariable, SYMBOL_INPUT_STRING } from '../../types'
 import { assert } from '../../utility/assert'
-import { fallback } from '../../utility/fallback'
 import { normalize } from './normalize'
-import { reducer } from './reducer'
+import { InitialStringValue } from '../../utility/normalize'
+import { reducer as reducerDefault } from './reducer'
 import {
   ActionDefault,
   ActionDescription,
@@ -39,12 +39,16 @@ export const fluentReducer = (log: Actions): State => {
 
   const repeat = Boolean(find(log, ({ type }) => type === TypeAction.Repeat))
 
-  const _reducer: InputStringReducer<unknown> = fallback(
-    reducer,
-    (find(log, (action) => action.type === TypeAction.Reducer) as
-      | ActionReducer
-      | undefined)?.payload
-  )
+  const reducerMaybe = (find(
+    log,
+    (action) => action.type === TypeAction.Reducer
+  ) as ActionReducer | undefined)?.payload
+
+  const reducer: InputStringReducer<unknown> =
+    reducerMaybe === undefined
+      ? reducerDefault
+      : (values: InitialStringValue[], model: { state: State; log: Actions }) =>
+          reducerMaybe(normalize(values, model), model)
 
   const isEmpty =
     log.length === 0 ||
@@ -69,7 +73,7 @@ export const fluentReducer = (log: Actions): State => {
     default: _default,
     description,
     isEmpty,
-    reducer: _reducer,
+    reducer,
     options,
     reference,
     repeat,
@@ -112,45 +116,16 @@ export const string = builder<Settings>([
     })
   },
   {
-    [Options.Type]: TypeAction.Repeat,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['repeat'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
-    [Options.Conflicts]: [TypeAction.Default, TypeAction.Reducer],
-    [Options.Interface]: (dispatch) => ({
-      repeat() {
-        return dispatch<ActionRepeat>({
-          type: TypeAction.Repeat,
-          payload: undefined
-        })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Default,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['default'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
-    [Options.Interface]: (dispatch, _, { repeat }) => ({
-      default(value: string | string[]) {
-        assert.inputStringDefault(value, repeat)
-
-        return dispatch<ActionDefault>({
-          type: TypeAction.Default,
-          payload: value
-        })
-      }
-    })
-  },
-  {
     [Options.Type]: TypeAction.Option,
     [Options.Dependencies]: [TypeAction.Description],
     [Options.Keys]: ['option'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Conflicts]: [TypeAction.Reducer],
+    [Options.Conflicts]: [
+      TypeAction.Reducer,
+      TypeAction.Repeat,
+      TypeAction.Default
+    ],
     [Options.Interface]: (dispatch, _, { options }) => ({
       option(value: string) {
         assert.option(value, options)
@@ -170,7 +145,11 @@ export const string = builder<Settings>([
     [Options.Keys]: ['variable'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Conflicts]: [TypeAction.Reducer],
+    [Options.Conflicts]: [
+      TypeAction.Reducer,
+      TypeAction.Repeat,
+      TypeAction.Default
+    ],
     [Options.Interface]: (dispatch, _, { variables }) => ({
       variable(value: string, settings: Partial<SettingsVariable> = {}) {
         assert.variable(value, variables)
@@ -187,18 +166,55 @@ export const string = builder<Settings>([
     })
   },
   {
+    [Options.Type]: TypeAction.Repeat,
+    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Keys]: ['repeat'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Conflicts]: [TypeAction.Default, TypeAction.Reducer],
+    [Options.Enabled]: (_, state) => !state.isEmpty,
+    [Options.Interface]: (dispatch) => ({
+      repeat() {
+        return dispatch<ActionRepeat>({
+          type: TypeAction.Repeat,
+          payload: undefined
+        })
+      }
+    })
+  },
+  {
+    [Options.Type]: TypeAction.Default,
+    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Keys]: ['default'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Conflicts]: [TypeAction.Reducer],
+    [Options.Enabled]: (_, state) => !state.isEmpty,
+    [Options.Interface]: (dispatch, _, { repeat }) => ({
+      default(value: string | string[]) {
+        assert.inputStringDefault(value, repeat)
+
+        return dispatch<ActionDefault>({
+          type: TypeAction.Default,
+          payload: value
+        })
+      }
+    })
+  },
+  {
     [Options.Type]: TypeAction.Reducer,
     [Options.Keys]: ['reducer'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
     [Options.Enabled]: (_, state) => !state.isEmpty,
+    [Options.Conflicts]: [TypeAction.Default],
     [Options.Interface]: (dispatch) => ({
       reducer(value: InputStringReducer) {
         assert.function(value)
 
         return dispatch<ActionReducer>({
           type: TypeAction.Reducer,
-          payload: (values, model) => value(normalize(values, model), model)
+          payload: value
         })
       }
     })
