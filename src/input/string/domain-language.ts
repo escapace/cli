@@ -116,16 +116,28 @@ export const string = builder<Settings>([
     })
   },
   {
+    [Options.Type]: TypeAction.Repeat,
+    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Keys]: ['repeat'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Conflicts]: [TypeAction.Option, TypeAction.Variable],
+    [Options.Interface]: (dispatch) => ({
+      repeat() {
+        return dispatch<ActionRepeat>({
+          type: TypeAction.Repeat,
+          payload: undefined
+        })
+      }
+    })
+  },
+  {
     [Options.Type]: TypeAction.Option,
     [Options.Dependencies]: [TypeAction.Description],
     [Options.Keys]: ['option'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Conflicts]: [
-      TypeAction.Reducer,
-      TypeAction.Repeat,
-      TypeAction.Default
-    ],
+    [Options.Conflicts]: [TypeAction.Reducer, TypeAction.Default],
     [Options.Interface]: (dispatch, _, { options }) => ({
       option(value: string) {
         assert.option(value, options)
@@ -145,11 +157,7 @@ export const string = builder<Settings>([
     [Options.Keys]: ['variable'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Conflicts]: [
-      TypeAction.Reducer,
-      TypeAction.Repeat,
-      TypeAction.Default
-    ],
+    [Options.Conflicts]: [TypeAction.Reducer, TypeAction.Default],
     [Options.Interface]: (dispatch, _, { variables }) => ({
       variable(value: string, settings: Partial<SettingsVariable> = {}) {
         assert.variable(value, variables)
@@ -161,23 +169,6 @@ export const string = builder<Settings>([
             name: value,
             settings: defaults({}, settings, settingsVariable)
           }
-        })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Repeat,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['repeat'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
-    [Options.Conflicts]: [TypeAction.Default, TypeAction.Reducer],
-    [Options.Enabled]: (_, state) => !state.isEmpty,
-    [Options.Interface]: (dispatch) => ({
-      repeat() {
-        return dispatch<ActionRepeat>({
-          type: TypeAction.Repeat,
-          payload: undefined
         })
       }
     })

@@ -155,16 +155,22 @@ export interface Specification<T extends Model<State>> {
     [Options.Conflicts]: never
   }
 
+  [TypeAction.Repeat]: {
+    [Options.Type]: typeof TypeAction.Repeat
+    [Options.Once]: $.True
+    [Options.Dependencies]: typeof TypeAction.Description
+    [Options.Keys]: 'repeat'
+    [Options.Enabled]: $.True
+    [Options.Conflicts]: typeof TypeAction.Option | typeof TypeAction.Variable
+  }
+
   [TypeAction.Option]: {
     [Options.Type]: typeof TypeAction.Option
     [Options.Once]: $.False
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Keys]: 'option'
     [Options.Enabled]: $.True
-    [Options.Conflicts]:
-      | typeof TypeAction.Reducer
-      | typeof TypeAction.Repeat
-      | typeof TypeAction.Default
+    [Options.Conflicts]: typeof TypeAction.Reducer | typeof TypeAction.Default
   }
 
   [TypeAction.Variable]: {
@@ -173,19 +179,7 @@ export interface Specification<T extends Model<State>> {
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Keys]: 'variable'
     [Options.Enabled]: $.True
-    [Options.Conflicts]:
-      | typeof TypeAction.Reducer
-      | typeof TypeAction.Repeat
-      | typeof TypeAction.Default
-  }
-
-  [TypeAction.Repeat]: {
-    [Options.Type]: typeof TypeAction.Repeat
-    [Options.Once]: $.True
-    [Options.Dependencies]: typeof TypeAction.Description
-    [Options.Keys]: 'repeat'
-    [Options.Enabled]: $.Equal<T['state']['isEmpty'], false>
-    [Options.Conflicts]: typeof TypeAction.Default | typeof TypeAction.Reducer
+    [Options.Conflicts]: typeof TypeAction.Reducer | typeof TypeAction.Default
   }
 
   [TypeAction.Default]: {

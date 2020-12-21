@@ -18,24 +18,30 @@ enum ModeFactory {
 const factory = (mode: ModeFactory = ModeFactory.Default) => {
   const spy = Spy()
 
-  const parent = string()
-    .reference('string')
-    .description('string')
+  const base = string().reference('string').description('string')
+
+  const parent = base.option('--str').option('-s').variable('STRING')
+
+  const withRepeat = base
+    .repeat()
     .option('--str')
     .option('-s')
     .variable('STRING')
+    .default(['Yay'])
 
-  // TODO: default doesn't make sense with reducer
-  const withRepeat = parent.repeat().default(['Yay'])
+  const withReducer = base
+    .repeat()
+    .option('--str')
+    .option('-s')
+    .variable('STRING')
+    .reducer((values, model) => {
+      assert.isArray(model.log)
+      assert.isObject(model.state)
 
-  const withReducer = parent.repeat().reducer((values, model) => {
-    assert.isArray(model.log)
-    assert.isObject(model.state)
+      spy(values)
 
-    spy(values)
-
-    return values
-  })
+      return values
+    })
 
   const choice = {
     [ModeFactory.Default]: parent,

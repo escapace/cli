@@ -39,13 +39,12 @@ const factory = (mode: Case = Case.One) => {
     .option('-b')
     .variable('BOOLEAN')
 
-  const inputString = string()
+  const inputStringA = string()
     .reference('string')
     .description('string')
+    .repeat()
     .option('-s')
     .option('--string')
-
-  const inputStringA = inputString.repeat()
 
   // eslint-disable-next-line @typescript-eslint/promise-function-async
   const inputStringB = inputStringA.reducer((value) => {

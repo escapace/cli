@@ -270,32 +270,3 @@ export interface InputChoiceState extends State {
 
 export interface InputChoice
   extends FluentInterface<Model<InputChoiceState, Actions>> {}
-
-// export type Values<T extends Model<State, Actions>> = Array<
-//   | $.If<
-//       $.Is.Never<$.Values<T['state']['options']>>,
-//       never,
-//       {
-//         type: InputType.Option
-//         name: $.Values<T['state']['options']>
-//         value: string
-//       }
-//     >
-//   | $.If<
-//       $.Is.Never<$.Values<T['state']['variables']>>,
-//       never,
-//       {
-//         type: InputType.Variable
-//         name: $.Values<T['state']['variables']>
-//         value: string
-//       }
-//     >
-// >
-//
-// export type InputChoiceReducer<
-//   T = unknown,
-//   U extends Model<State, Actions> = Model<State, Actions>
-// > = (
-//   values: Values<U>,
-//   model: { state: U['state']; log: Array<U['log']> }
-// ) => T | Promise<T>
