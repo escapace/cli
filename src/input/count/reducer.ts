@@ -1,7 +1,7 @@
-import { InputCountReducer } from './types'
 import { isEmpty, reduce } from 'lodash-es'
+import { GenericReducer } from '../../types'
 
-export const reducer: InputCountReducer<number> = (values, { state }) => {
+export const reducer: GenericReducer<number> = (values, { state }) => {
   if (isEmpty(values)) {
     return state.default
   } else {

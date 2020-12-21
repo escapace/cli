@@ -12,6 +12,7 @@ import {
 import {
   SYMBOL_INPUT_BOOLEAN,
   Reference,
+  GenericReducer,
   InputType,
   SharedState,
   SharedInitialState
@@ -126,7 +127,7 @@ export interface Settings {
 export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_BOOLEAN
   default: boolean | undefined
-  reducer: InputBooleanReducer<boolean | undefined>
+  reducer: GenericReducer<boolean | undefined>
   table: {
     options: Record<string, boolean>
     variables: Record<string, boolean>
@@ -136,7 +137,7 @@ export interface State extends SharedState {
 export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_BOOLEAN
   default: undefined
-  reducer: InputBooleanReducer<boolean | undefined>
+  reducer: GenericReducer<boolean | undefined>
   table: {
     options: Record<string, boolean>
     variables: Record<string, boolean>
@@ -208,7 +209,7 @@ export interface Reducer<T extends Action[]> {
   }
   [TypeAction.Default]: {
     default: Payload<$.Values<T>, TypeAction.Default>
-    reducer: InputBooleanReducer<boolean>
+    reducer: GenericReducer<boolean>
   }
   [TypeAction.Option]: {
     options: Payload<$.Values<T>, TypeAction.Option> extends {

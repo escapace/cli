@@ -16,7 +16,7 @@ import {
   Reference,
   SYMBOL_COMMAND,
   GenericReducer,
-  UnionToIntersection,
+  UnionMerge,
   Unwrap,
   SharedInitialState,
   SharedState
@@ -39,7 +39,7 @@ type ValuesInput<
   T extends Actions,
   U = $.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>[typeof SYMBOL_STATE]
 > = $.Cast<
-  UnionToIntersection<
+  UnionMerge<
     U extends { reference: infer X; reducer: infer Y }
       ? Record<$.Cast<X, Reference>, Unwrap<Y>>
       : never

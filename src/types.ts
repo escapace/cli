@@ -1,3 +1,4 @@
+import $ from '@escapace/typelevel'
 import { FluentInterface, Model } from '@escapace/fluent'
 import { InputBoolean } from './input/boolean/types'
 import { InputChoice } from './input/choice/types'
@@ -60,7 +61,7 @@ export type Input =
   | InputString
   | InputGroup
 
-export type Unwrap<T> = T extends (...args: any) => infer U
+export type Unwrap<T> = T extends (...args: any[]) => infer U
   ? U extends PromiseLike<infer R>
     ? R
     : U
@@ -73,3 +74,35 @@ export type UnionToIntersection<U> = (
   : never
 
 export type GenericReducer<T = unknown> = (...args: any[]) => T
+
+// type abc = { one: 1, two: 2, three: 3 }
+// type qwe = { three: 'three', four: 4, five: 5 }
+
+export type Merge<T extends object, U extends object> = Pick<
+  T,
+  $.Difference<keyof T, keyof U>
+> &
+  Pick<U, $.Difference<keyof U, keyof T>> &
+  {
+    [K in $.Intersection<keyof T, keyof U>]: T[K] | U[K]
+  }
+
+// type  qweqwe = Merge<{}, Record<"boolean", boolean | undefined>> | Merge<{}, Record<"choice", ("A" | "B" | "C")[]>>
+
+export type UnionMerge<T extends object> = UnionToIntersection<
+  T extends any ? (t: T) => T : never
+> extends (_: any) => infer W
+  ? W extends object
+    ? Merge<W, Exclude<T, W>>
+    : never
+  : {}
+
+// type qwee = UnionMerge<abc | qwe & qwe>
+//
+// type asdqwe = qwe['string']
+
+// type current = Record<"groupA", Record<"choice", ("A" | "B" | "C")[]>> | Record<"groupA", "groupA return"> | Record<"boolean", boolean | undefined>
+// type cint = UnionMerge<current>
+//
+// type asd  = cint['groupA']
+//

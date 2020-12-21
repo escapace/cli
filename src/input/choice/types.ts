@@ -14,6 +14,7 @@ import {
   Reference,
   SettingsVariable,
   // InputType,
+  GenericReducer,
   SharedState,
   SharedInitialState
 } from '../../types'
@@ -128,7 +129,7 @@ export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_CHOICE
   choices: string[]
   default: string | string[] | undefined
-  reducer: GenericInputChoiceReducer<string | string[] | undefined>
+  reducer: GenericReducer<string | string[] | undefined>
   repeat: boolean
 }
 
@@ -136,7 +137,7 @@ export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_CHOICE
   choices: []
   default: undefined
-  reducer: GenericInputChoiceReducer<string | undefined>
+  reducer: GenericReducer<string | undefined>
   repeat: false
 }
 
@@ -238,23 +239,21 @@ export interface Reducer<T extends Action[]> {
   }
   [TypeAction.Choices]: {
     choices: Payload<$.Values<T>, TypeAction.Choices>
-    reducer: GenericInputChoiceReducer<
+    reducer: GenericReducer<
       $.Values<Payload<$.Values<T>, TypeAction.Choices>> | undefined
     >
     isEmpty: false
   }
   [TypeAction.Repeat]: {
     repeat: true
-    reducer: GenericInputChoiceReducer<Payload<$.Values<T>, TypeAction.Choices>>
+    reducer: GenericReducer<Payload<$.Values<T>, TypeAction.Choices>>
   }
   [TypeAction.Default]: {
     default: Payload<$.Values<T>, TypeAction.Default>
     reducer: $.If<
       $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
-      GenericInputChoiceReducer<
-        $.Values<Payload<$.Values<T>, TypeAction.Choices>>
-      >,
-      GenericInputChoiceReducer<Payload<$.Values<T>, TypeAction.Choices>>
+      GenericReducer<$.Values<Payload<$.Values<T>, TypeAction.Choices>>>,
+      GenericReducer<Payload<$.Values<T>, TypeAction.Choices>>
     >
   }
 }
@@ -294,5 +293,3 @@ export interface InputChoice
 //   values: Values<U>,
 //   model: { state: U['state']; log: Array<U['log']> }
 // ) => T | Promise<T>
-
-export type GenericInputChoiceReducer<T = unknown> = (...args: any[]) => T

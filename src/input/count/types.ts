@@ -12,6 +12,7 @@ import {
 import {
   SYMBOL_INPUT_COUNT,
   Reference,
+  GenericReducer,
   InputType,
   SharedState,
   SharedInitialState
@@ -98,14 +99,14 @@ export interface Settings {
 export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_COUNT
   default: number
-  reducer: InputCountReducer<number>
+  reducer: GenericReducer<number>
   table: Record<string, number>
 }
 
 export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_COUNT
   default: 0
-  reducer: InputCountReducer<number>
+  reducer: GenericReducer<number>
   table: Record<string, number>
 }
 
