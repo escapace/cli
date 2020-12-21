@@ -26,10 +26,10 @@ const factory = (mode: Case = Case.One) => {
   const inputChoice = choice()
     .reference('choice')
     .description('choice')
-    .option('-c')
-    .option('--choice')
     .choices('A', 'B', 'C')
     .repeat()
+    .option('-c')
+    .option('--choice')
     .default(['A'])
 
   const inputBoolean = boolean()

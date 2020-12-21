@@ -160,32 +160,12 @@ export interface Specification<T extends Model<State>> {
     [Options.Conflicts]: never
   }
 
-  [TypeAction.Option]: {
-    [Options.Type]: typeof TypeAction.Option
-    [Options.Once]: $.False
-    [Options.Dependencies]: typeof TypeAction.Description
-    [Options.Keys]: 'option'
-    [Options.Enabled]: $.True
-    [Options.Conflicts]: typeof TypeAction.Choices
-  }
-
-  [TypeAction.Variable]: {
-    [Options.Type]: typeof TypeAction.Variable
-    [Options.Once]: $.False
-    [Options.Dependencies]: typeof TypeAction.Description
-    [Options.Keys]: 'variable'
-    [Options.Enabled]: $.True
-    [Options.Conflicts]: typeof TypeAction.Choices
-  }
-
   [TypeAction.Choices]: {
     [Options.Type]: typeof TypeAction.Choices
     [Options.Once]: $.True
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Keys]: 'choices'
-    [Options.Enabled]: $.Not<
-      $.Is.Never<Extract<$.Values<T['log']>, ActionVariable | ActionOption>>
-    >
+    [Options.Enabled]: $.True
     [Options.Conflicts]: never
   }
 
@@ -195,6 +175,24 @@ export interface Specification<T extends Model<State>> {
     [Options.Dependencies]: typeof TypeAction.Choices
     [Options.Keys]: 'repeat'
     [Options.Enabled]: $.True
+    [Options.Conflicts]: typeof TypeAction.Option | typeof TypeAction.Variable
+  }
+
+  [TypeAction.Option]: {
+    [Options.Type]: typeof TypeAction.Option
+    [Options.Once]: $.False
+    [Options.Dependencies]: typeof TypeAction.Choices
+    [Options.Keys]: 'option'
+    [Options.Enabled]: $.True
+    [Options.Conflicts]: typeof TypeAction.Default
+  }
+
+  [TypeAction.Variable]: {
+    [Options.Type]: typeof TypeAction.Variable
+    [Options.Once]: $.False
+    [Options.Dependencies]: typeof TypeAction.Choices
+    [Options.Keys]: 'variable'
+    [Options.Enabled]: $.True
     [Options.Conflicts]: typeof TypeAction.Default
   }
 
@@ -203,7 +201,9 @@ export interface Specification<T extends Model<State>> {
     [Options.Dependencies]: typeof TypeAction.Choices
     [Options.Once]: $.True
     [Options.Keys]: 'default'
-    [Options.Enabled]: $.True
+    [Options.Enabled]: $.Not<
+      $.Is.Never<Extract<$.Values<T['log']>, ActionVariable | ActionOption>>
+    >
     [Options.Conflicts]: never
   }
 }
@@ -215,6 +215,18 @@ declare module '@escapace/typelevel/hkt' {
     [INPUT_CHOICE_REDUCER]: Reducer<$.Cast<A, Action[]>>
   }
 }
+
+type ReducerRedcuer<T extends Action[]> = $.If<
+  $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
+  $.If<
+    $.Is.Never<Payload<$.Values<T>, TypeAction.Default>>,
+    GenericReducer<
+      $.Values<Payload<$.Values<T>, TypeAction.Choices>> | undefined
+    >,
+    GenericReducer<$.Values<Payload<$.Values<T>, TypeAction.Choices>>>
+  >,
+  GenericReducer<Payload<$.Values<T>, TypeAction.Choices>>
+>
 
 export interface Reducer<T extends Action[]> {
   [TypeAction.Reference]: {
@@ -239,22 +251,16 @@ export interface Reducer<T extends Action[]> {
   }
   [TypeAction.Choices]: {
     choices: Payload<$.Values<T>, TypeAction.Choices>
-    reducer: GenericReducer<
-      $.Values<Payload<$.Values<T>, TypeAction.Choices>> | undefined
-    >
+    reducer: ReducerRedcuer<T>
     isEmpty: false
   }
   [TypeAction.Repeat]: {
     repeat: true
-    reducer: GenericReducer<Payload<$.Values<T>, TypeAction.Choices>>
+    reducer: ReducerRedcuer<T>
   }
   [TypeAction.Default]: {
     default: Payload<$.Values<T>, TypeAction.Default>
-    reducer: $.If<
-      $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
-      GenericReducer<$.Values<Payload<$.Values<T>, TypeAction.Choices>>>,
-      GenericReducer<Payload<$.Values<T>, TypeAction.Choices>>
-    >
+    reducer: ReducerRedcuer<T>
   }
 }
 

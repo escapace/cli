@@ -54,7 +54,7 @@ describe('input/choice', () => {
 
     const test2 = test1.description('ABC')
 
-    assert.hasAllKeys(test2, [SYMBOL_LOG, SYMBOL_STATE, 'option', 'variable'])
+    assert.hasAllKeys(test2, [SYMBOL_LOG, SYMBOL_STATE, 'choices'])
 
     assert.deepEqual(log(test2), [
       { type: TypeAction.Description, payload: 'ABC' },
@@ -74,108 +74,78 @@ describe('input/choice', () => {
       variables: []
     })
 
-    const test3 = test2.option('--option')
+    const test3 = test2.choices('A', 'B')
 
     assert.hasAllKeys(test3, [
       SYMBOL_LOG,
       SYMBOL_STATE,
-      'choices',
       'option',
+      'repeat',
       'variable'
     ])
 
     assert.deepEqual(log(test3), [
-      {
-        type: TypeAction.Option,
-        payload: {
-          name: '--option'
-        }
-      },
+      { type: TypeAction.Choices, payload: ['A', 'B'] },
       { type: TypeAction.Description, payload: 'ABC' },
       { type: TypeAction.Reference, payload: reference }
     ])
 
     assert.deepEqual(state(test3), {
       type: SYMBOL_INPUT_CHOICE,
-      choices: [],
+      choices: ['A', 'B'],
       default: undefined,
       description: 'ABC',
-      isEmpty: true,
-      options: ['--option'],
+      isEmpty: false,
+      options: [],
       reducer,
       reference,
       repeat: false,
       variables: []
     })
 
-    const split = (value: string) => value.split(':')
+    const test4 = test3.repeat()
 
-    const test4 = test3.variable('VARIABLE', {
-      split
-    })
-
-    assert.hasAllKeys(test4, [
-      SYMBOL_LOG,
-      SYMBOL_STATE,
-      'choices',
-      'option',
-      'variable'
-    ])
+    assert.hasAllKeys(test4, [SYMBOL_LOG, SYMBOL_STATE, 'option', 'variable'])
 
     assert.deepEqual(log(test4), [
-      {
-        type: TypeAction.Variable,
-        payload: {
-          name: 'VARIABLE',
-          settings: {
-            split
-          }
-        }
-      },
-      {
-        type: TypeAction.Option,
-        payload: {
-          name: '--option'
-        }
-      },
+      { type: TypeAction.Repeat, payload: undefined },
+      { type: TypeAction.Choices, payload: ['A', 'B'] },
       { type: TypeAction.Description, payload: 'ABC' },
       { type: TypeAction.Reference, payload: reference }
     ])
 
     assert.deepEqual(state(test4), {
       type: SYMBOL_INPUT_CHOICE,
-      choices: [],
+      choices: ['A', 'B'],
       default: undefined,
       description: 'ABC',
-      isEmpty: true,
-      options: ['--option'],
+      isEmpty: false,
+      options: [],
       reducer,
       reference,
-      repeat: false,
-      variables: ['VARIABLE']
+      repeat: true,
+      variables: []
     })
 
-    const test5 = test4.choices('A', 'B')
+    const test5 = test4.option('--option')
 
-    assert.hasAllKeys(test5, [SYMBOL_LOG, SYMBOL_STATE, 'default', 'repeat'])
+    assert.hasAllKeys(test5, [
+      SYMBOL_LOG,
+      SYMBOL_STATE,
+      'default',
+      'option',
+      'variable'
+    ])
 
     assert.deepEqual(log(test5), [
-      { type: TypeAction.Choices, payload: ['A', 'B'] },
-      {
-        type: TypeAction.Variable,
-        payload: {
-          name: 'VARIABLE',
-          settings: {
-            split
-          }
-        }
-      },
       {
         type: TypeAction.Option,
         payload: {
           name: '--option'
         }
       },
+      { type: TypeAction.Repeat, payload: undefined },
+      { type: TypeAction.Choices, payload: ['A', 'B'] },
       { type: TypeAction.Description, payload: 'ABC' },
       { type: TypeAction.Reference, payload: reference }
     ])
@@ -189,17 +159,25 @@ describe('input/choice', () => {
       options: ['--option'],
       reducer,
       reference,
-      repeat: false,
-      variables: ['VARIABLE']
+      repeat: true,
+      variables: []
     })
 
-    const test6 = test5.default('A')
+    const split = (value: string) => value.split(':')
 
-    assert.hasAllKeys(test6, [SYMBOL_LOG, SYMBOL_STATE])
+    const test6 = test5.variable('VARIABLE', {
+      split
+    })
+
+    assert.hasAllKeys(test6, [
+      SYMBOL_LOG,
+      SYMBOL_STATE,
+      'default',
+      'option',
+      'variable'
+    ])
 
     assert.deepEqual(log(test6), [
-      { type: TypeAction.Default, payload: 'A' },
-      { type: TypeAction.Choices, payload: ['A', 'B'] },
       {
         type: TypeAction.Variable,
         payload: {
@@ -215,6 +193,8 @@ describe('input/choice', () => {
           name: '--option'
         }
       },
+      { type: TypeAction.Repeat, payload: undefined },
+      { type: TypeAction.Choices, payload: ['A', 'B'] },
       { type: TypeAction.Description, payload: 'ABC' },
       { type: TypeAction.Reference, payload: reference }
     ])
@@ -222,24 +202,22 @@ describe('input/choice', () => {
     assert.deepEqual(state(test6), {
       type: SYMBOL_INPUT_CHOICE,
       choices: ['A', 'B'],
-      default: 'A',
+      default: undefined,
       description: 'ABC',
       isEmpty: false,
       options: ['--option'],
       reducer,
       reference,
-      repeat: false,
+      repeat: true,
       variables: ['VARIABLE']
     })
 
-    const test7 = test5.repeat().default(['A'])
+    const test7 = test6.default(['B'])
 
     assert.hasAllKeys(test7, [SYMBOL_LOG, SYMBOL_STATE])
 
     assert.deepEqual(log(test7), [
-      { type: TypeAction.Default, payload: ['A'] },
-      { type: TypeAction.Repeat, payload: undefined },
-      { type: TypeAction.Choices, payload: ['A', 'B'] },
+      { type: TypeAction.Default, payload: ['B'] },
       {
         type: TypeAction.Variable,
         payload: {
@@ -255,6 +233,8 @@ describe('input/choice', () => {
           name: '--option'
         }
       },
+      { type: TypeAction.Repeat, payload: undefined },
+      { type: TypeAction.Choices, payload: ['A', 'B'] },
       { type: TypeAction.Description, payload: 'ABC' },
       { type: TypeAction.Reference, payload: reference }
     ])
@@ -262,7 +242,7 @@ describe('input/choice', () => {
     assert.deepEqual(state(test7), {
       type: SYMBOL_INPUT_CHOICE,
       choices: ['A', 'B'],
-      default: ['A'],
+      default: ['B'],
       description: 'ABC',
       isEmpty: false,
       options: ['--option'],

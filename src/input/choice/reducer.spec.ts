@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
+import $ from '@escapace/typelevel'
+import { noop } from 'lodash'
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
 import { spy as Spy } from 'sinon'
@@ -12,23 +14,38 @@ chai.use(promised)
 const factory = (repeat = true) => {
   const spy = Spy()
 
-  const parent = choice()
+  const base = choice()
     .reference('choice')
     .description('choice')
+    .choices('AA', 'BB', 'CC', 'DD')
+
+  const withRepeat = base
+    .repeat()
     .option('--choice')
     .option('-c')
     .variable('CHOICE')
-    .choices('AA', 'BB', 'CC', 'DD')
+    .default(['DD'])
+
+  const withoutRepeat = base.option('--choice').option('-c').variable('CHOICE')
 
   const cmd = compose(
     command()
       .reference('cmd')
       .name('command')
       .description('command')
-      .input(repeat ? parent.repeat().default(['DD']) : parent)
-      .reducer((values, model) => {
-        assert.isArray(model.log)
-        assert.isObject(model.state)
+      .input(repeat ? withRepeat : withoutRepeat)
+      .reducer((values) => {
+        const test: $.Equal<
+          typeof values['choice'],
+          | 'AA'
+          | 'BB'
+          | 'CC'
+          | 'DD'
+          | Array<'AA' | 'BB' | 'CC' | 'DD'>
+          | undefined
+        > = '1'
+
+        noop(test)
 
         spy(values)
       })
