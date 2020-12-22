@@ -1,54 +1,13 @@
-import { InputType, SettingsVariable } from '../types'
-import { map, flatMap } from 'lodash'
-
-export interface GenericOption<T> {
-  type: InputType.Option
-  name: string
-  value: T
-}
-
-export interface GenericVariable<T> {
-  type: InputType.Variable
-  name: string
-  value: T
-}
-
-export type InitialStringValue =
-  | GenericOption<string | string[]>
-  | GenericVariable<string>
-
-export type InitialNumberValue =
-  | GenericOption<number | number[]>
-  | GenericVariable<string>
-
-export type NormalizedStringValue =
-  | GenericOption<string>
-  | GenericVariable<string>
-
-export type NormalizedNumberValue =
-  | GenericOption<number>
-  | GenericVariable<number>
-
-export enum NormalizeMode {
-  Number,
-  String
-}
-
-interface NormalizeSharedOptions {
-  mode: NormalizeMode
-  repeat: boolean
-  variables: { [key: string]: SettingsVariable }
-}
-
-interface NormalizeStringOptions extends NormalizeSharedOptions {
-  mode: NormalizeMode.String
-  values: InitialStringValue[]
-}
-
-interface NormalizeNumberOptions extends NormalizeSharedOptions {
-  mode: NormalizeMode.Number
-  values: InitialNumberValue[]
-}
+import { flatMap, map } from 'lodash'
+import {
+  DeNormalizedNumberValue,
+  DeNormalizedStringValue,
+  InputType,
+  NormalizedNumberValue,
+  NormalizedStringValue,
+  NormalizeNumberOptions,
+  NormalizeStringOptions
+} from '../types'
 
 export function normalize(
   options: NormalizeNumberOptions
@@ -61,7 +20,7 @@ export function normalize(
 ): NormalizedStringValue[] | NormalizedNumberValue[] {
   return flatMap<any, any>(
     options.values,
-    (initial: InitialStringValue | InitialNumberValue) => {
+    (initial: DeNormalizedStringValue | DeNormalizedNumberValue) => {
       if (options.repeat) {
         const values: string[] =
           initial.type === InputType.Variable

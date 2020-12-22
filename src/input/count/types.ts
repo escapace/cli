@@ -1,26 +1,23 @@
-import $ from '@escapace/typelevel'
-
 import {
   Action,
-  Payload,
-  SYMBOL_LOG,
-  SYMBOL_STATE,
   FluentInterface,
   Model,
   Next,
-  Options
+  Options,
+  Payload,
+  SYMBOL_LOG,
+  SYMBOL_STATE
 } from '@escapace/fluent'
-
+import $ from '@escapace/typelevel'
 import {
-  SYMBOL_INPUT_COUNT,
-  Reference,
+  GenericOption,
   InputType,
   PropsShared,
+  Reference,
+  SharedInitialState,
   SharedState,
-  SharedInitialState
+  SYMBOL_INPUT_COUNT
 } from '../../types'
-
-import { GenericOption } from '../../utility/normalize'
 
 export declare const INPUT_COUNT_INTERFACE: unique symbol
 export declare const INPUT_COUNT_SPECIFICATION: unique symbol

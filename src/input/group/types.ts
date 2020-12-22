@@ -1,5 +1,3 @@
-import $ from '@escapace/typelevel'
-
 import {
   Action,
   FluentInterface,
@@ -10,19 +8,19 @@ import {
   SYMBOL_LOG,
   SYMBOL_STATE
 } from '@escapace/fluent'
-
+import $ from '@escapace/typelevel'
 import {
+  GenericOption,
+  GenericVariable,
   Input,
-  Reference,
-  SYMBOL_INPUT_GROUP,
   PropsShared,
+  Reference,
   SharedInitialState,
   SharedState,
+  SYMBOL_INPUT_GROUP,
   UnionMerge,
   Unwrap
 } from '../../types'
-
-import { GenericOption, GenericVariable } from '../../utility/normalize'
 
 export declare const INPUT_GROUP_INTERFACE: unique symbol
 export declare const INPUT_GROUP_SPECIFICATION: unique symbol
@@ -238,3 +236,5 @@ export type InputGroupReducer<
   values: Values<U['log']>,
   props: { model: { state: U['state']; log: U['log'] } } & PropsShared
 ) => T | Promise<T>
+
+// TODO: Lookup Reducer

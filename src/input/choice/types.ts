@@ -1,26 +1,22 @@
-import $ from '@escapace/typelevel'
-
 import {
   Action,
-  Payload,
-  SYMBOL_LOG,
-  SYMBOL_STATE,
   FluentInterface,
   Model,
   Next,
-  Options
+  Options,
+  Payload,
+  SYMBOL_LOG,
+  SYMBOL_STATE
 } from '@escapace/fluent'
-
-import { InitialStringValue } from '../../utility/normalize'
-
+import $ from '@escapace/typelevel'
 import {
-  SYMBOL_INPUT_CHOICE,
+  DeNormalizedStringValue,
+  PropsShared,
   Reference,
   SettingsVariable,
-  // InputType,
-  PropsShared,
+  SharedInitialState,
   SharedState,
-  SharedInitialState
+  SYMBOL_INPUT_CHOICE
 } from '../../types'
 
 export declare const INPUT_CHOICE_INTERFACE: unique symbol
@@ -293,5 +289,5 @@ export type GenericInputChoiceReducer<T = unknown, U = any> = (
 
 export type DefaultInputChoiceReducer = GenericInputChoiceReducer<
   any,
-  InitialStringValue[]
+  DeNormalizedStringValue[]
 >

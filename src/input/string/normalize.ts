@@ -1,18 +1,18 @@
-import {
-  normalize as n,
-  NormalizedStringValue,
-  InitialStringValue,
-  NormalizeMode
-} from '../../utility/normalize'
-import { TypeAction, PropsInputString } from './types'
 import { assign, map } from 'lodash-es'
+import {
+  DeNormalizedStringValue,
+  NormalizedStringValue,
+  TypeNormalize
+} from '../../types'
+import { normalize as _normalize } from '../../utility/normalize'
+import { PropsInputString, TypeAction } from './types'
 
 export const normalize = (
-  values: InitialStringValue[],
+  values: DeNormalizedStringValue[],
   props: PropsInputString
 ): NormalizedStringValue[] =>
-  n({
-    mode: NormalizeMode.String,
+  _normalize({
+    type: TypeNormalize.String,
     values,
     variables: assign(
       {},

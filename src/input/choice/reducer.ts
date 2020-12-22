@@ -1,14 +1,15 @@
 import { differenceWith, isEmpty, map, uniq, assign } from 'lodash-es'
 import { TypeAction, DefaultInputChoiceReducer } from './types'
-import { normalize, NormalizeMode } from '../../utility/normalize'
+import { normalize } from '../../utility/normalize'
 import { message } from '../../utility/message'
+import { TypeNormalize } from '../../types'
 
 export const reducer: DefaultInputChoiceReducer = (values, props) => {
   if (isEmpty(values)) {
     return props.model.state.default
   } else {
     const normalized = normalize({
-      mode: NormalizeMode.String,
+      type: TypeNormalize.String,
       values,
       variables: assign(
         {},

@@ -11,6 +11,7 @@ import { InputCount } from './input/count/types'
 import { InputString } from './input/string/types'
 import { InputGroup } from './input/group/types'
 import { Command } from './command/types'
+import { Spec } from 'arg'
 
 export const SYMBOL_INPUT_BOOLEAN = Symbol.for('ESCAPACE_CLI_INPUT_BOOLEAN')
 export const SYMBOL_INPUT_CHOICE = Symbol.for('ESCAPACE_CLI_INPUT_CHOICE')
@@ -58,6 +59,55 @@ export type Input =
   | InputString
   | InputGroup
 
+export interface GenericOption<T> {
+  type: InputType.Option
+  name: string
+  value: T
+}
+
+export interface GenericVariable<T> {
+  type: InputType.Variable
+  name: string
+  value: T
+}
+
+export type DeNormalizedStringValue =
+  | GenericOption<string | string[]>
+  | GenericVariable<string>
+
+export type DeNormalizedNumberValue =
+  | GenericOption<number | number[]>
+  | GenericVariable<string>
+
+export type NormalizedStringValue =
+  | GenericOption<string>
+  | GenericVariable<string>
+
+export type NormalizedNumberValue =
+  | GenericOption<number>
+  | GenericVariable<number>
+
+export enum TypeNormalize {
+  Number,
+  String
+}
+
+export interface NormalizeSharedOptions {
+  type: TypeNormalize
+  repeat: boolean
+  variables: { [key: string]: SettingsVariable }
+}
+
+export interface NormalizeStringOptions extends NormalizeSharedOptions {
+  type: TypeNormalize.String
+  values: DeNormalizedStringValue[]
+}
+
+export interface NormalizeNumberOptions extends NormalizeSharedOptions {
+  type: TypeNormalize.Number
+  values: DeNormalizedNumberValue[]
+}
+
 export type Unwrap<T> = T extends (...args: any[]) => infer U
   ? U extends PromiseLike<infer R>
     ? R
@@ -104,6 +154,19 @@ export interface ModelInput {
 export interface PropsShared {
   readonly commands: Command[]
   readonly settings: Settings
+}
+
+export interface Intent {
+  models: Command[]
+  commands: string[]
+  spec: Spec
+}
+
+export interface Match {
+  options: Record<string, string | string[] | number | number[]>
+  variables: Record<string, string | undefined>
+  arguments: string[]
+  models: Command[]
 }
 
 // export interface PropsInput  extends PropsShared {
