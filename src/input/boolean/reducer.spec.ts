@@ -25,10 +25,7 @@ const factory = () => {
           .variable('YES', 'NO')
           .default(false)
       )
-      .reducer((values, model) => {
-        assert.isArray(model.log)
-        assert.isObject(model.state)
-
+      .reducer((values) => {
         spy(values)
       })
   )

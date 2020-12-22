@@ -25,10 +25,7 @@ const factory = () => {
           .option('-v', '-q')
           .default(2)
       )
-      .reducer((values, model) => {
-        assert.isArray(model.log)
-        assert.isObject(model.state)
-
+      .reducer((values) => {
         spy(values)
       })
   )

@@ -4,7 +4,6 @@ import { settingsVariable } from '../../constants'
 import { Reference, SettingsVariable, SYMBOL_INPUT_STRING } from '../../types'
 import { assert } from '../../utility/assert'
 import { normalize } from './normalize'
-import { InitialStringValue } from '../../utility/normalize'
 import { reducer as reducerDefault } from './reducer'
 import {
   ActionDefault,
@@ -15,7 +14,7 @@ import {
   ActionRepeat,
   Actions,
   ActionVariable,
-  InputStringReducer,
+  GenericInputStringReducer,
   Settings,
   State,
   TypeAction
@@ -44,11 +43,10 @@ export const fluentReducer = (log: Actions): State => {
     (action) => action.type === TypeAction.Reducer
   ) as ActionReducer | undefined)?.payload
 
-  const reducer: InputStringReducer<unknown> =
+  const reducer: GenericInputStringReducer =
     reducerMaybe === undefined
       ? reducerDefault
-      : (values: InitialStringValue[], model: { state: State; log: Actions }) =>
-          reducerMaybe(normalize(values, model), model)
+      : (values, props) => reducerMaybe(normalize(values, props), props)
 
   const isEmpty =
     log.length === 0 ||
@@ -200,7 +198,7 @@ export const string = builder<Settings>([
     [Options.Enabled]: (_, state) => !state.isEmpty,
     [Options.Conflicts]: [TypeAction.Default],
     [Options.Interface]: (dispatch) => ({
-      reducer(value: InputStringReducer) {
+      reducer(value: GenericInputStringReducer) {
         assert.function(value)
 
         return dispatch<ActionReducer>({

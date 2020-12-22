@@ -7,7 +7,8 @@ import {
   Model,
   Next,
   Options,
-  SYMBOL_STATE
+  SYMBOL_STATE,
+  SYMBOL_LOG
 } from '@escapace/fluent'
 
 import {
@@ -15,7 +16,7 @@ import {
   LookupModel,
   Reference,
   SYMBOL_COMMAND,
-  GenericReducer,
+  PropsShared,
   UnionMerge,
   Unwrap,
   SharedInitialState,
@@ -56,7 +57,7 @@ type ValuesCommand<
 > = U extends {
   type: typeof SYMBOL_COMMAND
   reference: infer X
-  reducer: GenericReducer<infer Y>
+  reducer: GenericCommandReducer<infer Y>
 }
   ? { reference: $.Cast<X, Reference>; value: Y }
   : never
@@ -74,10 +75,7 @@ type Values<T extends Actions> = $.If<
 export type CommandReducer<
   T = unknown,
   U extends Model<State, Actions> = Model<State, Actions>
-> = (
-  values: Values<U['log']>,
-  model: { state: U['state']; log: Array<U['log']> }
-) => T | Promise<T>
+> = (values: Values<U['log']>, model: PropsCommand) => T | Promise<T>
 
 export type LookupReducer<
   T extends FluentInterface<Model<State, Actions>>,
@@ -111,7 +109,7 @@ export interface ActionInput<T extends Input = Input> {
 
 export interface ActionReducer<T = unknown> {
   type: TypeAction.Reducer
-  payload: GenericReducer<T>
+  payload: GenericCommandReducer<T>
 }
 
 export type Actions = Array<
@@ -185,7 +183,7 @@ export interface Settings {
 export interface State extends SharedState {
   type: typeof SYMBOL_COMMAND
   names: string[]
-  reducer: Function
+  reducer: GenericCommandReducer
   commands: Command[]
   inputs: Input[]
 }
@@ -193,7 +191,7 @@ export interface State extends SharedState {
 export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_COMMAND
   names: []
-  reducer: Function
+  reducer: GenericCommandReducer
   commands: []
   inputs: []
 }
@@ -302,7 +300,7 @@ export interface Reducer<T extends Action[]> {
     >
     reducer: $.If<
       $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
-      GenericReducer<ValuesCommand<T>>,
+      GenericCommandReducer<ValuesCommand<T>>,
       Payload<$.Values<T>, TypeAction.Reducer>
     >
   }
@@ -331,7 +329,7 @@ export interface Reducer<T extends Action[]> {
     >
     reducer: $.If<
       $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
-      GenericReducer<ValuesInput<T>>,
+      GenericCommandReducer<ValuesInput<T>>,
       Payload<$.Values<T>, TypeAction.Reducer>
     >
   }
@@ -347,3 +345,17 @@ export interface CommandState extends State {
 
 export interface Command
   extends FluentInterface<Model<CommandState, Actions>> {}
+
+export interface ModelCommand {
+  readonly state: Command[typeof SYMBOL_STATE]
+  readonly log: Command[typeof SYMBOL_LOG]
+}
+
+export interface PropsCommand extends PropsShared {
+  readonly model: ModelCommand
+}
+
+export type GenericCommandReducer<T = unknown> = (
+  values: any,
+  props: PropsCommand
+) => T

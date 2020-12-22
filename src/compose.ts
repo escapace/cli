@@ -14,6 +14,7 @@ import {
   pick,
   union
 } from 'lodash-es'
+
 import {
   Input,
   InputType,
@@ -202,7 +203,7 @@ export const compose = <T extends Command>(
 ) => {
   assert.command(command)
 
-  defaults({ ...settings }, {})
+  const _settings = defaults({ ...settings }, { help: true })
 
   const choices = iterate(extract(command), undefined)
 
@@ -246,7 +247,16 @@ export const compose = <T extends Command>(
           )
         ]
 
-        const result = await input[SYMBOL_STATE].reducer(values, { state, log })
+        const props: any = {
+          model: {
+            state,
+            log
+          },
+          commands: task.models,
+          settings: _settings
+        }
+
+        const result = await input[SYMBOL_STATE].reducer(values, props)
 
         return {
           [input[SYMBOL_STATE].reference as Reference]: result
@@ -274,8 +284,12 @@ export const compose = <T extends Command>(
 
       // TODO: command reducer error handling
       valuePrevious = await current[SYMBOL_STATE].reducer(valueNext, {
-        state: current[SYMBOL_STATE],
-        log: current[SYMBOL_LOG]
+        model: {
+          state: current[SYMBOL_STATE],
+          log: current[SYMBOL_LOG]
+        },
+        commands: task.models,
+        settings: _settings
       })
     }
   }

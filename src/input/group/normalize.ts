@@ -1,18 +1,18 @@
-import { assign, filter, includes, map } from 'lodash-es'
+import { assign, filter, includes, map, omit } from 'lodash-es'
 import { SYMBOL_STATE, SYMBOL_LOG } from '@escapace/fluent'
-import { GenericOption, GenericVariable } from '../../utility/normalize'
-import { State, Actions } from './types'
+import { PropsInputGroup } from './types'
 import { Reference, InputType } from './../../types'
+import { GenericOption, GenericVariable } from '../../utility/normalize'
 
 export const normalize = async (
   values: Array<GenericOption<any> | GenericVariable<any>>,
-  model: { state: State; log: Actions }
+  props: PropsInputGroup
 ): Promise<Record<Reference, any>> =>
   // eslint-disable-next-line @typescript-eslint/promise-function-async
   assign(
     {},
     ...(await Promise.all(
-      map(model.state.inputs, async (input) => {
+      map(props.model.state.inputs, async (input) => {
         const state = input[SYMBOL_STATE]
         const log = input[SYMBOL_LOG]
 
@@ -23,10 +23,12 @@ export const normalize = async (
           )
         )
 
+        const prop: any = { model: { state, log }, ...omit(props, 'model') }
+
         return {
           [input[SYMBOL_STATE].reference as Reference]: await input[
             SYMBOL_STATE
-          ].reducer(filteredValues, { state, log })
+          ].reducer(filteredValues, prop)
         }
       })
     ))

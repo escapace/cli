@@ -34,10 +34,7 @@ const factory = (mode: ModeFactory = ModeFactory.Default) => {
     .option('--str')
     .option('-s')
     .variable('STRING')
-    .reducer((values, model) => {
-      assert.isArray(model.log)
-      assert.isObject(model.state)
-
+    .reducer((values) => {
       spy(values)
 
       return values
@@ -55,10 +52,7 @@ const factory = (mode: ModeFactory = ModeFactory.Default) => {
       .name('command')
       .description('command')
       .input(choice)
-      .reducer((values, model) => {
-        assert.isArray(model.log)
-        assert.isObject(model.state)
-
+      .reducer((values) => {
         spy(values)
       })
   )

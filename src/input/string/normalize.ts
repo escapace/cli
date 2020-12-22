@@ -1,25 +1,26 @@
 import {
   normalize as n,
-  NormalizeMode,
-  InitialStringValue
+  NormalizedStringValue,
+  InitialStringValue,
+  NormalizeMode
 } from '../../utility/normalize'
-import { State, Actions, TypeAction } from './types'
+import { TypeAction, PropsInputString } from './types'
 import { assign, map } from 'lodash-es'
 
 export const normalize = (
   values: InitialStringValue[],
-  model: { state: State; log: Actions }
-) =>
+  props: PropsInputString
+): NormalizedStringValue[] =>
   n({
     mode: NormalizeMode.String,
     values,
     variables: assign(
       {},
-      ...map(model.log, (action) =>
+      ...map(props.model.log, (action) =>
         action.type === TypeAction.Variable
           ? { [action.payload.name]: action.payload.settings }
           : undefined
       )
     ),
-    repeat: model.state.repeat
+    repeat: props.model.state.repeat
   })

@@ -1,21 +1,17 @@
 import { isEmpty, map, uniq } from 'lodash-es'
 import { message } from '../../utility/message'
-import { InitialStringValue } from '../../utility/normalize'
 import { normalize } from './normalize'
-import { Actions, State } from './types'
+import { DefaultInputStringReducer } from './types'
 
-export const reducer = (
-  values: InitialStringValue[],
-  model: { state: State; log: Actions }
-) => {
+export const reducer: DefaultInputStringReducer = (values, props) => {
   if (isEmpty(values)) {
-    return model.state.default
+    return props.model.state.default
   } else {
-    const normalized = normalize(values, model)
+    const normalized = normalize(values, props)
 
     const uni = uniq(map(normalized, ({ value }) => value))
 
-    if (model.state.repeat) {
+    if (props.model.state.repeat) {
       return uni
     }
 

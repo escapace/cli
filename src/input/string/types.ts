@@ -3,6 +3,8 @@ import $ from '@escapace/typelevel'
 import {
   Action,
   Payload,
+  SYMBOL_STATE,
+  SYMBOL_LOG,
   FluentInterface,
   Model,
   Next,
@@ -13,12 +15,14 @@ import {
   SYMBOL_INPUT_STRING,
   Reference,
   SettingsVariable,
-  GenericReducer,
   InputType,
   SharedState,
+  PropsShared,
   LookupModel,
   SharedInitialState
 } from '../../types'
+
+import { InitialStringValue } from '../../utility/normalize'
 
 export declare const INPUT_STRING_INTERFACE: unique symbol
 export declare const INPUT_STRING_SPECIFICATION: unique symbol
@@ -58,7 +62,7 @@ export interface ActionDefault<
 
 export interface ActionReducer<T = unknown> {
   type: TypeAction.Reducer
-  payload: InputStringReducer<T>
+  payload: GenericInputStringReducer<T>
 }
 
 export interface ActionVariable<T extends string = string> {
@@ -125,14 +129,14 @@ export interface Settings {
 export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_STRING
   default: string | string[] | undefined
-  reducer: GenericReducer
+  reducer: GenericInputStringReducer
   repeat: boolean
 }
 
 export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_STRING
   default: undefined
-  reducer: GenericReducer<string | undefined>
+  reducer: GenericInputStringReducer<string | undefined>
   repeat: false
 }
 
@@ -215,12 +219,14 @@ export type ReducerReducer<T extends Action[]> = $.If<
     $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
     $.If<
       $.Is.Never<Payload<$.Values<T>, TypeAction.Default>>,
-      GenericReducer<string | undefined>,
-      GenericReducer<string>
+      GenericInputStringReducer<string | undefined>,
+      GenericInputStringReducer<string>
     >,
-    GenericReducer<string[]>
+    GenericInputStringReducer<string[]>
   >,
-  GenericReducer<ReturnType<Payload<$.Values<T>, TypeAction.Reducer>>>
+  GenericInputStringReducer<
+    ReturnType<Payload<$.Values<T>, TypeAction.Reducer>>
+  >
 >
 
 export interface Reducer<T extends Action[]> {
@@ -239,7 +245,7 @@ export interface Reducer<T extends Action[]> {
     reducer: ReducerReducer<T>
   }
   [TypeAction.Reducer]: {
-    reducer: GenericReducer<
+    reducer: GenericInputStringReducer<
       ReturnType<Payload<$.Values<T>, TypeAction.Reducer>>
     >
   }
@@ -289,12 +295,33 @@ export type Values<T extends Model<State, Actions>> = Array<
     >
 >
 
+export interface ModelInputString {
+  readonly state: InputString[typeof SYMBOL_STATE]
+  readonly log: InputString[typeof SYMBOL_LOG]
+}
+
+export interface PropsInputString extends PropsShared {
+  readonly model: ModelInputString
+}
+
+export type GenericInputStringReducer<T = unknown, U = any> = (
+  values: U,
+  props: PropsInputString
+) => T
+
+export type DefaultInputStringReducer = GenericInputStringReducer<
+  any,
+  InitialStringValue[]
+>
+
 export type InputStringReducer<
   T = unknown,
   U extends Model<State, Actions> = Model<State, Actions>
 > = (
   values: Values<U>,
-  model: { state: U['state']; log: U['log'] }
+  props: {
+    model: { state: U['state']; log: U['log'] }
+  } & PropsShared
 ) => T | Promise<T>
 
 export type LookupReducer<

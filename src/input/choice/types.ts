@@ -3,18 +3,22 @@ import $ from '@escapace/typelevel'
 import {
   Action,
   Payload,
+  SYMBOL_LOG,
+  SYMBOL_STATE,
   FluentInterface,
   Model,
   Next,
   Options
 } from '@escapace/fluent'
 
+import { InitialStringValue } from '../../utility/normalize'
+
 import {
   SYMBOL_INPUT_CHOICE,
   Reference,
   SettingsVariable,
   // InputType,
-  GenericReducer,
+  PropsShared,
   SharedState,
   SharedInitialState
 } from '../../types'
@@ -129,7 +133,7 @@ export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_CHOICE
   choices: string[]
   default: string | string[] | undefined
-  reducer: GenericReducer<string | string[] | undefined>
+  reducer: GenericInputChoiceReducer<string | string[] | undefined>
   repeat: boolean
 }
 
@@ -137,7 +141,7 @@ export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_CHOICE
   choices: []
   default: undefined
-  reducer: GenericReducer<string | undefined>
+  reducer: GenericInputChoiceReducer<string | undefined>
   repeat: false
 }
 
@@ -220,12 +224,14 @@ type ReducerRedcuer<T extends Action[]> = $.If<
   $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
   $.If<
     $.Is.Never<Payload<$.Values<T>, TypeAction.Default>>,
-    GenericReducer<
+    GenericInputChoiceReducer<
       $.Values<Payload<$.Values<T>, TypeAction.Choices>> | undefined
     >,
-    GenericReducer<$.Values<Payload<$.Values<T>, TypeAction.Choices>>>
+    GenericInputChoiceReducer<
+      $.Values<Payload<$.Values<T>, TypeAction.Choices>>
+    >
   >,
-  GenericReducer<Payload<$.Values<T>, TypeAction.Choices>>
+  GenericInputChoiceReducer<Payload<$.Values<T>, TypeAction.Choices>>
 >
 
 export interface Reducer<T extends Action[]> {
@@ -270,3 +276,22 @@ export interface InputChoiceState extends State {
 
 export interface InputChoice
   extends FluentInterface<Model<InputChoiceState, Actions>> {}
+
+export interface ModelInputChoice {
+  readonly state: InputChoice[typeof SYMBOL_STATE]
+  readonly log: InputChoice[typeof SYMBOL_LOG]
+}
+
+export interface PropsInputChoice extends PropsShared {
+  readonly model: ModelInputChoice
+}
+
+export type GenericInputChoiceReducer<T = unknown, U = any> = (
+  values: U,
+  props: PropsInputChoice
+) => T
+
+export type DefaultInputChoiceReducer = GenericInputChoiceReducer<
+  any,
+  InitialStringValue[]
+>

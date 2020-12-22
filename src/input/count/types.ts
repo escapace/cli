@@ -3,6 +3,8 @@ import $ from '@escapace/typelevel'
 import {
   Action,
   Payload,
+  SYMBOL_LOG,
+  SYMBOL_STATE,
   FluentInterface,
   Model,
   Next,
@@ -12,11 +14,13 @@ import {
 import {
   SYMBOL_INPUT_COUNT,
   Reference,
-  GenericReducer,
   InputType,
+  PropsShared,
   SharedState,
   SharedInitialState
 } from '../../types'
+
+import { GenericOption } from '../../utility/normalize'
 
 export declare const INPUT_COUNT_INTERFACE: unique symbol
 export declare const INPUT_COUNT_SPECIFICATION: unique symbol
@@ -99,14 +103,14 @@ export interface Settings {
 export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_COUNT
   default: number
-  reducer: GenericReducer<number>
+  reducer: GenericInputCountReducer<number>
   table: Record<string, number>
 }
 
 export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_COUNT
   default: 0
-  reducer: GenericReducer<number>
+  reducer: GenericInputCountReducer<number>
   table: Record<string, number>
 }
 
@@ -196,10 +200,21 @@ export type Values<T extends Model<State, Actions>> = Array<
   >
 >
 
-export type InputCountReducer<
-  T = unknown,
-  U extends Model<State, Actions> = Model<State, Actions>
-> = (
-  values: Values<U>,
-  model: { state: U['state']; log: U['log'] }
-) => T | Promise<T>
+export interface ModelInputCount {
+  readonly state: InputCount[typeof SYMBOL_STATE]
+  readonly log: InputCount[typeof SYMBOL_LOG]
+}
+
+export interface PropsInputCount extends PropsShared {
+  readonly model: ModelInputCount
+}
+
+export type GenericInputCountReducer<T = unknown, U = any> = (
+  values: U,
+  props: PropsInputCount
+) => T
+
+export type DefaultInputCountReducer = GenericInputCountReducer<
+  number,
+  Array<GenericOption<number>>
+>

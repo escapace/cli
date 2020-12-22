@@ -14,7 +14,7 @@ describe('..,', () => {
     assert.equal(spy.callCount, 2)
 
     assert.equal(spy.firstCall.args.length, 2)
-    // assert.equal(spy.firstCall.args[1].state.reference, TypeFixture.)
+    // assert.equal(spy.firstCall.args[1].model.state.reference, TypeFixture.)
 
     assert.deepEqual(spy.firstCall.args[0], {
       _: ['an argument', 'second argument']
@@ -57,7 +57,10 @@ describe('..,', () => {
     assert.equal(spy.callCount, 3)
 
     assert.equal(spy.firstCall.args.length, 2)
-    assert.equal(spy.firstCall.args[1].state.reference, TypeFixture.BRUNCH)
+    assert.equal(
+      spy.firstCall.args[1].model.state.reference,
+      TypeFixture.BRUNCH
+    )
 
     assert.deepEqual(spy.firstCall.args[0], {
       _: ['an argument', 'second argument'],
@@ -66,7 +69,10 @@ describe('..,', () => {
     })
 
     assert.equal(spy.secondCall.args.length, 2)
-    assert.equal(spy.secondCall.args[1].state.reference, TypeFixture.TAKEOUT)
+    assert.equal(
+      spy.secondCall.args[1].model.state.reference,
+      TypeFixture.TAKEOUT
+    )
 
     assert.deepEqual(spy.secondCall.args[0], {
       reference: TypeFixture.BRUNCH,
@@ -78,7 +84,10 @@ describe('..,', () => {
     })
 
     assert.equal(spy.thirdCall.args.length, 2)
-    assert.equal(spy.thirdCall.args[1].state.reference, TypeFixture.KITCHEN)
+    assert.equal(
+      spy.thirdCall.args[1].model.state.reference,
+      TypeFixture.KITCHEN
+    )
 
     assert.deepEqual(spy.thirdCall.args[0], {
       reference: TypeFixture.TAKEOUT,

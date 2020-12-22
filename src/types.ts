@@ -1,10 +1,16 @@
 import $ from '@escapace/typelevel'
-import { FluentInterface, Model } from '@escapace/fluent'
+import {
+  FluentInterface,
+  Model,
+  SYMBOL_LOG,
+  SYMBOL_STATE
+} from '@escapace/fluent'
 import { InputBoolean } from './input/boolean/types'
 import { InputChoice } from './input/choice/types'
 import { InputCount } from './input/count/types'
 import { InputString } from './input/string/types'
 import { InputGroup } from './input/group/types'
+import { Command } from './command/types'
 
 export const SYMBOL_INPUT_BOOLEAN = Symbol.for('ESCAPACE_CLI_INPUT_BOOLEAN')
 export const SYMBOL_INPUT_CHOICE = Symbol.for('ESCAPACE_CLI_INPUT_CHOICE')
@@ -13,7 +19,7 @@ export const SYMBOL_INPUT_STRING = Symbol.for('ESCAPACE_CLI_INPUT_STRING')
 export const SYMBOL_INPUT_GROUP = Symbol.for('ESCAPACE_CLI_INPUT_GROUP')
 export const SYMBOL_COMMAND = Symbol.for('ESCAPACE_CLI_COMMAND')
 
-export type Reference = string | number | symbol
+export type Reference = string | number
 
 // TODO: do we need a generic here
 export interface SettingsVariable<T extends string = string> {
@@ -45,15 +51,6 @@ export type LookupModel<
   T extends FluentInterface<Model>
 > = T extends FluentInterface<Model<infer S, infer L>> ? Model<S, L> : never
 
-export interface Settings {
-  help: Function
-}
-
-export interface SettingsEnvironment {
-  env: Record<string, string | undefined>
-  argv: string[]
-}
-
 export type Input =
   | InputBoolean
   | InputChoice
@@ -73,11 +70,6 @@ export type UnionToIntersection<U> = (
   ? I
   : never
 
-export type GenericReducer<T = unknown> = (...args: any[]) => T
-
-// type abc = { one: 1, two: 2, three: 3 }
-// type qwe = { three: 'three', four: 4, five: 5 }
-
 export type Merge<T extends object, U extends object> = Pick<
   T,
   $.Difference<keyof T, keyof U>
@@ -87,8 +79,6 @@ export type Merge<T extends object, U extends object> = Pick<
     [K in $.Intersection<keyof T, keyof U>]: T[K] | U[K]
   }
 
-// type  qweqwe = Merge<{}, Record<"boolean", boolean | undefined>> | Merge<{}, Record<"choice", ("A" | "B" | "C")[]>>
-
 export type UnionMerge<T extends object> = UnionToIntersection<
   T extends any ? (t: T) => T : never
 > extends (_: any) => infer W
@@ -97,12 +87,28 @@ export type UnionMerge<T extends object> = UnionToIntersection<
     : never
   : {}
 
-// type qwee = UnionMerge<abc | qwe & qwe>
-//
-// type asdqwe = qwe['string']
+export interface Settings {
+  help: Function
+}
 
-// type current = Record<"groupA", Record<"choice", ("A" | "B" | "C")[]>> | Record<"groupA", "groupA return"> | Record<"boolean", boolean | undefined>
-// type cint = UnionMerge<current>
-//
-// type asd  = cint['groupA']
-//
+export interface SettingsEnvironment {
+  env: Record<string, string | undefined>
+  argv: string[]
+}
+
+export interface ModelInput {
+  readonly state: Input[typeof SYMBOL_STATE]
+  readonly log: Input[typeof SYMBOL_LOG]
+}
+
+export interface PropsShared {
+  readonly commands: Command[]
+  readonly settings: Settings
+}
+
+// export interface PropsInput  extends PropsShared {
+//   readonly model: ModelInput
+// }
+
+// export type GenericReducer<T = unknown> = (...args: any[]) => T
+// export type GenericInputReducer<T = unknown> = (values: any, props: PropsInput) => T

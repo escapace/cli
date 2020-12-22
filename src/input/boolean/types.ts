@@ -4,6 +4,8 @@ import {
   Action,
   Payload,
   FluentInterface,
+  SYMBOL_LOG,
+  SYMBOL_STATE,
   Model,
   Next,
   Options
@@ -12,7 +14,7 @@ import {
 import {
   SYMBOL_INPUT_BOOLEAN,
   Reference,
-  GenericReducer,
+  PropsShared,
   InputType,
   SharedState,
   SharedInitialState
@@ -127,7 +129,7 @@ export interface Settings {
 export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_BOOLEAN
   default: boolean | undefined
-  reducer: GenericReducer<boolean | undefined>
+  reducer: GenericInputBooleanReducer<boolean | undefined>
   table: {
     options: Record<string, boolean>
     variables: Record<string, boolean>
@@ -137,7 +139,7 @@ export interface State extends SharedState {
 export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_BOOLEAN
   default: undefined
-  reducer: GenericReducer<boolean | undefined>
+  reducer: GenericInputBooleanReducer<boolean | undefined>
   table: {
     options: Record<string, boolean>
     variables: Record<string, boolean>
@@ -209,7 +211,7 @@ export interface Reducer<T extends Action[]> {
   }
   [TypeAction.Default]: {
     default: Payload<$.Values<T>, TypeAction.Default>
-    reducer: GenericReducer<boolean>
+    reducer: GenericInputBooleanReducer<boolean>
   }
   [TypeAction.Option]: {
     options: Payload<$.Values<T>, TypeAction.Option> extends {
@@ -230,13 +232,6 @@ export interface Reducer<T extends Action[]> {
     isEmpty: false
   }
 }
-
-export interface InputBooleanState extends State {
-  isEmpty: false
-}
-
-export interface InputBoolean
-  extends FluentInterface<Model<InputBooleanState, Actions>> {}
 
 export type Values<T extends Model<State, Actions>> = Array<
   | $.If<
@@ -259,10 +254,28 @@ export type Values<T extends Model<State, Actions>> = Array<
     >
 >
 
-export type InputBooleanReducer<
-  T = unknown,
-  U extends Model<State, Actions> = Model<State, Actions>
-> = (
-  values: Values<U>,
-  model: { state: U['state']; log: U['log'] }
-) => T | Promise<T>
+export interface InputBooleanState extends State {
+  isEmpty: false
+}
+
+export interface InputBoolean
+  extends FluentInterface<Model<InputBooleanState, Actions>> {}
+
+export interface ModelInputBoolean {
+  readonly state: InputBoolean[typeof SYMBOL_STATE]
+  readonly log: InputBoolean[typeof SYMBOL_LOG]
+}
+
+export interface PropsInputBoolean extends PropsShared {
+  readonly model: ModelInputBoolean
+}
+
+export type GenericInputBooleanReducer<T = unknown, U = any> = (
+  values: U,
+  props: PropsInputBoolean
+) => T
+
+export type DefaultInputBooleanReducer = GenericInputBooleanReducer<
+  any,
+  Values<Model<State, Actions>>
+>

@@ -1,18 +1,13 @@
 import { builder, Options, SYMBOL_STATE } from '@escapace/fluent'
 import { filter, find, map, flatMap } from 'lodash-es'
-import {
-  Reference,
-  SYMBOL_INPUT_GROUP,
-  Input,
-  GenericReducer
-} from '../../types'
+import { Reference, SYMBOL_INPUT_GROUP, Input } from '../../types'
 import { assert } from '../../utility/assert'
 import { normalize } from './normalize'
 import { reducer as reducerDefault } from './reducer'
 import { extract } from '../../utility/extract'
-import { GenericOption, GenericVariable } from '../../utility/normalize'
 import {
   ActionDescription,
+  GenericInputGroupReducer,
   ActionReducer,
   ActionInput,
   ActionReference,
@@ -48,13 +43,11 @@ export const fluentReducer = (log: Actions): State => {
     (action) => action.type === TypeAction.Reducer
   ) as ActionReducer | undefined)?.payload
 
-  const reducer: GenericReducer =
+  const reducer: GenericInputGroupReducer =
     reducerMaybe === undefined
       ? reducerDefault
-      : async (
-          values: Array<GenericOption<any> | GenericVariable<any>>,
-          model: { state: State; log: Actions }
-        ) => reducerMaybe(await normalize(values, model), model)
+      : async (values, props) =>
+          reducerMaybe(await normalize(values, props), props)
 
   return {
     type: SYMBOL_INPUT_GROUP,
@@ -129,13 +122,12 @@ export const group = builder<Settings>([
     [Options.Reducer]: fluentReducer,
     [Options.Enabled]: (_, state) => !state.isEmpty,
     [Options.Interface]: (dispatch) => ({
-      reducer(value: Function) {
+      reducer(value: GenericInputGroupReducer) {
         assert.function(value)
 
         return dispatch<ActionReducer>({
           type: TypeAction.Reducer,
-          // TODO: do this in the reducer
-          payload: value as GenericReducer
+          payload: value
         })
       }
     })

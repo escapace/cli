@@ -7,6 +7,7 @@ import {
   Next,
   Options,
   Payload,
+  SYMBOL_LOG,
   SYMBOL_STATE
 } from '@escapace/fluent'
 
@@ -14,12 +15,14 @@ import {
   Input,
   Reference,
   SYMBOL_INPUT_GROUP,
-  GenericReducer,
+  PropsShared,
   SharedInitialState,
   SharedState,
   UnionMerge,
   Unwrap
 } from '../../types'
+
+import { GenericOption, GenericVariable } from '../../utility/normalize'
 
 export declare const INPUT_GROUP_INTERFACE: unique symbol
 export declare const INPUT_GROUP_SPECIFICATION: unique symbol
@@ -44,7 +47,7 @@ export interface ActionDescription {
 
 export interface ActionReducer<T = unknown> {
   type: TypeAction.Reducer
-  payload: GenericReducer<T>
+  payload: GenericInputGroupReducer<T>
 }
 
 export interface ActionInput<T extends Input = Input> {
@@ -98,13 +101,13 @@ export interface Settings {
 export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_GROUP
   inputs: Input[]
-  reducer: GenericReducer
+  reducer: GenericInputGroupReducer
 }
 
 export interface InitialState extends SharedInitialState {
   type: typeof SYMBOL_INPUT_GROUP
   inputs: []
-  reducer: GenericReducer
+  reducer: GenericInputGroupReducer
 }
 
 export interface Specification<_ extends Model<State>> {
@@ -183,7 +186,7 @@ export interface Reducer<T extends Action[]> {
         : never
     >
     isEmpty: false
-    reducer: GenericReducer<Values<T>>
+    reducer: GenericInputGroupReducer<Values<T>>
   }
   [TypeAction.Reducer]: {
     reducer: Payload<$.Values<T>, TypeAction.Reducer>
@@ -209,10 +212,29 @@ type Values<
   object
 >
 
+export interface ModelInputGroup {
+  readonly state: InputGroup[typeof SYMBOL_STATE]
+  readonly log: InputGroup[typeof SYMBOL_LOG]
+}
+
+export interface PropsInputGroup extends PropsShared {
+  readonly model: ModelInputGroup
+}
+
+export type GenericInputGroupReducer<T = unknown, U = any> = (
+  values: U,
+  props: PropsInputGroup
+) => T
+
+export type DefaultInputGroupReducer = GenericInputGroupReducer<
+  any,
+  Array<GenericOption<any> | GenericVariable<any>>
+>
+
 export type InputGroupReducer<
   T = unknown,
   U extends Model<State, Actions> = Model<State, Actions>
 > = (
   values: Values<U['log']>,
-  model: { state: U['state']; log: U['log'] }
+  props: { model: { state: U['state']; log: U['log'] } } & PropsShared
 ) => T | Promise<T>

@@ -1,14 +1,14 @@
 import { isEmpty, reduce } from 'lodash-es'
-import { GenericReducer } from '../../types'
+import { DefaultInputCountReducer } from './types'
 
-export const reducer: GenericReducer<number> = (values, { state }) => {
+export const reducer: DefaultInputCountReducer = (values, props) => {
   if (isEmpty(values)) {
-    return state.default
+    return props.model.state.default
   } else {
     return reduce(
       values,
       (prev, curr) => {
-        return prev + state.table[curr.name] * curr.value
+        return prev + props.model.state.table[curr.name] * curr.value
       },
       0
     )
