@@ -11,7 +11,7 @@ import {
 import $ from '@escapace/typelevel'
 import {
   DeNormalizedStringValue,
-  PropsShared,
+  PropsInputShared,
   Reference,
   SettingsVariable,
   SharedInitialState,
@@ -278,7 +278,7 @@ export interface ModelInputChoice {
   readonly log: InputChoice[typeof SYMBOL_LOG]
 }
 
-export interface PropsInputChoice extends PropsShared {
+export interface PropsInputChoice extends PropsInputShared {
   readonly model: ModelInputChoice
 }
 

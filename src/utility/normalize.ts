@@ -1,4 +1,4 @@
-import { flatMap, map } from 'lodash'
+import { flatMap, map } from 'lodash-es'
 import {
   DeNormalizedNumberValue,
   DeNormalizedStringValue,

@@ -3,7 +3,7 @@
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
 import { spy as Spy } from 'sinon'
-import { compose } from '../../compose'
+import { compose } from '../../compose/compose'
 import { command } from '../../command/domain-language'
 import { group } from './domain-language'
 import { boolean } from '../boolean/domain-language'
@@ -87,7 +87,6 @@ describe('input/group/reducer', () => {
     })
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      _: [],
       groupB: {
         groupA: {
           boolean: true,
@@ -114,7 +113,6 @@ describe('input/group/reducer', () => {
     })
 
     assert.deepEqual(spy.getCall(2).args[0], {
-      _: [],
       groupB: {
         groupA: 'groupA return'
       }

@@ -44,7 +44,7 @@ type ValuesInput<
     U extends { reference: infer X; reducer: infer Y }
       ? Record<$.Cast<X, Reference>, Unwrap<Y>>
       : never
-  > & { _: string[] },
+  >,
   object
 >
 
@@ -66,7 +66,7 @@ type Values<T extends Actions> = $.If<
   $.Is.Never<Payload<$.Values<T>, TypeAction.Input, never>>,
   $.If<
     $.Is.Never<Payload<$.Values<T>, TypeAction.Subcommand, never>>,
-    { _: string[] },
+    {},
     ValuesCommand<T>
   >,
   ValuesInput<T>
@@ -77,10 +77,8 @@ export type CommandReducer<
   U extends Model<State, Actions> = Model<State, Actions>
 > = (values: Values<U['log']>, model: PropsCommand) => T | Promise<T>
 
-export type LookupReducer<
-  T extends FluentInterface<Model<State, Actions>>,
-  U
-> = CommandReducer<U, LookupModel<T>>
+export type LookupReducer<T extends FluentInterface<Model<State, Actions>>, U> =
+  CommandReducer<U, LookupModel<T>>
 
 export interface ActionReference<T extends Reference = Reference> {
   type: TypeAction.Reference

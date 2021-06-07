@@ -13,7 +13,7 @@ import {
   DeNormalizedStringValue,
   InputType,
   LookupModel,
-  PropsShared,
+  PropsInputShared,
   Reference,
   SettingsVariable,
   SharedInitialState,
@@ -297,7 +297,7 @@ export interface ModelInputString {
   readonly log: InputString[typeof SYMBOL_LOG]
 }
 
-export interface PropsInputString extends PropsShared {
+export interface PropsInputString extends PropsInputShared {
   readonly model: ModelInputString
 }
 
@@ -318,10 +318,8 @@ export type InputStringReducer<
   values: Values<U>,
   props: {
     model: { state: U['state']; log: U['log'] }
-  } & PropsShared
+  } & PropsInputShared
 ) => T | Promise<T>
 
-export type LookupReducer<
-  T extends FluentInterface<Model<State, Actions>>,
-  U
-> = InputStringReducer<U, LookupModel<T>>
+export type LookupReducer<T extends FluentInterface<Model<State, Actions>>, U> =
+  InputStringReducer<U, LookupModel<T>>

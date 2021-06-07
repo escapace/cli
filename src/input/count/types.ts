@@ -12,7 +12,7 @@ import $ from '@escapace/typelevel'
 import {
   GenericOption,
   InputType,
-  PropsShared,
+  PropsInputShared,
   Reference,
   SharedInitialState,
   SharedState,
@@ -111,6 +111,7 @@ export interface InitialState extends SharedInitialState {
   table: Record<string, number>
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface Specification<_ extends Model<State>> {
   [TypeAction.Reference]: {
     [Options.Type]: typeof TypeAction.Reference
@@ -202,7 +203,7 @@ export interface ModelInputCount {
   readonly log: InputCount[typeof SYMBOL_LOG]
 }
 
-export interface PropsInputCount extends PropsShared {
+export interface PropsInputCount extends PropsInputShared {
   readonly model: ModelInputCount
 }
 

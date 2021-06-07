@@ -13,7 +13,7 @@ import {
   GenericOption,
   GenericVariable,
   Input,
-  PropsShared,
+  PropsInputShared,
   Reference,
   SharedInitialState,
   SharedState,
@@ -108,6 +108,7 @@ export interface InitialState extends SharedInitialState {
   reducer: GenericInputGroupReducer
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface Specification<_ extends Model<State>> {
   [TypeAction.Reference]: {
     [Options.Type]: typeof TypeAction.Reference
@@ -215,7 +216,7 @@ export interface ModelInputGroup {
   readonly log: InputGroup[typeof SYMBOL_LOG]
 }
 
-export interface PropsInputGroup extends PropsShared {
+export interface PropsInputGroup extends PropsInputShared {
   readonly model: ModelInputGroup
 }
 
@@ -234,7 +235,7 @@ export type InputGroupReducer<
   U extends Model<State, Actions> = Model<State, Actions>
 > = (
   values: Values<U['log']>,
-  props: { model: { state: U['state']; log: U['log'] } } & PropsShared
+  props: { model: { state: U['state']; log: U['log'] } } & PropsInputShared
 ) => T | Promise<T>
 
 // TODO: Lookup Reducer

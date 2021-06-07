@@ -21,20 +21,22 @@ import {
 } from './types'
 
 export const fluentReducer = (log: Actions): State => {
-  const reference = (find(
-    log,
-    (action) => action.type === TypeAction.Reference
-  ) as ActionReference | undefined)?.payload
+  const reference = (
+    find(log, (action) => action.type === TypeAction.Reference) as
+      | ActionReference
+      | undefined
+  )?.payload
 
   const names = map(
     filter(log, (action) => action.type === TypeAction.Name) as ActionName[],
     ({ payload }) => payload
   )
 
-  const description = (find(
-    log,
-    (action) => action.type === TypeAction.Description
-  ) as ActionDescription | undefined)?.payload
+  const description = (
+    find(log, (action) => action.type === TypeAction.Description) as
+      | ActionDescription
+      | undefined
+  )?.payload
 
   const isEmpty =
     log.length === 0 ||
@@ -75,9 +77,11 @@ export const fluentReducer = (log: Actions): State => {
 
   const _reducer: CommandReducer = fallback(
     reducer,
-    (find(log, (action) => action.type === TypeAction.Reducer) as
-      | ActionReducer
-      | undefined)?.payload
+    (
+      find(log, (action) => action.type === TypeAction.Reducer) as
+        | ActionReducer
+        | undefined
+    )?.payload
   )
 
   return {

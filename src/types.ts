@@ -11,7 +11,8 @@ import { InputCount } from './input/count/types'
 import { InputString } from './input/string/types'
 import { InputGroup } from './input/group/types'
 import { Command } from './command/types'
-import { Spec } from 'arg'
+import { Spec as Specification } from 'arg'
+export { Spec as Specification, Handler as SpecificationHandler } from 'arg'
 
 export const SYMBOL_INPUT_BOOLEAN = Symbol.for('ESCAPACE_CLI_INPUT_BOOLEAN')
 export const SYMBOL_INPUT_CHOICE = Symbol.for('ESCAPACE_CLI_INPUT_CHOICE')
@@ -48,9 +49,8 @@ export interface SharedInitialState {
   variables: []
 }
 
-export type LookupModel<
-  T extends FluentInterface<Model>
-> = T extends FluentInterface<Model<infer S, infer L>> ? Model<S, L> : never
+export type LookupModel<T extends FluentInterface<Model>> =
+  T extends FluentInterface<Model<infer S, infer L>> ? Model<S, L> : never
 
 export type Input =
   | InputBoolean
@@ -152,26 +152,33 @@ export interface ModelInput {
 }
 
 export interface PropsShared {
+  // readonly _: string[]
   readonly commands: Command[]
   readonly settings: Settings
 }
 
+export interface PropsInputShared extends PropsShared {}
+
 export interface Intent {
-  models: Command[]
-  commands: string[]
-  spec: Spec
+  commands: Command[]
+  _: string[]
+  specification: Specification
 }
 
 export interface Match {
-  options: Record<string, string | string[] | number | number[]>
+  options: Record<string, boolean | string | string[] | number | number[]>
   variables: Record<string, string | undefined>
-  arguments: string[]
-  models: Command[]
+  _: string[]
+  commands: Command[]
 }
 
-// export interface PropsInput  extends PropsShared {
-//   readonly model: ModelInput
-// }
+export interface PropsInput extends PropsShared {
+  readonly model: ModelInput
+}
+
+export enum EXIT_CODE {
+  OK
+}
 
 // export type GenericReducer<T = unknown> = (...args: any[]) => T
 // export type GenericInputReducer<T = unknown> = (values: any, props: PropsInput) => T

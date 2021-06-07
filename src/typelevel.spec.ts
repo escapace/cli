@@ -4,7 +4,7 @@ import $ from '@escapace/typelevel'
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
 import { spy as Spy } from 'sinon'
-import { compose } from './compose'
+import { compose } from './compose/compose'
 import { command } from './command/domain-language'
 import { group } from './input/group/domain-language'
 import { boolean } from './input/boolean/domain-language'
@@ -47,7 +47,7 @@ const factory = (mode: Case = Case.One) => {
     .option('--string')
 
   // eslint-disable-next-line @typescript-eslint/promise-function-async
-  const inputStringB = inputStringA.reducer((value) => {
+  const inputStringB = inputStringA.reducer((value, props) => {
     const test: $.Equal<
       typeof value,
       Array<{
@@ -57,7 +57,7 @@ const factory = (mode: Case = Case.One) => {
       }>
     > = '1'
 
-    spy(value)
+    spy(value, props)
 
     noop(test)
 
@@ -71,7 +71,7 @@ const factory = (mode: Case = Case.One) => {
 
   const groupChildA = base.input(inputBoolean)
 
-  const groupChildB = base.input(inputChoice).reducer(async (value) => {
+  const groupChildB = base.input(inputChoice).reducer(async (value, props) => {
     const testKeys: $.Equal<keyof typeof value, 'choice' | 'string'> = '1'
     const testChoice: $.Equal<typeof value['choice'], Array<'A' | 'B' | 'C'>> =
       '1'
@@ -79,7 +79,7 @@ const factory = (mode: Case = Case.One) => {
 
     noop(testKeys, testChoice, testString)
 
-    spy(value)
+    spy(value, props)
 
     return Promise.resolve(Promise.resolve(value))
   })
@@ -88,14 +88,14 @@ const factory = (mode: Case = Case.One) => {
     .reference('groupUnion')
     .description('group parent')
     .input(mode === Case.One ? groupChildA : groupChildB)
-    .reducer((value) => {
+    .reducer((value, props) => {
       const testKeys: $.Equal<keyof typeof value['groupChild'], 'string'> = '1'
       const testString: $.Equal<
         typeof value['groupChild']['string'],
         string[] | 123
       > = '1'
 
-      spy(value)
+      spy(value, props)
 
       noop(testKeys, testString)
 
@@ -107,8 +107,8 @@ const factory = (mode: Case = Case.One) => {
     .name('command-a')
     .description('command A')
     .input(groupChildA)
-    .reducer((value) => {
-      spy(value)
+    .reducer((value, props) => {
+      spy(value, props)
 
       return value
     })
@@ -118,8 +118,8 @@ const factory = (mode: Case = Case.One) => {
     .name('command-b')
     .description('command B')
     .input(groupChildB)
-    .reducer((value) => {
-      spy(value)
+    .reducer((value, props) => {
+      spy(value, props)
 
       return value
     })
@@ -129,8 +129,8 @@ const factory = (mode: Case = Case.One) => {
     .name('command-c')
     .description('command C')
     .input(groupUnion)
-    .reducer((value) => {
-      spy(value)
+    .reducer((value, props) => {
+      spy(value, props)
 
       return value
     })
@@ -142,13 +142,13 @@ const factory = (mode: Case = Case.One) => {
       .description('command')
       .subcommand(mode === Case.One ? commandA : commandB)
       .subcommand(commandC)
-      .reducer((values) => {
-        spy(values)
+      .reducer((values, props) => {
+        spy(values, props)
 
         if (values.reference === 'commandA') {
           const value = values.value
 
-          const testArg: $.Equal<typeof value['_'], string[]> = '1'
+          // const testArg: $.Equal<typeof props['_'], string[]> = '1'
           const testKeys: $.Equal<
             keyof typeof value['groupChild'],
             'string' | 'boolean'
@@ -162,11 +162,11 @@ const factory = (mode: Case = Case.One) => {
             undefined | boolean
           > = '1'
 
-          noop(testArg, testKeys, testString, testBoolean)
+          noop(testKeys, testString, testBoolean)
         } else if (values.reference === 'commandB') {
           const value = values.value
 
-          const testArg: $.Equal<typeof value['_'], string[]> = '1'
+          // const testArg: $.Equal<typeof props['_'], string[]> = '1'
           const testKeys: $.Equal<
             keyof typeof value['groupChild'],
             'choice' | 'string'
@@ -180,11 +180,11 @@ const factory = (mode: Case = Case.One) => {
             string[] | 123
           > = '1'
 
-          noop(testArg, testKeys, testChoice, testString)
+          noop(testKeys, testChoice, testString)
         } else if (values.reference === 'commandC') {
           const value = values.value
 
-          const testArg: $.Equal<typeof value['_'], string[]> = '1'
+          // const testArg: $.Equal<typeof props['_'], string[]> = '1'
           const testKeys: $.Equal<
             keyof typeof value['groupUnion']['groupChild'],
             'string'
@@ -194,7 +194,7 @@ const factory = (mode: Case = Case.One) => {
             string[] | 123
           > = '1'
 
-          noop(testArg, testKeys, testString)
+          noop(testKeys, testString)
         }
       })
   )
@@ -207,14 +207,13 @@ describe('typelevel', () => {
     const { spy, cmd } = factory(Case.One)
 
     await cmd({
-      argv: ['command-a', '-b', '-s', 'hello', '-s', 'world', 'arg1', 'arg2'],
+      argv: ['command-a', '-b', '-s', 'hello', '-s', 'world'],
       env: {}
     })
 
     assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      _: ['arg1', 'arg2'],
       groupChild: {
         string: ['hello', 'world'],
         boolean: true
@@ -224,7 +223,6 @@ describe('typelevel', () => {
     assert.deepEqual(spy.getCall(1).args[0], {
       reference: 'commandA',
       value: {
-        _: ['arg1', 'arg2'],
         groupChild: {
           string: ['hello', 'world'],
           boolean: true
@@ -237,7 +235,7 @@ describe('typelevel', () => {
     const { spy, cmd } = factory(Case.One)
 
     await cmd({
-      argv: ['command-c', '-b', '-s', 'hello', '-s', 'world', 'arg1', 'arg2'],
+      argv: ['command-c', '-b', '-s', 'hello', '-s', 'world'],
       env: {}
     })
 
@@ -251,7 +249,6 @@ describe('typelevel', () => {
     })
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      _: ['arg1', 'arg2'],
       groupUnion: {
         groupChild: {
           string: ['hello', 'world'],
@@ -263,7 +260,6 @@ describe('typelevel', () => {
     assert.deepEqual(spy.getCall(2).args[0], {
       reference: 'commandC',
       value: {
-        _: ['arg1', 'arg2'],
         groupUnion: {
           groupChild: {
             string: ['hello', 'world'],
@@ -278,19 +274,7 @@ describe('typelevel', () => {
     const { spy, cmd } = factory(Case.Two)
 
     await cmd({
-      argv: [
-        'command-b',
-        '-c',
-        'B',
-        '-c',
-        'C',
-        '-s',
-        'hello',
-        '-s',
-        'world',
-        'arg1',
-        'arg2'
-      ],
+      argv: ['command-b', '-c', 'B', '-c', 'C', '-s', 'hello', '-s', 'world'],
       env: {}
     })
 
@@ -307,7 +291,6 @@ describe('typelevel', () => {
     })
 
     assert.deepEqual(spy.getCall(2).args[0], {
-      _: ['arg1', 'arg2'],
       groupChild: {
         choice: ['B', 'C'],
         string: 123
@@ -317,7 +300,6 @@ describe('typelevel', () => {
     assert.deepEqual(spy.getCall(3).args[0], {
       reference: 'commandB',
       value: {
-        _: ['arg1', 'arg2'],
         groupChild: {
           choice: ['B', 'C'],
           string: 123
@@ -330,19 +312,7 @@ describe('typelevel', () => {
     const { spy, cmd } = factory(Case.Two)
 
     await cmd({
-      argv: [
-        'command-c',
-        '-c',
-        'B',
-        '-c',
-        'C',
-        '-s',
-        'hello',
-        '-s',
-        'world',
-        'arg1',
-        'arg2'
-      ],
+      argv: ['command-c', '-c', 'B', '-c', 'C', '-s', 'hello', '-s', 'world'],
       env: {}
     })
 
@@ -366,7 +336,6 @@ describe('typelevel', () => {
     })
 
     assert.deepEqual(spy.getCall(3).args[0], {
-      _: ['arg1', 'arg2'],
       groupUnion: {
         groupChild: {
           choice: ['B', 'C'],
@@ -378,7 +347,6 @@ describe('typelevel', () => {
     assert.deepEqual(spy.getCall(4).args[0], {
       reference: 'commandC',
       value: {
-        _: ['arg1', 'arg2'],
         groupUnion: {
           groupChild: {
             choice: ['B', 'C'],

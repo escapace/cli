@@ -1,4 +1,4 @@
-export { compose } from './compose'
+export { compose } from './compose/compose'
 export { command } from './command/domain-language'
 // export { Command, CommandReducer } from './command/types'
 
@@ -14,4 +14,4 @@ export { count } from './input/count/domain-language'
 export { string } from './input/string/domain-language'
 // export { InputString, InputStringReducer } from './input/string/types'
 
-export { InputType } from './types'
+// export { InputType } from './types'

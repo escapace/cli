@@ -21,6 +21,7 @@ export const reducer: DefaultInputBooleanReducer = (values, props) => {
       )
     )
 
+    // TODO: replace conflicts with priority order
     if (product.length !== 1) {
       throw new Error(`Conflicting input for ${message(values)}`)
     }

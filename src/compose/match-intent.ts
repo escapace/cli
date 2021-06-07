@@ -1,6 +1,6 @@
 import { SYMBOL_STATE } from '@escapace/fluent'
 import arg from 'arg'
-import { difference, omitBy, pick } from 'lodash-es'
+import { xor, omitBy, pick } from 'lodash-es'
 import { Intent, Match, SettingsEnvironment } from '../types'
 
 export const matchIntent = (
@@ -13,29 +13,30 @@ export const matchIntent = (
   while (index < intents.length) {
     const intent = intents[index]
 
+    // TODO: catch error
     // TODO: do spec here?
     const options: Record<
       string,
-      string | number | string[] | number[] | undefined
-    > & { _: string[] } = arg(intent.spec, {
+      boolean | string | number | string[] | number[] | undefined
+    > & { _: string[] } = arg(intent.specification, {
       permissive: true,
       argv: settings.argv
     })
 
     const variables = pick(
       settings.env,
-      intent.models.slice(-1)[0][SYMBOL_STATE].variables
+      intent.commands.slice(-1)[0][SYMBOL_STATE].variables
     )
 
-    if (difference(intent.commands, options._).length === 0) {
+    if (xor(intent._, options._).length === 0) {
       task = {
         options: omitBy(
           options,
           (value, key) => key === '_' || value === undefined
         ) as Record<string, string | number | string[] | number[]>,
         variables,
-        arguments: options._.slice(intent.commands.length),
-        models: intent.models
+        _: options._.slice(intent._.length),
+        commands: intent.commands
       }
 
       break

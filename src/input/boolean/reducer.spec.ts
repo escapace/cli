@@ -3,7 +3,7 @@
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
 import { spy as Spy } from 'sinon'
-import { compose } from '../../compose'
+import { compose } from '../../compose/compose'
 import { command } from '../../command/domain-language'
 import { boolean } from './domain-language'
 
@@ -42,7 +42,6 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 1)
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      _: [],
       bool: false
     })
 
@@ -51,7 +50,6 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      _: [],
       bool: true
     })
 
@@ -60,7 +58,6 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 3)
 
     assert.deepEqual(spy.getCall(2).args[0], {
-      _: [],
       bool: true
     })
 
@@ -69,7 +66,6 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 4)
 
     assert.deepEqual(spy.getCall(3).args[0], {
-      _: [],
       bool: false
     })
 
@@ -78,7 +74,6 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 5)
 
     assert.deepEqual(spy.getCall(4).args[0], {
-      _: [],
       bool: false
     })
 
@@ -87,7 +82,6 @@ describe('input/boolean/reducer', () => {
     assert.equal(spy.callCount, 6)
 
     assert.deepEqual(spy.getCall(5).args[0], {
-      _: [],
       bool: true
     })
   })

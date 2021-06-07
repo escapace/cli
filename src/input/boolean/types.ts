@@ -14,7 +14,7 @@ import {
 import {
   SYMBOL_INPUT_BOOLEAN,
   Reference,
-  PropsShared,
+  PropsInputShared,
   InputType,
   SharedState,
   SharedInitialState
@@ -266,7 +266,7 @@ export interface ModelInputBoolean {
   readonly log: InputBoolean[typeof SYMBOL_LOG]
 }
 
-export interface PropsInputBoolean extends PropsShared {
+export interface PropsInputBoolean extends PropsInputShared {
   readonly model: ModelInputBoolean
 }
 

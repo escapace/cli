@@ -3,7 +3,7 @@
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
 import { spy as Spy } from 'sinon'
-import { compose } from '../../compose'
+import { compose } from '../../compose/compose'
 import { command } from '../../command/domain-language'
 import { string } from './domain-language'
 
@@ -69,7 +69,6 @@ describe('input/string/reducer', () => {
     assert.equal(spy.callCount, 1)
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      _: [],
       string: ['Yay']
     })
 
@@ -81,7 +80,6 @@ describe('input/string/reducer', () => {
     assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      _: [],
       string: ['!', 'Hello', 'World']
     })
   })
@@ -94,7 +92,6 @@ describe('input/string/reducer', () => {
     assert.equal(spy.callCount, 1)
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      _: [],
       string: 'hello:world'
     })
   })
@@ -147,7 +144,6 @@ describe('input/string/reducer', () => {
     assert.deepEqual(spy.getCall(0).args[0], value)
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      _: [],
       string: value
     })
   })

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
 import $ from '@escapace/typelevel'
-import { noop } from 'lodash'
+import { noop } from 'lodash-es'
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
 import { spy as Spy } from 'sinon'
-import { compose } from '../../compose'
+import { compose } from '../../compose/compose'
 import { command } from '../../command/domain-language'
 import { choice } from './domain-language'
 
@@ -63,7 +63,6 @@ describe('input/choice/reducer', () => {
     assert.equal(spy.callCount, 1)
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      _: [],
       choice: ['DD']
     })
 
@@ -72,7 +71,6 @@ describe('input/choice/reducer', () => {
     assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(1).args[0], {
-      _: [],
       choice: ['CC', 'AA', 'BB']
     })
   })
