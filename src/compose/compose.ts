@@ -1,14 +1,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
-import {
-  assign,
-  compact,
-  defaults,
-  intersection,
-  keys,
-  map,
-  omit
-} from 'lodash-es'
+import { assign, compact, defaults, intersection, keys, omit } from 'lodash-es'
 import { Command } from '../command/types'
 import { InputBooleanState } from '../input/boolean/types'
 import { InputChoiceState } from '../input/choice/types'
@@ -69,8 +61,6 @@ export const compose = <T extends Command>(
 ) => {
   assert.command(command)
 
-  const _settings = defaults({ ...settings }, { help: true })
-
   // console.time('intent')
   const intents = listIntent(extract(command))
   // console.timeEnd('intent')
@@ -79,6 +69,14 @@ export const compose = <T extends Command>(
   return async (
     environemntSettings: Partial<SettingsEnvironment> = {}
   ): Promise<void> => {
+    let exitBoolean = false
+
+    const exit = () => {
+      exitBoolean = true
+    }
+
+    const _settings = defaults({ ...settings }, { help: console.log, exit })
+
     const _environmentSettings = defaults(
       { ...environemntSettings },
       { env: process.env, argv: process.argv.slice(2) }
@@ -90,49 +88,67 @@ export const compose = <T extends Command>(
 
     if (match === undefined || match._.length > 0) {
       console.log('Fallthrough', match?.commands[0][SYMBOL_STATE].names)
+      exit()
     } else {
       const command = match.commands.slice(-1)[0]
 
-      // TODO: input reducer error handling
-      const valuesInput = await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/promise-function-async
-        map(command[SYMBOL_STATE].inputs, async (input) => {
-          const state = input[SYMBOL_STATE]
-          const log = input[SYMBOL_LOG]
+      // TODO: error handling
+      // TODO: replace Promise all map with a while structure
+      const valuesInput: Array<{
+        [x: string]: unknown
+      }> = []
 
-          const values = abc(state, match)
+      let inputIndex = 0
 
-          const props: any = {
-            model: {
-              state,
-              log
-            },
-            commands: match.commands,
-            settings: _settings
-          }
+      while (inputIndex < command[SYMBOL_STATE].inputs.length) {
+        if (exitBoolean) {
+          return
+        }
 
-          const result = await input[SYMBOL_STATE].reducer(values, props)
+        const input = command[SYMBOL_STATE].inputs[inputIndex]
 
-          return {
-            [input[SYMBOL_STATE].reference as Reference]: result
-          }
+        const state = input[SYMBOL_STATE]
+        const log = input[SYMBOL_LOG]
+
+        const values = abc(state, match)
+
+        const props: any = {
+          model: {
+            state,
+            log
+          },
+          commands: match.commands,
+          settings: _settings
+        }
+
+        valuesInput.push({
+          [input[SYMBOL_STATE].reference as Reference]: await input[
+            SYMBOL_STATE
+          ].reducer(values, props)
         })
-      )
 
-      let index = 0
+        inputIndex++
+      }
+
+      let commandIndex = 0
       let valuePrevious: any = assign({}, ...valuesInput)
 
-      while (index < match.commands.length) {
-        index++
+      while (commandIndex < match.commands.length) {
+        if (exitBoolean) {
+          return
+        }
 
-        const current = match.commands[match.commands.length - index]
+        commandIndex++
+
+        const currentCommand =
+          match.commands[match.commands.length - commandIndex]
 
         const valueNext = omit(
-          index === 1
+          commandIndex === 1
             ? assign({}, valuePrevious)
             : {
                 reference:
-                  match.commands[match.commands.length - index + 1][
+                  match.commands[match.commands.length - commandIndex + 1][
                     SYMBOL_STATE
                   ].reference,
                 value: valuePrevious
@@ -141,11 +157,11 @@ export const compose = <T extends Command>(
         )
 
         // TODO: command reducer error handling
-        valuePrevious = await current[SYMBOL_STATE].reducer(valueNext, {
+        valuePrevious = await currentCommand[SYMBOL_STATE].reducer(valueNext, {
           // _: match._,
           model: {
-            state: current[SYMBOL_STATE],
-            log: current[SYMBOL_LOG]
+            state: currentCommand[SYMBOL_STATE],
+            log: currentCommand[SYMBOL_LOG]
           },
           commands: match.commands,
           settings: _settings

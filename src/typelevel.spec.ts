@@ -3,14 +3,14 @@
 import $ from '@escapace/typelevel'
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
+import { noop } from 'lodash'
 import { spy as Spy } from 'sinon'
-import { compose } from './compose/compose'
 import { command } from './command/domain-language'
-import { group } from './input/group/domain-language'
+import { compose } from './compose/compose'
 import { boolean } from './input/boolean/domain-language'
 import { choice } from './input/choice/domain-language'
+import { group } from './input/group/domain-language'
 import { string } from './input/string/domain-language'
-import { noop } from 'lodash'
 import { InputType } from './types'
 
 chai.use(promised)

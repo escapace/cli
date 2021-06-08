@@ -139,6 +139,7 @@ export type UnionMerge<T extends object> = UnionToIntersection<
 
 export interface Settings {
   help: Function
+  exit: Function
 }
 
 export interface SettingsEnvironment {
@@ -160,16 +161,16 @@ export interface PropsShared {
 export interface PropsInputShared extends PropsShared {}
 
 export interface Intent {
-  commands: Command[]
   _: string[]
+  commands: Command[]
   specification: Specification
 }
 
 export interface Match {
-  options: Record<string, boolean | string | string[] | number | number[]>
-  variables: Record<string, string | undefined>
   _: string[]
   commands: Command[]
+  options: Record<string, boolean | string | string[] | number | number[]>
+  variables: Record<string, string | undefined>
 }
 
 export interface PropsInput extends PropsShared {

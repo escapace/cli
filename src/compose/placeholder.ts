@@ -27,7 +27,9 @@ export const placeholderInput = extract(
     .input(helpBoolean)
     .reducer((values, props) => {
       if (values[PLACEHOLDER_REFERENCES.HELP_BOOLEAN]) {
-        return renderHelp(props)
+        renderHelp(props)
+
+        return props.settings.exit()
       } else {
         return values[PLACEHOLDER_REFERENCES.HELP_BOOLEAN]
       }
