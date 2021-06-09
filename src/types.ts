@@ -138,13 +138,20 @@ export type UnionMerge<T extends object> = UnionToIntersection<
   : {}
 
 export interface Settings {
-  help: Function
-  exit: Function
+  // TODO: custom help function
+  help: Boolean | Function
 }
 
-export interface SettingsEnvironment {
+export interface Console {
+  log: (message?: any, ...optionalParams: any[]) => void
+  error: (message?: any, ...optionalParams: any[]) => void
+}
+
+export interface Context {
   env: Record<string, string | undefined>
   argv: string[]
+  console: Console
+  exit: (code?: number | undefined) => never
 }
 
 export interface ModelInput {
@@ -155,6 +162,7 @@ export interface ModelInput {
 export interface PropsShared {
   // readonly _: string[]
   readonly commands: Command[]
+  readonly context: Context
   readonly settings: Settings
 }
 
@@ -177,9 +185,9 @@ export interface PropsInput extends PropsShared {
   readonly model: ModelInput
 }
 
-export enum EXIT_CODE {
-  OK
-}
+// export enum EXIT_CODE {
+//   OK
+// }
 
 // export type GenericReducer<T = unknown> = (...args: any[]) => T
 // export type GenericInputReducer<T = unknown> = (values: any, props: PropsInput) => T

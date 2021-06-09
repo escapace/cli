@@ -29,7 +29,7 @@ export const placeholderInput = extract(
       if (values[PLACEHOLDER_REFERENCES.HELP_BOOLEAN]) {
         renderHelp(props)
 
-        return props.settings.exit()
+        return props.context.exit()
       } else {
         return values[PLACEHOLDER_REFERENCES.HELP_BOOLEAN]
       }
@@ -46,7 +46,8 @@ export const placeholderCommand = (commands: Command[]) => {
       .reducer((_, props) => {
         renderHelp({
           commands,
-          settings: props.settings
+          settings: props.settings,
+          context: props.context
         })
       })
   )

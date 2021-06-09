@@ -1,11 +1,11 @@
 import { SYMBOL_STATE } from '@escapace/fluent'
 import arg from 'arg'
 import { xor, omitBy, pick } from 'lodash-es'
-import { Intent, Match, SettingsEnvironment } from '../types'
+import { Intent, Match, Context } from '../types'
 
 export const matchIntent = (
   intents: Intent[],
-  settings: SettingsEnvironment
+  context: Context
 ): Match | undefined => {
   let task: Match | undefined
   let index = 0
@@ -20,11 +20,11 @@ export const matchIntent = (
       boolean | string | number | string[] | number[] | undefined
     > & { _: string[] } = arg(intent.specification, {
       permissive: true,
-      argv: settings.argv
+      argv: context.argv
     })
 
     const variables = pick(
-      settings.env,
+      context.env,
       intent.commands.slice(-1)[0][SYMBOL_STATE].variables
     )
 
