@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { assert } from 'chai'
-import { compose } from './compose/compose'
+import { compose } from './exports/node-test'
 import { testFixture, TypeFixture } from './test-fixture'
 
 describe('..,', () => {

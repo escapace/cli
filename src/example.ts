@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { compose } from './compose/compose'
+import { compose } from './exports/node-test'
 import { command } from './command/domain-language'
 import { string } from './input/string/domain-language'
 import { group } from './input/group/domain-language'

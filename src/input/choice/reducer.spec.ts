@@ -5,7 +5,7 @@ import { noop } from 'lodash-es'
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
 import { spy as Spy } from 'sinon'
-import { compose } from '../../compose/compose'
+import { compose } from '../../exports/node-test'
 import { command } from '../../command/domain-language'
 import { choice } from './domain-language'
 

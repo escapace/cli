@@ -151,7 +151,7 @@ export interface Context {
   env: Record<string, string | undefined>
   argv: string[]
   console: Console
-  exit: (code?: number | undefined) => never
+  exit: (code?: number | undefined) => unknown
 }
 
 export interface ModelInput {
@@ -191,3 +191,8 @@ export interface PropsInput extends PropsShared {
 
 // export type GenericReducer<T = unknown> = (...args: any[]) => T
 // export type GenericInputReducer<T = unknown> = (values: any, props: PropsInput) => T
+
+export type Compose = <T extends Command>(
+  command: T,
+  settings?: Partial<Settings>
+) => (context?: Partial<Context>) => Promise<void>

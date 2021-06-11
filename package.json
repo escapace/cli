@@ -72,9 +72,9 @@
   "repository": "https://github.com/escapace/cli.git",
   "scripts": {
     "build": "rm -rf lib && mkdir -p lib/browser lib/node lib/types && npm run build:node && npm run build:browser && npm run build:types",
-    "build:browser": "esbuild src/index.ts --bundle --minify --sourcemap --format=esm --external:lodash-es --external:arg --external:@escapace/fluent --outfile=./lib/browser/index.js",
+    "build:browser": "esbuild src/exports/browser.ts --bundle --minify --sourcemap --format=esm --external:lodash-es --external:arg --external:@escapace/fluent --outfile=./lib/browser/index.js",
     "build:example": "esbuild src/example.ts --bundle --minify --sourcemap --format=esm --platform=node --target=node14.17.0 --outfile=./lib/example/index.js",
-    "build:node": "esbuild src/index.ts --bundle --sourcemap --format=esm --platform=node --target=node14.17.0 --external:lodash-es --external:arg --external:@escapace/fluent --outfile=./lib/node/index.js",
+    "build:node": "esbuild src/exports/node.ts --bundle --sourcemap --format=esm --platform=node --target=node14.17.0 --external:lodash-es --external:arg --external:@escapace/fluent --outfile=./lib/node/index.js",
     "build:types": "tsc --emitDeclarationOnly --declarationDir lib/types",
     "lint": "ls-lint && eslint 'src/**/*.ts?(x)'",
     "prepare": "is-ci || husky install",
