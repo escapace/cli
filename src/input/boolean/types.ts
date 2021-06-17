@@ -147,7 +147,7 @@ export interface InitialState extends SharedInitialState {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface Specification<_ extends Model<State>> {
+export interface Specification<T extends Model<State>> {
   [TypeAction.Reference]: {
     [Options.Type]: typeof TypeAction.Reference
     [Options.Once]: $.True
@@ -189,7 +189,9 @@ export interface Specification<_ extends Model<State>> {
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Once]: $.True
     [Options.Keys]: 'default'
-    [Options.Enabled]: $.True
+    [Options.Enabled]: $.Not<
+      $.Is.Never<Extract<$.Values<T['log']>, ActionVariable | ActionOption>>
+    >
     [Options.Conflicts]: never
   }
 }

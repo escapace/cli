@@ -16,20 +16,23 @@ import {
 } from './types'
 
 export const fluentReducer = (log: Actions): State => {
-  const reference = (find(
-    log,
-    (action) => action.type === TypeAction.Reference
-  ) as ActionReference | undefined)?.payload
+  const reference = (
+    find(log, (action) => action.type === TypeAction.Reference) as
+      | ActionReference
+      | undefined
+  )?.payload
 
-  const description = (find(
-    log,
-    (action) => action.type === TypeAction.Description
-  ) as ActionDescription | undefined)?.payload
+  const description = (
+    find(log, (action) => action.type === TypeAction.Description) as
+      | ActionDescription
+      | undefined
+  )?.payload
 
-  const _default = (find(
-    log,
-    (action) => action.type === TypeAction.Default
-  ) as ActionDefault | undefined)?.payload
+  const _default = (
+    find(log, (action) => action.type === TypeAction.Default) as
+      | ActionDefault
+      | undefined
+  )?.payload
 
   const isEmpty =
     log.length === 0 ||
@@ -164,6 +167,13 @@ export const boolean = builder<Settings>([
     [Options.Once]: true,
     [Options.Dependencies]: [TypeAction.Description],
     [Options.Reducer]: fluentReducer,
+    [Options.Enabled]: (log) =>
+      some(
+        log,
+        (action) =>
+          action.type === TypeAction.Option ||
+          action.type === TypeAction.Variable
+      ),
     [Options.Interface]: (dispatch) => ({
       default(value: boolean) {
         assert.boolean(value)
