@@ -134,11 +134,7 @@ describe('input/choice', () => {
       variables: []
     })
 
-    const split = (value: string) => value.split(':')
-
-    const test5 = test4.variable('VARIABLE', {
-      split
-    })
+    const test5 = test4.variable('VARIABLE')
 
     assert.hasAllKeys(test5, [
       SYMBOL_LOG,
@@ -152,12 +148,7 @@ describe('input/choice', () => {
     assert.deepEqual(log(test5), [
       {
         type: TypeAction.Variable,
-        payload: {
-          name: 'VARIABLE',
-          settings: {
-            split
-          }
-        }
+        payload: 'VARIABLE'
       },
       {
         type: TypeAction.Option,
@@ -190,12 +181,7 @@ describe('input/choice', () => {
       { type: TypeAction.Default, payload: ['A', 'B', 'C'] },
       {
         type: TypeAction.Variable,
-        payload: {
-          name: 'VARIABLE',
-          settings: {
-            split
-          }
-        }
+        payload: 'VARIABLE'
       },
       {
         type: TypeAction.Option,
@@ -235,12 +221,7 @@ describe('input/choice', () => {
       },
       {
         type: TypeAction.Variable,
-        payload: {
-          name: 'VARIABLE',
-          settings: {
-            split
-          }
-        }
+        payload: 'VARIABLE'
       },
       {
         type: TypeAction.Option,

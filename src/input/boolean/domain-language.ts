@@ -1,5 +1,5 @@
 import { builder, Options } from '@escapace/fluent'
-import { filter, find, some, map, assign, keys } from 'lodash-es'
+import { filter, find, some, map, assign, keys, reverse } from 'lodash-es'
 import { Reference, SYMBOL_INPUT_BOOLEAN } from '../../types'
 import { assert } from '../../utility/assert'
 import { reducer } from './reducer'
@@ -42,11 +42,16 @@ export const fluentReducer = (log: Actions): State => {
         action.type === TypeAction.Option || action.type === TypeAction.Variable
     )
 
+  const rlog = reverse([...log])
+
   const table = {
     options: assign(
       {},
       ...map(
-        filter(log, ({ type }) => type === TypeAction.Option) as ActionOption[],
+        filter(
+          rlog,
+          ({ type }) => type === TypeAction.Option
+        ) as ActionOption[],
         ({ payload }): { [key: string]: boolean } =>
           assign(
             {},
@@ -59,7 +64,7 @@ export const fluentReducer = (log: Actions): State => {
       {},
       ...map(
         filter(
-          log,
+          rlog,
           ({ type }) => type === TypeAction.Variable
         ) as ActionVariable[],
         ({ payload }): { [key: string]: boolean } =>

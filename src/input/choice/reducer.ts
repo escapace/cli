@@ -1,26 +1,21 @@
-import { differenceWith, isEmpty, map, uniq, assign } from 'lodash-es'
-import { TypeAction, DefaultInputChoiceReducer } from './types'
-import { normalize } from '../../utility/normalize'
-import { message } from '../../utility/message'
+import { differenceWith, isEmpty, map, uniq } from 'lodash-es'
 import { TypeNormalize } from '../../types'
+import { message } from '../../utility/message'
+import { normalize } from '../../utility/normalize'
+import { DefaultInputChoiceReducer } from './types'
 
 export const reducer: DefaultInputChoiceReducer = (values, props) => {
   if (isEmpty(values)) {
     return props.model.state.default
   } else {
-    const normalized = normalize({
-      type: TypeNormalize.String,
-      values,
-      variables: assign(
-        {},
-        ...map(props.model.log, (action) =>
-          action.type === TypeAction.Variable
-            ? { [action.payload.name]: action.payload.settings }
-            : undefined
-        )
-      ),
-      repeat: props.model.state.repeat
-    })
+    const normalized = normalize(
+      {
+        type: TypeNormalize.String,
+        values,
+        repeat: props.model.state.repeat
+      },
+      props
+    )
 
     const differences = differenceWith(
       normalized,

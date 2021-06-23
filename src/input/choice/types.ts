@@ -13,7 +13,6 @@ import {
   DeNormalizedStringValue,
   PropsInputShared,
   Reference,
-  SettingsVariable,
   SharedInitialState,
   SharedState,
   SYMBOL_INPUT_CHOICE
@@ -62,10 +61,7 @@ export interface ActionDefault<
 
 export interface ActionVariable<T extends string = string> {
   type: TypeAction.Variable
-  payload: {
-    name: T
-    settings: SettingsVariable
-  }
+  payload: T
 }
 
 export interface ActionOption<T extends string = string> {
@@ -112,8 +108,7 @@ export interface Interface<T extends Model<State, Actions>>
     option: Exclude<P, $.Values<T['state']['options']>>
   ) => Next<Settings, T, ActionOption<P>>
   variable: <P extends string>(
-    variable: Exclude<P, $.Values<T['state']['variables']>>,
-    settings?: SettingsVariable<P>
+    variable: Exclude<P, $.Values<T['state']['variables']>>
   ) => Next<Settings, T, ActionVariable<P>>
 }
 

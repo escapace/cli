@@ -10,7 +10,6 @@ import {
   isBoolean,
   isFunction,
   isNumber,
-  isObject,
   isString,
   isUndefined,
   map
@@ -32,7 +31,6 @@ import {
 import {
   Input,
   Reference,
-  SettingsVariable,
   SYMBOL_COMMAND,
   SYMBOL_INPUT_BOOLEAN,
   SYMBOL_INPUT_CHOICE,
@@ -144,9 +142,6 @@ const assertions = {
   variable(value: unknown, variables: string[]): asserts value is string {
     // TODO: option regex
     ok(isString(value) && !includes(variables, value), 'Assertion Error')
-  },
-  variableSettings(value: unknown): asserts value is SettingsVariable {
-    ok(isObject(value), 'Assertion Error')
   },
   commandName(value: unknown): asserts value is string {
     // TODO: command-name regex

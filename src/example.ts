@@ -1,79 +1,140 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { compose } from './exports/node-test'
 import { command } from './command/domain-language'
-import { string } from './input/string/domain-language'
+
+import { boolean } from './input/boolean/domain-language'
+import { choice } from './input/choice/domain-language'
+import { count } from './input/count/domain-language'
 import { group } from './input/group/domain-language'
+import { string } from './input/string/domain-language'
 
-enum INPUT {
-  AIRTABLE_BASE = 'INPUT_AIRTABLE_BASE',
-  AIRTABLE_API_KEY = 'INPUT_AIRTABLE_API_KEY'
-}
-
-enum COMMAND {
-  MAIN = 'COMMAND_MAIN',
-  SUBCOMMAND = 'SUBCOMMAND',
-  PRIORITIZE_ACTIVITIES = 'COMMAND_PRIORITIZE_ACTIVITIES'
-}
-
-// TODO: missing functionality
-//
-// Command Help
-// Input Help
-// Inputs need a configuration option that acts as a selector
-// Compatibility layer with slack/deno/cli
-
-const airtableBase = string()
-  .reference(INPUT.AIRTABLE_BASE)
+export const grant = string()
+  .reference('GRANT')
   .description(
-    'Open the AirTable Standard API page and click on the AirTable base that you want to use. This will open the API page of the base. The base ID can be found in the URL of the API page of the base.'
+    'Onset onset oddball for the abandon podium of the antiquo tempo and moonlit. Pneumo pneumo poncho for the dauphin opossum of the holdup bishop and supplies.'
   )
-  .variable('AIRTABLE_BASE')
-  .option('--airtable-base')
+  .option('--grant')
+  .variable('GRANT')
 
-const airtableApiKey = string()
-  .reference(INPUT.AIRTABLE_API_KEY)
+export const scroll = count()
+  .reference('SCROLL')
   .description(
-    `On your account overview page, under the API heading, there's a button that says "Generate API key."`
+    'Xmas xmas xenon for the bauxite doxology of the tableaux equinox and exxon. Yunnan yunnan young for the dynamo coyote of the obloquy employ and sayyid. Zloty zloty zodiac for the gizmo ozone of the franz laissez and buzzing.'
   )
-  .variable('AIRTABLE_API_KEY')
-  .option('--airtable-api-key')
+  .option('--scroll')
 
-const airtableGroup = group()
-  .reference('airtable')
-  .description('Airtable Settings')
-  .input(airtableBase)
-  .input(airtableApiKey)
+export const retrace = count()
+  .reference('RETRACE')
+  .description('dybbuk outlook and trekked')
+  .option('--retrace', '--detrace')
+  .option('-r', '-d')
+  .default(2)
 
-const prioritizeActivities = command()
-  .reference(COMMAND.PRIORITIZE_ACTIVITIES)
-  .name('prioritize-activities')
-  .description('Prioritize activities in the product design template.')
-  .input(airtableGroup)
-// .reducer((qwe, asd) => {
-//   return qwe
-// })
+export const pummel = string()
+  .reference('PUMMEL')
+  .description(
+    'Furlong furlong focal for the genuflect profound of the motif aloof and offers. Gnome gnome gondola for the impugn logos'
+  )
+  .repeat()
+  .option('--pummel')
+  .option('-p')
+  .variable('PUMMEL')
+  .default(['bison', 'tunnel'])
 
-const all = command()
-  .reference(COMMAND.SUBCOMMAND)
-  .name('subcommand')
-  .name('sub')
-  .description('Generic subcommand')
-  .subcommand(prioritizeActivities)
+export const wick = choice()
+  .reference('WICK')
+  .description('quanta quanta qophs for the inquest sheqel of the cinq')
+  .choices('swagger', 'dislocate', 'unexpired', 'unnamable')
+  .repeat()
+  .option('--wick')
+  .option('-w')
+  .variable('WICK')
+  .default(['swagger', 'unnamable'])
 
-export const managementTools = command()
-  .reference(COMMAND.MAIN)
-  .name('management-tools')
-  .description('Collection of escapace management tools.')
-  .subcommand(prioritizeActivities)
-  .subcommand(all)
+export const slum = boolean()
+  .reference('SLUM')
+  .description(
+    'Knoll knoll koala for the banknote lookout of the dybbuk outlook and trekked. Linden linden loads for the ulna monolog of the consul menthol and shallot. Milliner milliner modal for the alumna solomon of the album custom and summon.'
+  )
+  .option('--slum', '--no-slum')
+  .option(undefined, '--no-slm')
+  .variable('SLUM', 'NO_SLUM')
+  .variable('SLM')
+  .default(false)
+
+export const blah = group()
+  .reference('BLAH')
+  .description(
+    'Number number nodule for the unmade economic of the shotgun bison and tunnel.'
+  )
+  .input(wick)
+  .input(slum)
+
+export const yodel = group()
+  .reference('YODEL')
+  .description(
+    'buddhist alcohol of the riyadh caliph and bathhouse. Inlet inlet iodine for the quince champion of the ennui scampi and shiite. Justin justin jocose for the djibouti sojourn of the oranj raj and hajjis. Knoll knoll koala for the banknote lookout of the dybbuk outlook and trekked.'
+  )
+  .input(retrace)
+  .input(pummel)
+
+export const refute = group()
+  .reference('REFUTE')
+  .description('quanta quanta qophs for the inquest sheqel')
+  .input(yodel)
+
+export const cotton = group()
+  .reference('COTTON')
+  .description(
+    'Yunnan yunnan young for the dynamo coyote of the obloquy employ and sayyid. Zloty zloty zodiac for the gizmo ozone of the franz laissez and buzzing.'
+  )
+  .input(refute)
+
+export const drown = group()
+  .reference('DROWN')
+  .description(
+    'Vulcan vulcan vocal for the alluvial ovoid of the yugoslav chekhov and revved. Whale whale woman for the meanwhile blowout of the forepaw meadow and glowworm. Xmas xmas xenon for the bauxite doxology of the tableaux equinox and exxon.'
+  )
+  .input(blah)
+
+export const purge = command()
+  .reference('PURGE')
+  .name('purge')
+  .name('p')
+  .description(
+    'Gnome gnome gondola for the impugn logos of the unplug analog and smuggle. Human human hoist for the buddhist alcohol of the riyadh caliph and bathhouse. Inlet inlet iodine for the quince champion of the ennui scampi and shiite. Justin justin jocose for the djibouti sojourn of the oranj raj and hajjis.'
+  )
+  .input(scroll)
+  .input(cotton)
+  .input(drown)
+  .input(grant)
+
+export const tilt = command()
+  .reference('TILT')
+  .name('tilt')
+  .name('t')
+  .description(
+    'Knoll knoll koala for the banknote lookout of the dybbuk outlook and trekked.'
+  )
+  .input(drown)
+
+export const sharpie = command()
+  .reference('SHARPIE')
+  .name('sharpie')
+  .name('shrp')
+  .description(
+    'Blind blind bodice for the submit oboe of the club snob and abbot'
+  )
+  .subcommand(tilt)
+  .subcommand(purge)
   .reducer((abc) => {
     console.log('Reducer:', abc.value)
+    // if (abc.reference === 'TILT') {
+    //   const zzz = abc.reference
+    // } else {
+    //   const qqq = abc.reference
+    // }
   })
 
-// console.time('compose')
-const app = compose(managementTools)
-// console.timeEnd('compose')
-
-// console.time('app')
+const app = compose(sharpie)
 app()
-// console.timeEnd('app')

@@ -1,5 +1,5 @@
 import { builder, Options, SYMBOL_STATE } from '@escapace/fluent'
-import { filter, find, map, reduce, some, union } from 'lodash-es'
+import { filter, find, map, reduce, reverse, some, union } from 'lodash-es'
 import { Reference, SYMBOL_COMMAND, Input } from '../types'
 import { assert } from '../utility/assert'
 import { extract } from '../utility/extract'
@@ -27,8 +27,10 @@ export const fluentReducer = (log: Actions): State => {
       | undefined
   )?.payload
 
+  const rlog = reverse([...log])
+
   const names = map(
-    filter(log, (action) => action.type === TypeAction.Name) as ActionName[],
+    filter(rlog, (action) => action.type === TypeAction.Name) as ActionName[],
     ({ payload }) => payload
   )
 
@@ -50,7 +52,7 @@ export const fluentReducer = (log: Actions): State => {
 
   const { variables, options } = reduce(
     filter(
-      log,
+      rlog,
       ({ type }) => type === TypeAction.Subcommand || type === TypeAction.Input
     ) as Array<ActionSubcommand | ActionInput>,
     (acc: { variables: string[]; options: string[] }, n) => {
@@ -63,13 +65,13 @@ export const fluentReducer = (log: Actions): State => {
   )
 
   const inputs = map(
-    filter(log, (action) => action.type === TypeAction.Input) as ActionInput[],
+    filter(rlog, (action) => action.type === TypeAction.Input) as ActionInput[],
     ({ payload }) => payload
   )
 
   const commands = map(
     filter(
-      log,
+      rlog,
       (action) => action.type === TypeAction.Subcommand
     ) as ActionSubcommand[],
     ({ payload }) => payload

@@ -21,12 +21,14 @@ export const SYMBOL_INPUT_STRING = Symbol.for('ESCAPACE_CLI_INPUT_STRING')
 export const SYMBOL_INPUT_GROUP = Symbol.for('ESCAPACE_CLI_INPUT_GROUP')
 export const SYMBOL_COMMAND = Symbol.for('ESCAPACE_CLI_COMMAND')
 
-export type Reference = string | number
+export type InputTypes =
+  | typeof SYMBOL_INPUT_BOOLEAN
+  | typeof SYMBOL_INPUT_CHOICE
+  | typeof SYMBOL_INPUT_COUNT
+  | typeof SYMBOL_INPUT_STRING
+  | typeof SYMBOL_INPUT_GROUP
 
-// TODO: do we need a generic here
-export interface SettingsVariable<T extends string = string> {
-  split: (value: T) => string[]
-}
+export type Reference = string | number
 
 export enum InputType {
   Option,
@@ -95,7 +97,6 @@ export enum TypeNormalize {
 export interface NormalizeSharedOptions {
   type: TypeNormalize
   repeat: boolean
-  variables: { [key: string]: SettingsVariable }
 }
 
 export interface NormalizeStringOptions extends NormalizeSharedOptions {
@@ -140,18 +141,19 @@ export type UnionMerge<T extends object> = UnionToIntersection<
 export interface Settings {
   // TODO: custom help function
   help: Boolean | Function
+  split: string
 }
 
 export interface Console {
-  log: (message?: any, ...optionalParams: any[]) => void
-  error: (message?: any, ...optionalParams: any[]) => void
+  log: (message?: any, ...optionalParams: any[]) => void | Promise<void>
+  error: (message?: any, ...optionalParams: any[]) => void | Promise<void>
 }
 
 export interface Context {
   env: Record<string, string | undefined>
   argv: string[]
   console: Console
-  exit: (code?: number | undefined) => unknown
+  exit: (code?: number | undefined) => void | Promise<void>
 }
 
 export interface ModelInput {
@@ -185,14 +187,14 @@ export interface PropsInput extends PropsShared {
   readonly model: ModelInput
 }
 
-// export enum EXIT_CODE {
-//   OK
-// }
-
-// export type GenericReducer<T = unknown> = (...args: any[]) => T
-// export type GenericInputReducer<T = unknown> = (values: any, props: PropsInput) => T
-
 export type Compose = <T extends Command>(
   command: T,
   settings?: Partial<Settings>
 ) => (context?: Partial<Context>) => Promise<void>
+
+export interface HelpOptions {
+  indent: string
+  newline: string
+  ratio: number
+  width: number
+}

@@ -1,8 +1,9 @@
 import { builder, Options } from '@escapace/fluent'
-import { defaults, filter, find, map, some, isArray, uniq } from 'lodash-es'
-import { Reference, SYMBOL_INPUT_CHOICE, SettingsVariable } from '../../types'
+import { filter, find, isArray, map, reverse, some, uniq } from 'lodash-es'
+import { Reference, SYMBOL_INPUT_CHOICE } from '../../types'
 import { assert } from '../../utility/assert'
 import { fallback } from '../../utility/fallback'
+import { reducer } from './reducer'
 import {
   ActionChoices,
   ActionDefault,
@@ -16,31 +17,36 @@ import {
   State,
   TypeAction
 } from './types'
-import { settingsVariable } from '../../constants'
-import { reducer } from './reducer'
 
 export const fluentReducer = (log: Actions): State => {
-  const reference = (find(
-    log,
-    (action) => action.type === TypeAction.Reference
-  ) as ActionReference | undefined)?.payload
+  const reference = (
+    find(log, (action) => action.type === TypeAction.Reference) as
+      | ActionReference
+      | undefined
+  )?.payload
 
-  const description = (find(
-    log,
-    (action) => action.type === TypeAction.Description
-  ) as ActionDescription | undefined)?.payload
+  const description = (
+    find(log, (action) => action.type === TypeAction.Description) as
+      | ActionDescription
+      | undefined
+  )?.payload
+
+  const rlog = reverse([...log])
 
   const choices = fallback(
     [] as [],
-    (find(log, (action) => action.type === TypeAction.Choices) as
-      | ActionChoices
-      | undefined)?.payload
+    (
+      find(rlog, (action) => action.type === TypeAction.Choices) as
+        | ActionChoices
+        | undefined
+    )?.payload
   )
 
-  const _default = (find(
-    log,
-    (action) => action.type === TypeAction.Default
-  ) as ActionDefault | undefined)?.payload
+  const _default = (
+    find(log, (action) => action.type === TypeAction.Default) as
+      | ActionDefault
+      | undefined
+  )?.payload
 
   const repeat = Boolean(find(log, ({ type }) => type === TypeAction.Repeat))
 
@@ -49,13 +55,16 @@ export const fluentReducer = (log: Actions): State => {
     !some(log, (action) => action.type === TypeAction.Choices)
 
   const options = map(
-    filter(log, ({ type }) => type === TypeAction.Option) as ActionOption[],
+    filter(rlog, ({ type }) => type === TypeAction.Option) as ActionOption[],
     ({ payload }) => payload.name
   )
 
   const variables = map(
-    filter(log, ({ type }) => type === TypeAction.Variable) as ActionVariable[],
-    ({ payload }) => payload.name
+    filter(
+      rlog,
+      ({ type }) => type === TypeAction.Variable
+    ) as ActionVariable[],
+    ({ payload }) => payload
   )
 
   return {
@@ -167,16 +176,12 @@ export const choice = builder<Settings>([
     [Options.Reducer]: fluentReducer,
     [Options.Conflicts]: [TypeAction.Default],
     [Options.Interface]: (dispatch, _, { variables }) => ({
-      variable(value: string, settings: Partial<SettingsVariable> = {}) {
+      variable(value: string) {
         assert.variable(value, variables)
-        assert.variableSettings(settings)
 
         return dispatch<ActionVariable>({
           type: TypeAction.Variable,
-          payload: {
-            name: value,
-            settings: defaults({}, settings, settingsVariable)
-          }
+          payload: value
         })
       }
     })

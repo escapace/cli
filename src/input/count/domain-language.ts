@@ -1,5 +1,5 @@
 import { builder, Options } from '@escapace/fluent'
-import { filter, find, some, assign, map, keys } from 'lodash-es'
+import { filter, find, some, assign, map, keys, reverse } from 'lodash-es'
 import { Reference, SYMBOL_INPUT_COUNT } from '../../types'
 import { assert } from '../../utility/assert'
 import { fallback } from '../../utility/fallback'
@@ -16,21 +16,27 @@ import {
 } from './types'
 
 export const fluentReducer = (log: Actions): State => {
-  const reference = (find(
-    log,
-    (action) => action.type === TypeAction.Reference
-  ) as ActionReference | undefined)?.payload
+  const reference = (
+    find(log, (action) => action.type === TypeAction.Reference) as
+      | ActionReference
+      | undefined
+  )?.payload
 
-  const description = (find(
-    log,
-    (action) => action.type === TypeAction.Description
-  ) as ActionDescription | undefined)?.payload
+  const description = (
+    find(log, (action) => action.type === TypeAction.Description) as
+      | ActionDescription
+      | undefined
+  )?.payload
+
+  const rlog = reverse([...log])
 
   const _default = fallback(
     0,
-    (find(log, (action) => action.type === TypeAction.Default) as
-      | ActionDefault
-      | undefined)?.payload
+    (
+      find(log, (action) => action.type === TypeAction.Default) as
+        | ActionDefault
+        | undefined
+    )?.payload
   )
 
   const isEmpty =
@@ -40,7 +46,9 @@ export const fluentReducer = (log: Actions): State => {
   const table = assign(
     {},
     ...map(
-      filter(log, ({ type }) => type === TypeAction.Option) as ActionOption[],
+      reverse(
+        filter(rlog, ({ type }) => type === TypeAction.Option) as ActionOption[]
+      ),
       ({ payload }): { [key: string]: number } =>
         assign(
           {},

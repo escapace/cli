@@ -1,4 +1,4 @@
-import { intersection, findIndex, slice } from 'lodash-es'
+import { intersection, slice, findIndex } from 'lodash-es'
 import { SYMBOL_STATE, SYMBOL_LOG } from '@escapace/fluent'
 import { Command, TypeAction } from '../command/types'
 import { placeholderInput } from './placeholder'

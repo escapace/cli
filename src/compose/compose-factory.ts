@@ -15,19 +15,21 @@ export const composeFactory =
   <T extends Command>(command: T, settings: Partial<Settings> = {}) => {
     assert.command(command)
 
-    // console.time('intent')
     const intents = listIntent(extract(command))
-    // console.timeEnd('intent')
-    // console.log(intents)
 
     const contextGlobal = context
+
+    console.log(intents)
 
     return async (context: Partial<Context> = {}): Promise<void> => {
       let exitBoolean = false
 
       const contextLocal = context
 
-      const _settings = defaults({ ...settings }, { help: true })
+      const _settings: Settings = defaults(
+        { ...settings },
+        { help: true, split: ':' }
+      )
 
       const ctx: Context = pick({ ...contextGlobal, ...contextLocal }, [
         'env',
@@ -40,28 +42,20 @@ export const composeFactory =
 
       const exit =
         contextExit === undefined
-          ? () => {
+          ? async () => {
               exitBoolean = true
             }
-          : (code?: number | undefined) => {
+          : async (code?: number | undefined) => {
               exitBoolean = true
 
-              contextExit(code)
+              await contextExit(code)
             }
 
       ctx.exit = exit
-      // const _context = defaults(
-      //   { ..._context },
-      //
-      // )
 
-      // console.time('match')
       const match = matchIntent(intents, ctx)
-      // console.timeEnd('match')
 
       if (match === undefined || match._.length > 0) {
-        console.log('Fallthrough', match?.commands[0][SYMBOL_STATE].names)
-
         ctx.exit()
       } else {
         const command = match.commands.slice(-1)[0]
@@ -94,6 +88,7 @@ export const composeFactory =
             settings: _settings
           }
 
+          // TODO: error handling
           valuesInput.push({
             [input[SYMBOL_STATE].reference as Reference]: await input[
               SYMBOL_STATE
@@ -129,6 +124,7 @@ export const composeFactory =
             [PLACEHOLDER_REFERENCES.INPUT]
           )
 
+          // TODO: error handling
           valuePrevious = await currentCommand[SYMBOL_STATE].reducer(
             valueNext,
             {

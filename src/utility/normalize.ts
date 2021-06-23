@@ -1,4 +1,4 @@
-import { flatMap, map } from 'lodash-es'
+import { flatMap, map, split } from 'lodash-es'
 import {
   DeNormalizedNumberValue,
   DeNormalizedStringValue,
@@ -6,17 +6,21 @@ import {
   NormalizedNumberValue,
   NormalizedStringValue,
   NormalizeNumberOptions,
-  NormalizeStringOptions
+  NormalizeStringOptions,
+  PropsInputShared
 } from '../types'
 
 export function normalize(
-  options: NormalizeNumberOptions
+  options: NormalizeNumberOptions,
+  props: PropsInputShared
 ): NormalizedNumberValue[]
 export function normalize(
-  options: NormalizeStringOptions
+  options: NormalizeStringOptions,
+  props: PropsInputShared
 ): NormalizedStringValue[]
 export function normalize(
-  options: NormalizeStringOptions | NormalizeNumberOptions
+  options: NormalizeStringOptions | NormalizeNumberOptions,
+  props: PropsInputShared
 ): NormalizedStringValue[] | NormalizedNumberValue[] {
   return flatMap<any, any>(
     options.values,
@@ -24,7 +28,7 @@ export function normalize(
       if (options.repeat) {
         const values: string[] =
           initial.type === InputType.Variable
-            ? options.variables[initial.name].split(initial.value)
+            ? split(initial.value, props.settings.split)
             : (initial.value as string[])
 
         return map(

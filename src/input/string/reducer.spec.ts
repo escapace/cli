@@ -120,14 +120,14 @@ describe('input/string/reducer', () => {
 
     const value = [
       {
-        name: '-s',
-        type: 0,
-        value: 'abc'
-      },
-      {
         name: '--str',
         type: 0,
         value: 'zxc'
+      },
+      {
+        name: '-s',
+        type: 0,
+        value: 'abc'
       },
       {
         name: 'STRING',
