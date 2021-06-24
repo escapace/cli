@@ -134,9 +134,9 @@ export type UnionMerge<T extends object> = UnionToIntersection<
   T extends any ? (t: T) => T : never
 > extends (_: any) => infer W
   ? W extends object
-    ? Merge<W, Exclude<T, W>>
+    ? Merge<$.Cast<UnionToIntersection<Exclude<T, W>>, object>, W>
     : never
-  : {}
+  : never
 
 export interface Settings {
   // TODO: custom help function

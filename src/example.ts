@@ -96,6 +96,7 @@ export const drown = group()
     'Vulcan vulcan vocal for the alluvial ovoid of the yugoslav chekhov and revved. Whale whale woman for the meanwhile blowout of the forepaw meadow and glowworm. Xmas xmas xenon for the bauxite doxology of the tableaux equinox and exxon.'
   )
   .input(blah)
+  .input(cotton)
 
 export const purge = command()
   .reference('PURGE')
@@ -106,7 +107,6 @@ export const purge = command()
   )
   .input(scroll)
   .input(cotton)
-  .input(drown)
   .input(grant)
 
 export const tilt = command()
@@ -128,11 +128,15 @@ export const sharpie = command()
   .subcommand(tilt)
   .subcommand(purge)
   .reducer((abc) => {
-    console.log('Reducer:', abc.value)
+    console.log('Reducer:', JSON.stringify(abc.value, null, '  '))
     // if (abc.reference === 'TILT') {
-    //   const zzz = abc.reference
+    //   const zzz = abc.value
+
+    //   // zzz.DROWN.COTTON.REFUTE.YODEL.
     // } else {
-    //   const qqq = abc.reference
+    //   const qqq = abc.value
+
+    //   qqq.COTTON.
     // }
   })
 

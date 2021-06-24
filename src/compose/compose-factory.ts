@@ -19,8 +19,6 @@ export const composeFactory =
 
     const contextGlobal = context
 
-    console.log(intents)
-
     return async (context: Partial<Context> = {}): Promise<void> => {
       let exitBoolean = false
 
