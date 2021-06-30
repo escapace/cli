@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
-import $ from '@escapace/typelevel'
-import { noop } from 'lodash-es'
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
 import { spy as Spy } from 'sinon'

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
-import { assign, defaults, isPlainObject, omit, pick } from 'lodash-es'
+import { assign, defaults, omit, pick } from 'lodash-es'
 import { Command } from '../command/types'
 import { Compose, Context, PropsInput, Reference, Settings } from '../types'
 import { assert } from '../utility/assert'
@@ -11,7 +11,7 @@ import { matchIntent } from '../compose/match-intent'
 import { PLACEHOLDER_REFERENCES } from '../compose/placeholder'
 
 export const composeFactory =
-  (context: Context): Compose =>
+  (context: Omit<Context, 'configuration'>): Compose =>
   <T extends Command>(command: T, settings: Partial<Settings> = {}) => {
     assert.command(command)
 
@@ -29,13 +29,10 @@ export const composeFactory =
         { help: true, split: ':' }
       )
 
-      const ctx: Context = pick({ ...contextGlobal, ...contextLocal }, [
-        'env',
-        'argv',
-        'console',
-        'exit',
-        'configuration'
-      ])
+      const ctx: Context = pick(
+        { configuration: {}, ...contextGlobal, ...contextLocal },
+        ['env', 'argv', 'console', 'exit', 'configuration']
+      )
 
       const contextExit = ctx.exit
 
@@ -52,9 +49,7 @@ export const composeFactory =
 
       ctx.exit = exit
 
-      if (!isPlainObject(ctx.configuration)) {
-        ctx.configuration = {}
-      }
+      assert.configuration(ctx.configuration)
 
       const match = matchIntent(intents, ctx)
 

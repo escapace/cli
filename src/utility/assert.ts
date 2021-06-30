@@ -7,6 +7,7 @@ import {
   includes,
   intersection,
   isArray,
+  isPlainObject,
   isBoolean,
   isFunction,
   isNumber,
@@ -62,6 +63,9 @@ const assertions = {
   ok,
   string(value: unknown): asserts value is string {
     ok(isString(value), 'Not a string.')
+  },
+  configuration(value: unknown): asserts value is Record<Reference, any> {
+    ok(isPlainObject(value), 'Not a plain object.')
   },
   function(value: unknown): asserts value is Function {
     ok(isFunction(value), 'Not a function.')

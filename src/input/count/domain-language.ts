@@ -43,22 +43,19 @@ export const fluentReducer = (log: Actions): State => {
     log.length === 0 ||
     !some(log, (action) => action.type === TypeAction.Option)
 
+  const options = filter(
+    rlog,
+    ({ type }) => type === TypeAction.Option
+  ) as ActionOption[]
+
   const table = assign(
     {},
-    ...map(
-      reverse(
-        filter(rlog, ({ type }) => type === TypeAction.Option) as ActionOption[]
-      ),
-      ({ payload }): { [key: string]: number } =>
-        assign(
-          {},
-          payload.increase === undefined
-            ? undefined
-            : { [payload.increase]: 1 },
-          payload.decrease === undefined
-            ? undefined
-            : { [payload.decrease]: -1 }
-        )
+    ...map(options, ({ payload }): { [key: string]: number } =>
+      assign(
+        {},
+        payload.increase === undefined ? undefined : { [payload.increase]: 1 },
+        payload.decrease === undefined ? undefined : { [payload.decrease]: -1 }
+      )
     )
   )
 

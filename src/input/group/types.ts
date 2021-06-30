@@ -13,6 +13,7 @@ import {
   GenericOption,
   GenericVariable,
   Input,
+  LookupModel,
   PropsInputShared,
   Reference,
   SharedInitialState,
@@ -238,4 +239,7 @@ export type InputGroupReducer<
   props: { model: { state: U['state']; log: U['log'] } } & PropsInputShared
 ) => T | Promise<T>
 
-// TODO: Lookup Reducer
+export type LookupReducer<
+  T extends FluentInterface<Model<State, Actions>>,
+  U
+> = InputGroupReducer<U, LookupModel<T>>

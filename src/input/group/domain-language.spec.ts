@@ -1,59 +1,156 @@
-// TODO: group domain language tests
-// import { group } from './domain-language'
-// import { reducer } from './reducer'
-//
-// import { SYMBOL_LOG, SYMBOL_STATE, log, state } from '@escapace/fluent'
-// import { assert } from 'chai'
-// import { SYMBOL_INPUT_STRING } from '../../types'
-// import { TypeAction } from './types'
-// import { boolean } from '../boolean/domain-language'
-//
-// describe('input/choice', () => {
-//   it('domain-language', () => {
-//     const reference = 'test' as const
-//
-//     assert.isFunction(group)
-//
-//     const booleanA = boolean().reference('asd').description('abc').option('-qweqwe', '-qasdzxc').variable('ASDJKHKW')
-//     const booleanB = boolean().reference('asdd').description('abc').variable('BLA')
-//
-//     const test0 = group()
-//     .reference(reference)
-//     .description('abc')
-//     .input(booleanA)
-//     .reducer((asd) => {
-//       const qwe = asd
-//
-//       return 1
-//     })
-//
-//     const test1 = group()
-//       .reference('qqwjek')
-//       .description('abc')
-//       .input(test0)
-//       .input(booleanB)
-//       .reducer((asd) => {
-//         const qwe = asd
-//
-//         return 2
-//       })
-//
-//     // const qwe = test0[SYMBOL_STATE].isEmpty
-//
-//     // assert.hasAllKeys(test0, [SYMBOL_LOG, SYMBOL_STATE, 'reference'])
-//     //
-//     // assert.deepEqual(log(test0), [])
-//
-//     // assert.deepEqual(state(test0), {
-//     //   type: SYMBOL_INPUT_STRING,
-//     //   default: undefined,
-//     //   reducer,
-//     //   description: undefined,
-//     //   isEmpty: true,
-//     //   options: [],
-//     //   reference: undefined,
-//     //   repeat: false,
-//     //   variables: []
-//     // })
-//   })
-// })
+import { SYMBOL_LOG, SYMBOL_STATE, log, state } from '@escapace/fluent'
+import { assert } from 'chai'
+import { SYMBOL_INPUT_GROUP } from '../../types'
+import { reducer } from './reducer'
+import { group } from './domain-language'
+import { LookupReducer, TypeAction } from './types'
+import { count } from '../count/domain-language'
+import { extract } from '../../utility/extract'
+import { boolean } from '../boolean/domain-language'
+
+describe('input/group', () => {
+  it('domain-language', () => {
+    const reference = 'test' as const
+
+    assert.isFunction(group)
+    assert.hasAllKeys(group(), [SYMBOL_LOG, SYMBOL_STATE, 'reference'])
+
+    const test0 = group().reference(reference)
+
+    assert.hasAllKeys(test0, [SYMBOL_LOG, SYMBOL_STATE, 'description'])
+
+    assert.deepEqual(log(test0), [
+      {
+        type: TypeAction.Reference,
+        payload: reference
+      }
+    ])
+
+    assert.deepEqual(state(test0), {
+      type: SYMBOL_INPUT_GROUP,
+      description: undefined,
+      isEmpty: true,
+      inputs: [],
+      options: [],
+      reducer,
+      reference,
+      variables: []
+    })
+
+    const test1 = test0.description('description')
+
+    assert.hasAllKeys(test1, [SYMBOL_LOG, SYMBOL_STATE, 'input'])
+
+    assert.deepEqual(log(test1), [
+      {
+        type: TypeAction.Description,
+        payload: 'description'
+      },
+      {
+        type: TypeAction.Reference,
+        payload: reference
+      }
+    ])
+
+    assert.deepEqual(state(test1), {
+      type: SYMBOL_INPUT_GROUP,
+      description: 'description',
+      isEmpty: true,
+      inputs: [],
+      options: [],
+      reducer,
+      reference,
+      variables: []
+    })
+
+    const inputA = extract(
+      count()
+        .reference('count')
+        .description('count')
+        .option('-c')
+        .option('--count')
+    )
+
+    const inputB = extract(
+      boolean()
+        .reference('boolean')
+        .description('boolean')
+        .option('-b')
+        .option('--boolean')
+    )
+
+    const test2 = test1.input(inputA).input(inputB)
+
+    assert.hasAllKeys(test2, [SYMBOL_LOG, SYMBOL_STATE, 'input', 'reducer'])
+
+    assert.deepEqual(log(test2), [
+      {
+        type: TypeAction.Input,
+        payload: inputB
+      },
+      {
+        type: TypeAction.Input,
+        payload: inputA
+      },
+      {
+        type: TypeAction.Description,
+        payload: 'description'
+      },
+      {
+        type: TypeAction.Reference,
+        payload: reference
+      }
+    ])
+
+    assert.deepEqual(state(test2), {
+      type: SYMBOL_INPUT_GROUP,
+      description: 'description',
+      isEmpty: false,
+      inputs: [inputA, inputB],
+      options: ['-c', '--count', '-b', '--boolean'],
+      reducer,
+      reference,
+      variables: []
+    })
+
+    const fn: LookupReducer<typeof test2, any> = (value) => value
+
+    const test3 = test2.reducer(fn)
+
+    assert.hasAllKeys(test3, [SYMBOL_LOG, SYMBOL_STATE])
+
+    assert.deepEqual(log(test3), [
+      {
+        type: TypeAction.Reducer,
+        payload: fn
+      },
+      {
+        type: TypeAction.Input,
+        payload: inputB
+      },
+      {
+        type: TypeAction.Input,
+        payload: inputA
+      },
+      {
+        type: TypeAction.Description,
+        payload: 'description'
+      },
+      {
+        type: TypeAction.Reference,
+        payload: reference
+      }
+    ])
+
+    assert.deepEqual(state(test3), {
+      type: SYMBOL_INPUT_GROUP,
+      description: 'description',
+      isEmpty: false,
+      inputs: [inputA, inputB],
+      options: ['-c', '--count', '-b', '--boolean'],
+      reducer: state(test3).reducer,
+      reference,
+      variables: []
+    })
+  })
+})
