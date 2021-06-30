@@ -10,6 +10,7 @@ import {
 } from '@escapace/fluent'
 import $ from '@escapace/typelevel'
 import {
+  GenericConfiguration,
   GenericOption,
   InputType,
   PropsInputShared,
@@ -214,5 +215,5 @@ export type GenericInputCountReducer<T = unknown, U = any> = (
 
 export type DefaultInputCountReducer = GenericInputCountReducer<
   number,
-  Array<GenericOption<number>>
+  Array<GenericOption<number> | GenericConfiguration<any>>
 >

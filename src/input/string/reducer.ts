@@ -1,24 +1,18 @@
 import { isEmpty, map, uniq } from 'lodash-es'
-import { message } from '../../utility/message'
-import { normalize } from './normalize'
+import { normalizeString } from '../../utility/normalize'
 import { DefaultInputStringReducer } from './types'
 
-export const reducer: DefaultInputStringReducer = (values, props) => {
-  if (isEmpty(values)) {
+export const reducer: DefaultInputStringReducer = (_values, props) => {
+  const values = normalizeString(_values, props)
+  const strings = uniq(map(values, ({ value }) => value))
+
+  if (isEmpty(strings)) {
     return props.model.state.default
   } else {
-    const normalized = normalize(values, props)
-
-    const uni = uniq(map(normalized, ({ value }) => value))
-
     if (props.model.state.repeat) {
-      return uni
+      return strings
     }
 
-    if (uni.length !== 1) {
-      throw new Error(`Conflicting input for ${message(normalized)}`)
-    }
-
-    return uni[0]
+    return strings[0]
   }
 }

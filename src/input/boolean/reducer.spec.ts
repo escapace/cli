@@ -39,15 +39,11 @@ describe('input/boolean/reducer', () => {
 
     await cmd({ argv: [], env: {} })
 
-    assert.equal(spy.callCount, 1)
-
     assert.deepEqual(spy.getCall(0).args[0], {
       bool: false
     })
 
     await cmd({ argv: ['--yes'], env: {} })
-
-    assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(1).args[0], {
       bool: true
@@ -55,15 +51,11 @@ describe('input/boolean/reducer', () => {
 
     await cmd({ argv: [], env: { YES: 'true' } })
 
-    assert.equal(spy.callCount, 3)
-
     assert.deepEqual(spy.getCall(2).args[0], {
       bool: true
     })
 
     await cmd({ argv: ['--no'], env: {} })
-
-    assert.equal(spy.callCount, 4)
 
     assert.deepEqual(spy.getCall(3).args[0], {
       bool: false
@@ -71,35 +63,44 @@ describe('input/boolean/reducer', () => {
 
     await cmd({ argv: [], env: { NO: 'TRUE' } })
 
-    assert.equal(spy.callCount, 5)
-
     assert.deepEqual(spy.getCall(4).args[0], {
       bool: false
     })
 
     await cmd({ argv: [], env: { NO: 'FALSE' } })
 
-    assert.equal(spy.callCount, 6)
-
     assert.deepEqual(spy.getCall(5).args[0], {
+      bool: true
+    })
+
+    await cmd({ argv: [], env: {}, configuration: { bool: true } })
+
+    assert.deepEqual(spy.getCall(6).args[0], {
       bool: true
     })
   })
 
-  it('conflict', async () => {
-    const { cmd } = factory()
-    const message = /conflicting/i
+  it('precedence order', async () => {
+    const { spy, cmd } = factory()
 
-    await assert.isRejected(cmd({ argv: ['--yes', '--no'], env: {} }), message)
+    await cmd({
+      argv: [],
+      env: { YES: 'false' },
+      configuration: { bool: true }
+    })
 
-    await assert.isRejected(
-      cmd({ argv: ['--yes'], env: { NO: 'true' } }),
-      message
-    )
+    assert.deepEqual(spy.getCall(0).args[0], {
+      bool: false
+    })
 
-    await assert.isRejected(
-      cmd({ argv: ['--no'], env: { YES: 'true' } }),
-      message
-    )
+    await cmd({
+      argv: ['--yes'],
+      env: { YES: 'false' },
+      configuration: { bool: true }
+    })
+
+    assert.deepEqual(spy.getCall(1).args[0], {
+      bool: true
+    })
   })
 })

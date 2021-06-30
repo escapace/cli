@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-import { compact, intersection, keys } from 'lodash-es'
+/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-floating-promises */
+import { compact, get, intersection, keys } from 'lodash-es'
 import { InputBooleanState } from '../input/boolean/types'
 import { InputChoiceState } from '../input/choice/types'
 import { InputCountState } from '../input/count/types'
@@ -16,6 +16,14 @@ export const getOptionsVariables = (
     | InputGroupState,
   match: Match
 ) => {
+  const options: Array<
+    GenericOption<boolean | string | string[] | number | number[]>
+  > = intersection(state.options, keys(match.options)).map((name) => ({
+    type: InputType.Option,
+    name,
+    value: match.options[name]
+  }))
+
   const variables: Array<GenericVariable<string>> = compact(
     intersection(state.variables, keys(match.variables)).map((name) => {
       const value = match.variables[name]
@@ -29,13 +37,19 @@ export const getOptionsVariables = (
     })
   )
 
-  const options: Array<
-    GenericOption<boolean | string | string[] | number | number[]>
-  > = intersection(state.options, keys(match.options)).map((name) => ({
-    type: InputType.Option,
-    name,
-    value: match.options[name]
-  }))
+  const configuration = get(match.configuration, [state.reference!])
 
-  return [...options, ...variables]
+  return [
+    ...options,
+    ...variables,
+    ...(configuration === undefined
+      ? []
+      : [
+          {
+            type: InputType.Configuration,
+            name: [state.reference],
+            value: configuration
+          }
+        ])
+  ]
 }

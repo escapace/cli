@@ -254,6 +254,10 @@ export type Values<T extends Model<State, Actions>> = Array<
         value: string
       }
     >
+  | {
+      type: InputType.Configuration
+      value: unknown
+    }
 >
 
 export interface InputBooleanState extends State {

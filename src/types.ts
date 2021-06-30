@@ -12,6 +12,7 @@ import { InputString } from './input/string/types'
 import { InputGroup } from './input/group/types'
 import { Command } from './command/types'
 import { Spec as Specification } from 'arg'
+import { Configuration } from './configuration'
 export { Spec as Specification, Handler as SpecificationHandler } from 'arg'
 
 export const SYMBOL_INPUT_BOOLEAN = Symbol.for('ESCAPACE_CLI_INPUT_BOOLEAN')
@@ -32,7 +33,8 @@ export type Reference = string | number
 
 export enum InputType {
   Option,
-  Variable
+  Variable,
+  Configuration
 }
 
 export interface SharedState {
@@ -73,41 +75,31 @@ export interface GenericVariable<T> {
   value: T
 }
 
+export interface GenericConfiguration<T> {
+  type: InputType.Configuration
+  name: string[]
+  value: T
+}
+
 export type DeNormalizedStringValue =
   | GenericOption<string | string[]>
   | GenericVariable<string>
+  | GenericConfiguration<any>
 
 export type DeNormalizedNumberValue =
   | GenericOption<number | number[]>
   | GenericVariable<string>
+  | GenericConfiguration<any>
 
 export type NormalizedStringValue =
   | GenericOption<string>
   | GenericVariable<string>
+  | GenericConfiguration<string>
 
 export type NormalizedNumberValue =
   | GenericOption<number>
   | GenericVariable<number>
-
-export enum TypeNormalize {
-  Number,
-  String
-}
-
-export interface NormalizeSharedOptions {
-  type: TypeNormalize
-  repeat: boolean
-}
-
-export interface NormalizeStringOptions extends NormalizeSharedOptions {
-  type: TypeNormalize.String
-  values: DeNormalizedStringValue[]
-}
-
-export interface NormalizeNumberOptions extends NormalizeSharedOptions {
-  type: TypeNormalize.Number
-  values: DeNormalizedNumberValue[]
-}
+  | GenericConfiguration<number>
 
 export type Unwrap<T> = T extends (...args: any[]) => infer U
   ? U extends PromiseLike<infer R>
@@ -153,6 +145,8 @@ export interface Context {
   env: Record<string, string | undefined>
   argv: string[]
   console: Console
+  // TODO: unknown or Record<Reference, any>?
+  configuration: unknown
   exit: (code?: number | undefined) => void | Promise<void>
 }
 
@@ -181,6 +175,7 @@ export interface Match {
   commands: Command[]
   options: Record<string, boolean | string | string[] | number | number[]>
   variables: Record<string, string | undefined>
+  configuration: Record<Reference, any>
 }
 
 export interface PropsInput extends PropsShared {
@@ -190,7 +185,11 @@ export interface PropsInput extends PropsShared {
 export type Compose = <T extends Command>(
   command: T,
   settings?: Partial<Settings>
-) => (context?: Partial<Context>) => Promise<void>
+) => (
+  context?: Partial<Omit<Context, 'configuration'>> & {
+    configuration?: Configuration<T>
+  }
+) => Promise<void>
 
 export interface HelpOptions {
   indent: string

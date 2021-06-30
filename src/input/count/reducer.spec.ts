@@ -39,15 +39,11 @@ describe('input/count/reducer', () => {
 
     await cmd({ argv: [], env: {} })
 
-    assert.equal(spy.callCount, 1)
-
     assert.deepEqual(spy.getCall(0).args[0], {
       count: 2
     })
 
     await cmd({ argv: ['-vv', '--quiet', '-v'], env: {} })
-
-    assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(1).args[0], {
       count: 2

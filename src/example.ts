@@ -141,4 +141,6 @@ export const sharpie = command()
   })
 
 const app = compose(sharpie)
-app()
+app({
+  configuration: { TILT: { DROWN: { BLAH: { SLUM: true } } } }
+})

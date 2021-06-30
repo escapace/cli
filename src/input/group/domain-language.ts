@@ -2,8 +2,7 @@ import { builder, Options, SYMBOL_STATE } from '@escapace/fluent'
 import { filter, find, map, flatMap, reverse } from 'lodash-es'
 import { Reference, SYMBOL_INPUT_GROUP, Input } from '../../types'
 import { assert } from '../../utility/assert'
-import { normalize } from './normalize'
-import { reducer as reducerDefault } from './reducer'
+import { wrap, reducer as reducerDefault } from './reducer'
 import { extract } from '../../utility/extract'
 import {
   ActionDescription,
@@ -51,8 +50,7 @@ export const fluentReducer = (log: Actions): State => {
   const reducer: GenericInputGroupReducer =
     reducerMaybe === undefined
       ? reducerDefault
-      : async (values, props) =>
-          reducerMaybe(await normalize(values, props), props)
+      : async (values, props) => reducerMaybe(await wrap(values, props), props)
 
   return {
     type: SYMBOL_INPUT_GROUP,

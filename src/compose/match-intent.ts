@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SYMBOL_STATE } from '@escapace/fluent'
 import arg from 'arg'
-import { xor, omitBy, pick } from 'lodash-es'
+import { xor, omitBy, pick, map, get, slice } from 'lodash-es'
 import { Intent, Match, Context } from '../types'
 
 export const matchIntent = (
   intents: Intent[],
   context: Context
 ): Match | undefined => {
-  let task: Match | undefined
+  let match: Match | undefined
   let index = 0
 
   while (index < intents.length) {
@@ -29,14 +30,24 @@ export const matchIntent = (
     )
 
     if (xor(intent._, options._).length === 0) {
-      task = {
+      match = {
         options: omitBy(
           options,
           (value, key) => key === '_' || value === undefined
         ) as Record<string, string | number | string[] | number[]>,
         variables,
         _: options._.slice(intent._.length),
-        commands: intent.commands
+        commands: intent.commands,
+        configuration:
+          intent.commands.length === 1
+            ? context.configuration
+            : get(
+                context.configuration,
+                map(
+                  slice(intent.commands, 1),
+                  (command) => command[SYMBOL_STATE].reference!
+                )
+              )
       }
 
       break
@@ -45,5 +56,5 @@ export const matchIntent = (
     }
   }
 
-  return task
+  return match
 }

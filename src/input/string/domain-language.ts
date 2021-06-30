@@ -2,7 +2,7 @@ import { builder, Options } from '@escapace/fluent'
 import { filter, find, map, reverse, some } from 'lodash-es'
 import { Reference, SYMBOL_INPUT_STRING } from '../../types'
 import { assert } from '../../utility/assert'
-import { normalize } from './normalize'
+import { normalizeString } from '../../utility/normalize'
 import { reducer as reducerDefault } from './reducer'
 import {
   ActionDefault,
@@ -49,7 +49,7 @@ export const fluentReducer = (log: Actions): State => {
   const reducer: GenericInputStringReducer =
     reducerMaybe === undefined
       ? reducerDefault
-      : (values, props) => reducerMaybe(normalize(values, props), props)
+      : (values, props) => reducerMaybe(normalizeString(values, props), props)
 
   const isEmpty =
     log.length === 0 ||

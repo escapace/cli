@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
-import { assign, defaults, omit, pick } from 'lodash-es'
+import { assign, defaults, isPlainObject, omit, pick } from 'lodash-es'
 import { Command } from '../command/types'
 import { Compose, Context, PropsInput, Reference, Settings } from '../types'
 import { assert } from '../utility/assert'
@@ -19,7 +19,7 @@ export const composeFactory =
 
     const contextGlobal = context
 
-    return async (context: Partial<Context> = {}): Promise<void> => {
+    return async (context = {}): Promise<void> => {
       let exitBoolean = false
 
       const contextLocal = context
@@ -33,7 +33,8 @@ export const composeFactory =
         'env',
         'argv',
         'console',
-        'exit'
+        'exit',
+        'configuration'
       ])
 
       const contextExit = ctx.exit
@@ -50,6 +51,10 @@ export const composeFactory =
             }
 
       ctx.exit = exit
+
+      if (!isPlainObject(ctx.configuration)) {
+        ctx.configuration = {}
+      }
 
       const match = matchIntent(intents, ctx)
 

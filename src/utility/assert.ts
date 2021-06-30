@@ -66,7 +66,7 @@ const assertions = {
   function(value: unknown): asserts value is Function {
     ok(isFunction(value), 'Not a function.')
   },
-  strings(values: unknown): asserts values is string {
+  strings(values: unknown): asserts values is string[] {
     ok(
       isArray(values) && every(values, (value) => isString(value)),
       'Assertion error.'
@@ -79,6 +79,7 @@ const assertions = {
     ok(isBoolean(value), 'Not a boolean.')
   },
   reference(value: unknown): asserts value is Reference {
+    // TODO: is object key
     ok(
       isNumber(value) || (isString(value) && value !== '_'),
       'Not a sring or number.'

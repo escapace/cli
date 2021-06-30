@@ -9,49 +9,49 @@ import { string } from './domain-language'
 
 chai.use(promised)
 
-enum ModeFactory {
-  Default,
-  Repeat,
-  Reducer
-}
-
-const factory = (mode: ModeFactory = ModeFactory.Default) => {
+const withRepeat = () => {
   const spy = Spy()
-
-  const base = string().reference('string').description('string')
-
-  const parent = base.option('--str').option('-s').variable('STRING')
-
-  const withRepeat = base
-    .repeat()
-    .option('--str')
-    .option('-s')
-    .variable('STRING')
-    .default(['Yay'])
-
-  const withReducer = base
-    .repeat()
-    .option('--str')
-    .option('-s')
-    .variable('STRING')
-    .reducer((values) => {
-      spy(values)
-
-      return values
-    })
-
-  const choice = {
-    [ModeFactory.Default]: parent,
-    [ModeFactory.Repeat]: withRepeat,
-    [ModeFactory.Reducer]: withReducer
-  }[mode]
 
   const cmd = compose(
     command()
       .reference('cmd')
       .name('command')
       .description('command')
-      .input(choice)
+      .input(
+        string()
+          .reference('string')
+          .description('string')
+          .repeat()
+          .option('--str')
+          .option('-s')
+          .variable('STRING')
+          .default(['picture'])
+      )
+      .reducer((values) => {
+        spy(values)
+      })
+  )
+
+  return { spy, cmd }
+}
+
+const withoutRepeat = () => {
+  const spy = Spy()
+
+  const cmd = compose(
+    command()
+      .reference('cmd')
+      .name('command')
+      .description('command')
+      .input(
+        string()
+          .reference('string')
+          .description('string')
+          .option('--str')
+          .option('-s')
+          .variable('STRING')
+          .default('picture')
+      )
       .reducer((values) => {
         spy(values)
       })
@@ -61,90 +61,47 @@ const factory = (mode: ModeFactory = ModeFactory.Default) => {
 }
 
 describe('input/string/reducer', () => {
-  it('repeat', async () => {
-    const { spy, cmd } = factory(ModeFactory.Repeat)
+  it('...', async () => {
+    const { spy, cmd } = withRepeat()
 
     await cmd({ argv: [], env: {} })
 
-    assert.equal(spy.callCount, 1)
-
     assert.deepEqual(spy.getCall(0).args[0], {
-      string: ['Yay']
+      string: ['picture']
     })
 
     await cmd({
       argv: ['--str', '!'],
-      env: { STRING: 'Hello:World' }
+      env: { STRING: 'Hello:World' },
+      configuration: {
+        string: ['ABC']
+      }
     })
 
-    assert.equal(spy.callCount, 2)
-
     assert.deepEqual(spy.getCall(1).args[0], {
-      string: ['!', 'Hello', 'World']
+      string: ['!', 'Hello', 'World', 'ABC']
     })
   })
 
-  it('default', async () => {
-    const { spy, cmd } = factory()
+  it('...', async () => {
+    const { spy, cmd } = withoutRepeat()
 
-    await cmd({ argv: [], env: { STRING: 'hello:world' } })
-
-    assert.equal(spy.callCount, 1)
+    await cmd({ argv: [], env: {} })
 
     assert.deepEqual(spy.getCall(0).args[0], {
-      string: 'hello:world'
+      string: 'picture'
     })
-  })
-
-  it('conflict', async () => {
-    const { cmd } = factory()
-
-    await assert.isRejected(
-      cmd({
-        argv: ['-s', 'Hello'],
-        env: { STRING: 'World' }
-      }),
-      /conflicting input/i
-    )
-  })
-
-  it('custom', async () => {
-    const { spy, cmd } = factory(ModeFactory.Reducer)
 
     await cmd({
-      argv: ['-s', 'abc', '--str', 'zxc'],
-      env: { STRING: 'hello:world' }
+      argv: [],
+      env: { STRING: 'Hello:World' },
+      configuration: {
+        string: 'ABC'
+      }
     })
 
-    assert.equal(spy.callCount, 2)
-
-    const value = [
-      {
-        name: '--str',
-        type: 0,
-        value: 'zxc'
-      },
-      {
-        name: '-s',
-        type: 0,
-        value: 'abc'
-      },
-      {
-        name: 'STRING',
-        type: 1,
-        value: 'hello'
-      },
-      {
-        name: 'STRING',
-        type: 1,
-        value: 'world'
-      }
-    ]
-
-    assert.deepEqual(spy.getCall(0).args[0], value)
-
     assert.deepEqual(spy.getCall(1).args[0], {
-      string: value
+      string: 'Hello:World'
     })
   })
 })

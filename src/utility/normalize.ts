@@ -1,46 +1,61 @@
 import { flatMap, map, split } from 'lodash-es'
+import { PropsInputChoice } from '../input/choice/types'
+import { PropsInputString } from '../input/string/types'
 import {
-  DeNormalizedNumberValue,
   DeNormalizedStringValue,
+  GenericConfiguration,
+  GenericOption,
+  GenericVariable,
   InputType,
-  NormalizedNumberValue,
-  NormalizedStringValue,
-  NormalizeNumberOptions,
-  NormalizeStringOptions,
-  PropsInputShared
+  NormalizedStringValue
 } from '../types'
+import { assert } from './assert'
 
-export function normalize(
-  options: NormalizeNumberOptions,
-  props: PropsInputShared
-): NormalizedNumberValue[]
-export function normalize(
-  options: NormalizeStringOptions,
-  props: PropsInputShared
-): NormalizedStringValue[]
-export function normalize(
-  options: NormalizeStringOptions | NormalizeNumberOptions,
-  props: PropsInputShared
-): NormalizedStringValue[] | NormalizedNumberValue[] {
-  return flatMap<any, any>(
-    options.values,
-    (initial: DeNormalizedStringValue | DeNormalizedNumberValue) => {
-      if (options.repeat) {
-        const values: string[] =
-          initial.type === InputType.Variable
-            ? split(initial.value, props.settings.split)
-            : (initial.value as string[])
+export function normalizeString(
+  previousValues: DeNormalizedStringValue[],
+  props: PropsInputChoice | PropsInputString
+): NormalizedStringValue[] {
+  const { repeat } = props.model.state
+
+  return flatMap(previousValues, (previousValue) => {
+    if (previousValue.type === InputType.Option) {
+      return repeat
+        ? map(
+            previousValue.value as string[],
+            (value): GenericOption<string> => ({
+              ...previousValue,
+              value
+            })
+          )
+        : (previousValue as GenericOption<string>)
+    } else if (previousValue.type === InputType.Variable) {
+      return repeat
+        ? map(
+            split(previousValue.value, props.settings.split),
+            (value): GenericVariable<string> => ({
+              ...previousValue,
+              value
+            })
+          )
+        : previousValue
+    } else {
+      if (repeat) {
+        // TODO: error handling assert or message?
+        assert.strings(previousValue.value)
 
         return map(
-          values,
-          (value): NormalizedStringValue => ({
-            ...initial,
+          previousValue.value,
+          (value): GenericConfiguration<string> => ({
+            ...previousValue,
             value
           })
         )
       } else {
-        return initial as NormalizedStringValue
+        // TODO: error handling assert or message?
+        assert.string(previousValue.value)
+
+        return previousValue as GenericConfiguration<string>
       }
     }
-  )
+  })
 }

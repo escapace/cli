@@ -11,7 +11,7 @@ import { choice } from './domain-language'
 
 chai.use(promised)
 
-const factory = (repeat = true) => {
+const factory = () => {
   const spy = Spy()
 
   const base = choice()
@@ -26,27 +26,15 @@ const factory = (repeat = true) => {
     .variable('CHOICE')
     .default(['DD'])
 
-  const withoutRepeat = base.option('--choice').option('-c').variable('CHOICE')
+  // const withoutRepeat = base.option('--choice').option('-c').variable('CHOICE')
 
   const cmd = compose(
     command()
       .reference('cmd')
       .name('command')
       .description('command')
-      .input(repeat ? withRepeat : withoutRepeat)
+      .input(withRepeat)
       .reducer((values) => {
-        const test: $.Equal<
-          typeof values['choice'],
-          | 'AA'
-          | 'BB'
-          | 'CC'
-          | 'DD'
-          | Array<'AA' | 'BB' | 'CC' | 'DD'>
-          | undefined
-        > = '1'
-
-        noop(test)
-
         spy(values)
       })
   )
@@ -60,15 +48,11 @@ describe('input/choice/reducer', () => {
 
     await cmd({ argv: [], env: {} })
 
-    assert.equal(spy.callCount, 1)
-
     assert.deepEqual(spy.getCall(0).args[0], {
       choice: ['DD']
     })
 
     await cmd({ argv: ['-c', 'CC'], env: { CHOICE: 'AA:BB' } })
-
-    assert.equal(spy.callCount, 2)
 
     assert.deepEqual(spy.getCall(1).args[0], {
       choice: ['CC', 'AA', 'BB']
@@ -85,25 +69,31 @@ describe('input/choice/reducer', () => {
       }),
       /unexpected input/i
     )
-  })
-
-  it('conflict', async () => {
-    const { cmd } = factory(false)
 
     await assert.isRejected(
       cmd({
         argv: [],
-        env: { CHOICE: 'CC:DD' }
+        env: {},
+        configuration: {
+          // @ts-expect-error
+          choice: ['ZZ']
+        }
       }),
       /unexpected input/i
     )
+  })
 
-    await assert.isRejected(
-      cmd({
-        argv: ['-c', 'DD', '-c', 'AA'],
-        env: { CHOICE: 'CC' }
-      }),
-      /conflicting input/i
-    )
+  it('precedence order', async () => {
+    const { spy, cmd } = factory()
+
+    await cmd({
+      argv: ['-c', 'CC'],
+      env: { CHOICE: 'BB' },
+      configuration: { choice: ['AA'] }
+    })
+
+    assert.deepEqual(spy.getCall(0).args[0], {
+      choice: ['CC', 'BB', 'AA']
+    })
   })
 })
