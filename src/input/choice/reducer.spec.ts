@@ -3,7 +3,7 @@
 import chai, { assert } from 'chai'
 import promised from 'chai-as-promised'
 import { spy as Spy } from 'sinon'
-import { compose } from '../../exports/node-test'
+import { compose, exitSpy } from '../../exports/node-test'
 import { command } from '../../command/domain-language'
 import { choice } from './domain-language'
 
@@ -60,25 +60,17 @@ describe('input/choice/reducer', () => {
   it('unexpected input', async () => {
     const { cmd } = factory()
 
-    await assert.isRejected(
-      cmd({
-        argv: ['-c', 'FF', '--choice', 'QQ'],
-        env: { CHOICE: 'ZZ:XX' }
-      }),
-      /unexpected input/i
-    )
+    exitSpy.resetHistory()
 
-    await assert.isRejected(
-      cmd({
-        argv: [],
-        env: {},
-        configuration: {
-          // @ts-expect-error
-          choice: ['ZZ']
-        }
-      }),
-      /unexpected input/i
-    )
+    await cmd({
+      argv: ['-c', 'FF', '--choice', 'QQ'],
+      env: { CHOICE: 'ZZ:XX' }
+    })
+
+    assert.deepEqual(exitSpy.firstCall.args, [1])
+    assert.equal(exitSpy.callCount, 1)
+
+    exitSpy.resetHistory()
   })
 
   it('precedence order', async () => {

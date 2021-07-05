@@ -72,7 +72,6 @@ export const composeFactory =
             settings
           })
 
-          console.log('exit with error')
           context.exit(1)
         } else {
           const command = match.commands.slice(-1)[0]

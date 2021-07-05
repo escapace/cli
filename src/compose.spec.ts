@@ -3,7 +3,7 @@ import { assert } from 'chai'
 import { compose } from './exports/node-test'
 import { testFixture, TypeFixture } from './test-fixture'
 
-describe('..,', () => {
+describe('compose', () => {
   it('omakase', async () => {
     const { kitchen, spy } = testFixture()
 

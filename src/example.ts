@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { compose } from './exports/node-test'
 import { command } from './command/domain-language'
-
 import { boolean } from './input/boolean/domain-language'
 import { choice } from './input/choice/domain-language'
 import { count } from './input/count/domain-language'
@@ -140,7 +138,7 @@ export const sharpie = command()
     // }
   })
 
-const app = compose(sharpie)
-app({
-  configuration: { TILT: { DROWN: { BLAH: { SLUM: true } } } }
-})
+// const app = compose(sharpie)
+// app({
+//   configuration: { TILT: { DROWN: { BLAH: { SLUM: true } } } }
+// })
