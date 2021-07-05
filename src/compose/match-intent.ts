@@ -1,8 +1,28 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SYMBOL_STATE } from '@escapace/fluent'
-import arg from 'arg'
-import { xor, omitBy, pick, map, get, slice } from 'lodash-es'
+import arg, {
+  Result as ArgResult,
+  Spec as ArgSpec,
+  Options as ArgOptions
+} from 'arg'
+import { xor, omitBy, pick, map, get, slice, isError } from 'lodash-es'
+import { CliError } from '../error'
 import { Intent, Match, Context } from '../types'
+
+const wrapArg = <T extends ArgSpec>(
+  spec: ArgSpec,
+  options: ArgOptions | undefined
+): ArgResult<T> => {
+  try {
+    return arg(spec, options)
+  } catch (e) {
+    if (isError(e)) {
+      throw new CliError(e.message)
+    } else {
+      throw new Error('Unexpected Error')
+    }
+  }
+}
 
 export const matchIntent = (
   intents: Intent[],
@@ -14,15 +34,17 @@ export const matchIntent = (
   while (index < intents.length) {
     const intent = intents[index]
 
-    // TODO: catch error
-    // TODO: do spec here?
     const options: Record<
       string,
       boolean | string | number | string[] | number[] | undefined
-    > & { _: string[] } = arg(intent.specification, {
-      permissive: true,
-      argv: context.argv
-    })
+    > & { _: string[] } = wrapArg(
+      intent.specification,
+      {
+        permissive: true,
+        argv: context.argv
+      }
+      // context
+    )
 
     const variables = pick(
       context.env,

@@ -1,141 +1,181 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
-import { assign, defaults, omit, pick } from 'lodash-es'
+import { assign, capitalize, defaults, isError, omit, pick } from 'lodash-es'
 import { Command } from '../command/types'
-import { Compose, Context, PropsInput, Reference, Settings } from '../types'
-import { assert } from '../utility/assert'
-import { extract } from '../utility/extract'
 import { getOptionsVariables } from '../compose/get-options-variables'
 import { listIntent } from '../compose/list-intent'
 import { matchIntent } from '../compose/match-intent'
 import { PLACEHOLDER_REFERENCES } from '../compose/placeholder'
+import { CliError } from '../error'
+import { help } from '../help/help'
+import { Compose, Context, PropsInput, Reference, Settings } from '../types'
+import { assert } from '../utility/assert'
+import { extract } from '../utility/extract'
+import { levenshtein } from '../utility/levenshtein'
+
+export const defaultContext = (
+  presetContext: Omit<Context, 'configuration' | 'exited'>,
+  userContext: Partial<Context>
+): Context => {
+  const context: Context = pick(
+    { configuration: {}, exited: false, ...presetContext, ...userContext },
+    ['env', 'argv', 'console', 'exit', 'configuration', 'exited']
+  )
+
+  assert.configuration(context.configuration)
+
+  const contextExit = context.exit
+
+  const exit =
+    contextExit === undefined
+      ? async () => {
+          context.exited = true
+        }
+      : async (code?: number | undefined) => {
+          context.exited = true
+
+          await contextExit(code)
+        }
+
+  context.exit = exit
+
+  return context
+}
 
 export const composeFactory =
-  (context: Omit<Context, 'configuration'>): Compose =>
-  <T extends Command>(command: T, settings: Partial<Settings> = {}) => {
+  (presetContext: Omit<Context, 'configuration' | 'exited'>): Compose =>
+  <T extends Command>(command: T, _settings: Partial<Settings> = {}) => {
     assert.command(command)
+
+    const settings: Settings = defaults(
+      { ..._settings },
+      { help: true, split: ':' }
+    )
 
     const intents = listIntent(extract(command))
 
-    const contextGlobal = context
+    return async (userContext = {}): Promise<void> => {
+      const context = defaultContext(presetContext, userContext)
 
-    return async (context = {}): Promise<void> => {
-      let exitBoolean = false
+      try {
+        const match = matchIntent(intents, context)
 
-      const contextLocal = context
+        if (match === undefined || match._.length > 0) {
+          const intent = levenshtein(
+            match === undefined ? context.argv : match._,
+            intents
+          )
 
-      const _settings: Settings = defaults(
-        { ...settings },
-        { help: true, split: ':' }
-      )
-
-      const ctx: Context = pick(
-        { configuration: {}, ...contextGlobal, ...contextLocal },
-        ['env', 'argv', 'console', 'exit', 'configuration']
-      )
-
-      const contextExit = ctx.exit
-
-      const exit =
-        contextExit === undefined
-          ? async () => {
-              exitBoolean = true
-            }
-          : async (code?: number | undefined) => {
-              exitBoolean = true
-
-              await contextExit(code)
-            }
-
-      ctx.exit = exit
-
-      assert.configuration(ctx.configuration)
-
-      const match = matchIntent(intents, ctx)
-
-      if (match === undefined || match._.length > 0) {
-        ctx.exit()
-      } else {
-        const command = match.commands.slice(-1)[0]
-
-        const valuesInput: Array<{
-          [x: string]: unknown
-        }> = []
-
-        let inputIndex = 0
-
-        while (inputIndex < command[SYMBOL_STATE].inputs.length) {
-          if (exitBoolean) {
-            return
-          }
-
-          const input = command[SYMBOL_STATE].inputs[inputIndex]
-
-          const state = input[SYMBOL_STATE]
-          const log = input[SYMBOL_LOG]
-
-          const values = getOptionsVariables(state, match)
-
-          const props: PropsInput = {
-            model: {
-              state,
-              log
-            },
-            commands: match.commands,
-            context: ctx,
-            settings: _settings
-          }
-
-          // TODO: error handling
-          valuesInput.push({
-            [input[SYMBOL_STATE].reference as Reference]: await input[
-              SYMBOL_STATE
-            ].reducer(values, props as unknown as any)
+          help({
+            commands: intent === undefined ? [command] : intent.commands,
+            context,
+            settings
           })
 
-          inputIndex++
-        }
+          console.log('exit with error')
+          context.exit(1)
+        } else {
+          const command = match.commands.slice(-1)[0]
 
-        let commandIndex = 0
-        let valuePrevious: any = assign({}, ...valuesInput)
+          const valuesInput: Array<{
+            [x: string]: unknown
+          }> = []
 
-        while (commandIndex < match.commands.length) {
-          if (exitBoolean) {
-            return
-          }
+          let inputIndex = 0
 
-          commandIndex++
+          while (inputIndex < command[SYMBOL_STATE].inputs.length) {
+            if (context.exited) {
+              return
+            }
 
-          const currentCommand =
-            match.commands[match.commands.length - commandIndex]
+            const input = command[SYMBOL_STATE].inputs[inputIndex]
 
-          const valueNext = omit(
-            commandIndex === 1
-              ? assign({}, valuePrevious)
-              : {
-                  reference:
-                    match.commands[match.commands.length - commandIndex + 1][
-                      SYMBOL_STATE
-                    ].reference,
-                  value: valuePrevious
-                },
-            [PLACEHOLDER_REFERENCES.INPUT]
-          )
+            const state = input[SYMBOL_STATE]
+            const log = input[SYMBOL_LOG]
 
-          // TODO: error handling
-          valuePrevious = await currentCommand[SYMBOL_STATE].reducer(
-            valueNext,
-            {
-              // _: match._,
+            const values = getOptionsVariables(state, match)
+
+            const props: PropsInput = {
               model: {
-                state: currentCommand[SYMBOL_STATE],
-                log: currentCommand[SYMBOL_LOG]
+                state,
+                log
               },
               commands: match.commands,
-              settings: _settings,
-              context: ctx
+              context,
+              settings
             }
-          )
+
+            // TODO: error handling
+            valuesInput.push({
+              [input[SYMBOL_STATE].reference as Reference]: await input[
+                SYMBOL_STATE
+              ].reducer(values, props as unknown as any)
+            })
+
+            inputIndex++
+          }
+
+          let commandIndex = 0
+          let valuePrevious: any = assign({}, ...valuesInput)
+
+          while (commandIndex < match.commands.length) {
+            if (context.exited) {
+              return
+            }
+
+            commandIndex++
+
+            const currentCommand =
+              match.commands[match.commands.length - commandIndex]
+
+            const valueNext = omit(
+              commandIndex === 1
+                ? assign({}, valuePrevious)
+                : {
+                    reference:
+                      match.commands[match.commands.length - commandIndex + 1][
+                        SYMBOL_STATE
+                      ].reference,
+                    value: valuePrevious
+                  },
+              [PLACEHOLDER_REFERENCES.INPUT]
+            )
+
+            // TODO: error handling
+            valuePrevious = await currentCommand[SYMBOL_STATE].reducer(
+              valueNext,
+              {
+                model: {
+                  state: currentCommand[SYMBOL_STATE],
+                  log: currentCommand[SYMBOL_LOG]
+                },
+                commands: match.commands,
+                settings,
+                context
+              }
+            )
+          }
+        }
+      } catch (e) {
+        if (isError(e)) {
+          if (e instanceof CliError) {
+            const intent = levenshtein(context.argv, intents)
+
+            if (intent !== undefined) {
+              help({
+                commands: intent.commands,
+                context,
+                settings
+              })
+            }
+
+            await context.console.error(capitalize(e.message))
+            await context.exit(1)
+          } else {
+            throw e
+          }
+        } else {
+          throw new Error('Unexpected Error')
         }
       }
     }

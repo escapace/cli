@@ -148,6 +148,7 @@ export interface Context {
   // TODO: unknown or Record<Reference, any>?
   configuration: unknown
   exit: (code?: number | undefined) => void | Promise<void>
+  exited: boolean
 }
 
 export interface ModelInput {
@@ -186,7 +187,7 @@ export type Compose = <T extends Command>(
   command: T,
   settings?: Partial<Settings>
 ) => (
-  context?: Partial<Omit<Context, 'configuration'>> & {
+  context?: Partial<Omit<Context, 'configuration' | 'exited'>> & {
     configuration?: Configuration<T>
   }
 ) => Promise<void>

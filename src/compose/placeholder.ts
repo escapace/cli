@@ -51,6 +51,8 @@ export const placeholderCommand = (commands: Command[]) => {
           settings: props.settings,
           context: props.context
         })
+
+        await props.context.exit()
       })
   )
 }

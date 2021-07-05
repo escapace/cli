@@ -1,4 +1,5 @@
 import { differenceWith, isEmpty, map, uniq } from 'lodash-es'
+import { CliError } from '../../error'
 import { message } from '../../utility/message'
 import { normalizeString } from '../../utility/normalize'
 import { DefaultInputChoiceReducer } from './types'
@@ -13,7 +14,7 @@ export const reducer: DefaultInputChoiceReducer = (values, props) => {
   )
 
   if (differences.length !== 0) {
-    throw new Error(`Unexpected input for ${message(differences)}`)
+    throw new CliError(`Unexpected input for ${message(differences)}`)
   }
 
   if (isEmpty(normalized)) {
