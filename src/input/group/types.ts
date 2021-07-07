@@ -239,7 +239,10 @@ export type InputGroupReducer<
   props: { model: { state: U['state']; log: U['log'] } } & PropsInputShared
 ) => T | Promise<T>
 
-export type LookupReducer<
-  T extends FluentInterface<Model<State, Actions>>,
-  U
-> = InputGroupReducer<U, LookupModel<T>>
+export interface InputGroupEmpty
+  extends FluentInterface<Model<State, Actions>> {}
+
+export type LookupReducer<T extends InputGroupEmpty, U> = InputGroupReducer<
+  U,
+  LookupModel<T>
+>

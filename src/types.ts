@@ -9,8 +9,16 @@ import { InputBoolean } from './input/boolean/types'
 import { InputChoice } from './input/choice/types'
 import { InputCount } from './input/count/types'
 import { InputString } from './input/string/types'
-import { InputGroup } from './input/group/types'
-import { Command } from './command/types'
+import {
+  InputGroup,
+  LookupReducer as InputGroupLookupReducer,
+  InputGroupEmpty
+} from './input/group/types'
+import {
+  Command,
+  LookupReducer as CommandLookupReducer,
+  CommandEmpty
+} from './command/types'
 import { Spec as Specification } from 'arg'
 import { Configuration } from './configuration'
 export { Spec as Specification, Handler as SpecificationHandler } from 'arg'
@@ -198,3 +206,12 @@ export interface HelpOptions {
   ratio: number
   width: number
 }
+
+export type LookupReducer<
+  T extends CommandEmpty | InputGroupEmpty,
+  U
+> = T extends CommandEmpty
+  ? CommandLookupReducer<T, U>
+  : T extends InputGroupEmpty
+  ? InputGroupLookupReducer<T, U>
+  : never

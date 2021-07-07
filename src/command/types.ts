@@ -77,9 +77,6 @@ export type CommandReducer<
   U extends Model<State, Actions> = Model<State, Actions>
 > = (values: Values<U['log']>, model: PropsCommand) => T | Promise<T>
 
-export type LookupReducer<T extends FluentInterface<Model<State, Actions>>, U> =
-  CommandReducer<U, LookupModel<T>>
-
 export interface ActionReference<T extends Reference = Reference> {
   type: TypeAction.Reference
   payload: T
@@ -357,3 +354,10 @@ export type GenericCommandReducer<T = unknown> = (
   values: any,
   props: PropsCommand
 ) => T
+
+export interface CommandEmpty extends FluentInterface<Model<State, Actions>> {}
+
+export type LookupReducer<T extends CommandEmpty, U> = CommandReducer<
+  U,
+  LookupModel<T>
+>

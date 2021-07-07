@@ -55,6 +55,8 @@ export const composeFactory =
     const intents = listIntent(extract(command))
 
     return async (userContext = {}): Promise<void> => {
+      // TODO: assert user context
+
       const context = defaultContext(presetContext, userContext)
 
       try {
@@ -104,7 +106,6 @@ export const composeFactory =
               settings
             }
 
-            // TODO: error handling
             valuesInput.push({
               [input[SYMBOL_STATE].reference as Reference]: await input[
                 SYMBOL_STATE
@@ -140,7 +141,6 @@ export const composeFactory =
               [PLACEHOLDER_REFERENCES.INPUT]
             )
 
-            // TODO: error handling
             valuePrevious = await currentCommand[SYMBOL_STATE].reducer(
               valueNext,
               {
