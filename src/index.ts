@@ -1,3 +1,5 @@
+import { Compose } from './types'
+
 export { command } from './command/domain-language'
 export type { PropsCommand } from './command/types'
 
@@ -17,7 +19,6 @@ export { string } from './input/string/domain-language'
 export type { PropsInputString } from './input/string/types'
 
 export type {
-  Compose as compose,
   Compose,
   Context,
   Input,
@@ -28,3 +29,7 @@ export type {
 } from './types'
 
 export type { Configuration } from './configuration'
+
+declare const compose: Compose
+
+export { compose }
