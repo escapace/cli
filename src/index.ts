@@ -16,8 +16,9 @@ export type { PropsInputGroup } from './input/group/types'
 export { string } from './input/string/domain-language'
 export type { PropsInputString } from './input/string/types'
 
+export { Compose as compose } from './types'
+
 export type {
-  Compose as compose,
   Compose,
   Context,
   Input,
