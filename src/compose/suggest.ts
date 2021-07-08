@@ -7,7 +7,6 @@ import { PLACEHOLDER_REFERENCES } from './placeholder'
 export const suggest = (argv: string[], intents: Intent[]) => {
   const string = join(argv, ' ')
 
-  // TODO: exclud help from intents cli qw
   return minBy(
     map(
       filter(
