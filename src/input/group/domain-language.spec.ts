@@ -1,12 +1,12 @@
-import { SYMBOL_LOG, SYMBOL_STATE, log, state } from '@escapace/fluent'
+import { log, state, SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
 import { assert } from 'chai'
-import { SYMBOL_INPUT_GROUP, LookupReducer } from '../../types'
-import { reducer } from './reducer'
-import { group } from './domain-language'
-import { TypeAction } from './types'
-import { count } from '../count/domain-language'
+import { LookupValues, SYMBOL_INPUT_GROUP } from '../../types'
 import { extract } from '../../utility/extract'
 import { boolean } from '../boolean/domain-language'
+import { count } from '../count/domain-language'
+import { group } from './domain-language'
+import { reducer } from './reducer'
+import { PropsInputGroup, TypeAction } from './types'
 
 describe('input/group', () => {
   it('domain-language', () => {
@@ -113,7 +113,7 @@ describe('input/group', () => {
       variables: []
     })
 
-    const fn: LookupReducer<typeof test2, any> = (value) => value
+    const fn = (value: LookupValues<typeof test2>, _: PropsInputGroup) => value
 
     const test3 = test2.reducer(fn)
 

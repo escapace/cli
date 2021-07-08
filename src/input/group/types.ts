@@ -242,7 +242,6 @@ export type InputGroupReducer<
 export interface InputGroupEmpty
   extends FluentInterface<Model<State, Actions>> {}
 
-export type LookupReducer<T extends InputGroupEmpty, U> = InputGroupReducer<
-  U,
-  LookupModel<T>
+export type LookupValues<T extends InputGroupEmpty> = Values<
+  LookupModel<T>['log']
 >

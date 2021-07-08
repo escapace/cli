@@ -1,14 +1,13 @@
-import { command } from './domain-language'
-
-import { SYMBOL_LOG, SYMBOL_STATE, log, state } from '@escapace/fluent'
+import { log, state, SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
 import { assert } from 'chai'
-import { SYMBOL_COMMAND, LookupReducer } from '../types'
-// import { TypeAction } from './types'
-import { reducer } from './reducer'
-import { TypeAction } from './types'
 import { boolean } from '../input/boolean/domain-language'
 import { count } from '../input/count/domain-language'
+import { LookupValues, SYMBOL_COMMAND } from '../types'
 import { extract } from '../utility/extract'
+import { command } from './domain-language'
+// import { TypeAction } from './types'
+import { reducer } from './reducer'
+import { PropsCommand, TypeAction } from './types'
 
 describe('command', () => {
   it('domain-language', () => {
@@ -188,7 +187,10 @@ describe('command', () => {
       variables: [...state(booleanA).variables]
     })
 
-    const inputReducer: LookupReducer<typeof test4, any> = (values) => values
+    const inputReducer = (
+      values: LookupValues<typeof test4>,
+      _: PropsCommand
+    ) => values
 
     const test5 = test4.reducer(inputReducer)
 
@@ -299,8 +301,10 @@ describe('command', () => {
       variables: [...state(commandA).variables]
     })
 
-    const subcommandReducer: LookupReducer<typeof test6, any> = (values) =>
-      values
+    const subcommandReducer = (
+      values: LookupValues<typeof test6>,
+      _: PropsCommand
+    ) => values
 
     const test7 = test6.reducer(subcommandReducer)
 
@@ -350,7 +354,7 @@ describe('command', () => {
       variables: [...state(commandA).variables]
     })
 
-    const simpleReducer: LookupReducer<typeof test3, any> = (value) => value
+    const simpleReducer = (value: LookupValues<typeof test3>) => value
 
     const test8 = test3.reducer(simpleReducer)
 

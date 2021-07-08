@@ -316,5 +316,7 @@ export type InputStringReducer<
   } & PropsInputShared
 ) => T | Promise<T>
 
-export type LookupReducer<T extends FluentInterface<Model<State, Actions>>, U> =
-  InputStringReducer<U, LookupModel<T>>
+export interface InputStringEmpty
+  extends FluentInterface<Model<State, Actions>> {}
+
+export type LookupValues<T extends InputStringEmpty> = Values<LookupModel<T>>

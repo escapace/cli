@@ -357,7 +357,4 @@ export type GenericCommandReducer<T = unknown> = (
 
 export interface CommandEmpty extends FluentInterface<Model<State, Actions>> {}
 
-export type LookupReducer<T extends CommandEmpty, U> = CommandReducer<
-  U,
-  LookupModel<T>
->
+export type LookupValues<T extends CommandEmpty> = Values<LookupModel<T>['log']>

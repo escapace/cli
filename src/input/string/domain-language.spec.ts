@@ -1,10 +1,9 @@
+import { log, state, SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
+import { assert } from 'chai'
+import { LookupValues, SYMBOL_INPUT_STRING } from '../../types'
 import { string } from './domain-language'
 import { reducer } from './reducer'
-
-import { SYMBOL_LOG, SYMBOL_STATE, log, state } from '@escapace/fluent'
-import { assert } from 'chai'
-import { SYMBOL_INPUT_STRING } from '../../types'
-import { TypeAction, LookupReducer } from './types'
+import { TypeAction } from './types'
 
 describe('input/choice', () => {
   it('domain-language', () => {
@@ -206,8 +205,8 @@ describe('input/choice', () => {
       variables: ['VARIABLE']
     })
 
-    const fn: LookupReducer<typeof test5, 1> = () => {
-      return 1
+    const fn = (_: LookupValues<typeof test5>) => {
+      return 1 as const
     }
 
     const test7 = test5.reducer(fn)
