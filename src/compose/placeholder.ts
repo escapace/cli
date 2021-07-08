@@ -6,6 +6,7 @@ import { extract } from '../utility/extract'
 import { help } from '../help/help'
 
 export enum PLACEHOLDER_REFERENCES {
+  NAME = 'placeholder',
   INPUT = '@escapace/cli/placeholder-input',
   COMMAND = '@escapace/cli/placeholder-input',
   HELP_BOOLEAN = '@escapace/cli/placeholder-help-boolean'
@@ -42,7 +43,7 @@ export const placeholderCommand = (commands: Command[]) => {
   return extract(
     command()
       .reference(PLACEHOLDER_REFERENCES.COMMAND)
-      .name('placeholder')
+      .name(PLACEHOLDER_REFERENCES.NAME)
       .description('')
       .input(helpBoolean)
       .reducer(async (_, props) => {

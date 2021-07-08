@@ -5,6 +5,7 @@ import { choice } from './input/choice/domain-language'
 import { count } from './input/count/domain-language'
 import { group } from './input/group/domain-language'
 import { string } from './input/string/domain-language'
+import { compose } from './exports/node'
 
 export const grant = string()
   .reference('GRANT')
@@ -138,7 +139,8 @@ export const sharpie = command()
     // }
   })
 
-// const app = compose(sharpie)
-// app({
-//   configuration: { TILT: { DROWN: { BLAH: { SLUM: true } } } }
-// })
+const app = compose(sharpie)
+
+app({
+  configuration: { TILT: { DROWN: { BLAH: { SLUM: true } } } }
+})

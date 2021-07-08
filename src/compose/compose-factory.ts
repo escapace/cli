@@ -63,6 +63,7 @@ export const composeFactory =
         const match = matchIntent(intents, context)
 
         if (match === undefined || match._.length > 0) {
+          // TODO: print did you mean?
           const intent = levenshtein(
             match === undefined ? context.argv : match._,
             intents

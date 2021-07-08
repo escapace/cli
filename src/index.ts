@@ -23,7 +23,6 @@ export type {
   Context,
   Input,
   LookupModel,
-  LookupReducer,
   Reference,
   Settings
 } from './types'
@@ -33,3 +32,5 @@ export type { Configuration } from './configuration'
 declare const compose: Compose
 
 export { compose }
+
+// TODO: lookup values instead of lookup reducer
