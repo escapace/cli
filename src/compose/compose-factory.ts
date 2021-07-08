@@ -11,7 +11,7 @@ import { help } from '../help/help'
 import { Compose, Context, PropsInput, Reference, Settings } from '../types'
 import { assert } from '../utility/assert'
 import { extract } from '../utility/extract'
-import { levenshtein } from '../utility/levenshtein'
+import { suggest } from './suggest'
 
 export const defaultContext = (
   presetContext: Omit<Context, 'configuration' | 'exited'>,
@@ -64,13 +64,14 @@ export const composeFactory =
 
         if (match === undefined || match._.length > 0) {
           // TODO: print did you mean?
-          const intent = levenshtein(
+          const suggestion = suggest(
             match === undefined ? context.argv : match._,
             intents
           )
 
           help({
-            commands: intent === undefined ? [command] : intent.commands,
+            commands:
+              suggestion === undefined ? [command] : suggestion.commands,
             context,
             settings
           })
@@ -159,11 +160,11 @@ export const composeFactory =
       } catch (e) {
         if (isError(e)) {
           if (e instanceof CliError) {
-            const intent = levenshtein(context.argv, intents)
+            const suggestion = suggest(context.argv, intents)
 
-            if (intent !== undefined) {
+            if (suggestion !== undefined) {
               help({
-                commands: intent.commands,
+                commands: suggestion.commands,
                 context,
                 settings
               })

@@ -1,9 +1,4 @@
-import { join, map, minBy, filter } from 'lodash-es'
-import { Intent } from '../types'
-import { SYMBOL_STATE } from '@escapace/fluent'
-import { PLACEHOLDER_REFERENCES } from '../compose/placeholder'
-
-const distance = (a: string, b: string): number => {
+export const levenshtein = (a: string, b: string): number => {
   if (a.length === 0) {
     return b.length
   }
@@ -28,25 +23,4 @@ const distance = (a: string, b: string): number => {
     }
   }
   return matrix[b.length][a.length]
-}
-
-export const levenshtein = (argv: string[], intents: Intent[]) => {
-  const string = join(argv, ' ')
-
-  // TODO: exclud help from intents cli qw
-  return minBy(
-    map(
-      filter(
-        intents,
-        (intent) =>
-          intent.commands[0][SYMBOL_STATE].reference !==
-          PLACEHOLDER_REFERENCES.COMMAND
-      ),
-      (intent) => ({
-        distance: distance(join(intent._, ' '), string),
-        ...intent
-      })
-    ),
-    (value) => value.distance
-  )
 }
