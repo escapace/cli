@@ -88,32 +88,22 @@ export type DeNormalizedStringValue =
   | GenericOption<string | string[]>
   | GenericVariable<string>
 
-export type DeNormalizedNumberValue =
-  | GenericConfiguration<any>
-  | GenericOption<number | number[]>
-  | GenericVariable<string>
+// export type DeNormalizedNumberValue =
+//   | GenericConfiguration<any>
+//   | GenericOption<number | number[]>
+//   | GenericVariable<string>
 
 export type NormalizedStringValue =
   | GenericConfiguration<string>
   | GenericOption<string>
   | GenericVariable<string>
 
-export type NormalizedNumberValue =
-  | GenericConfiguration<number>
-  | GenericOption<number>
-  | GenericVariable<number>
+// export type NormalizedNumberValue =
+//   | GenericConfiguration<number>
+//   | GenericOption<number>
+//   | GenericVariable<number>
 
-export type Unwrap<T> = T extends (...arguments_: any[]) => infer U
-  ? U extends PromiseLike<infer R>
-    ? R
-    : U
-  : never
-
-export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-  k: infer I,
-) => void
-  ? I
-  : never
+export type Unwrap<T> = T extends (...arguments_: any[]) => infer U ? Awaited<U> : never
 
 export type Merge<T extends object, U extends object> = {
   [K in $.Intersection<keyof T, keyof U>]: T[K] | U[K]
@@ -121,9 +111,9 @@ export type Merge<T extends object, U extends object> = {
   Pick<U, $.Difference<keyof U, keyof T>>
 
 export type UnionMerge<T extends object> =
-  UnionToIntersection<T extends any ? (t: T) => T : never> extends (_: any) => infer W
+  $.To.Intersection<T extends any ? (t: T) => T : never> extends (_: any) => infer W
     ? W extends object
-      ? Merge<$.Cast<UnionToIntersection<Exclude<T, W>>, object>, W>
+      ? Merge<$.Cast<$.To.Intersection<Exclude<T, W>>, object>, W>
       : never
     : never
 
@@ -197,3 +187,10 @@ export type LookupValues<T extends CommandEmpty | InputGroupEmpty | InputStringE
       : T extends InputStringEmpty
         ? InputStringLookupValues<T>
         : never
+
+export enum PLACEHOLDER_REFERENCES {
+  COMMAND = '@escapace/cli/placeholder-command',
+  HELP_BOOLEAN = '@escapace/cli/placeholder-help-boolean',
+  INPUT = '@escapace/cli/placeholder-input',
+  NAME = 'placeholder',
+}

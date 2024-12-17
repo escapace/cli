@@ -1,6 +1,6 @@
 import { filter, isEmpty, map, uniq } from 'lodash-es'
 import { InputType } from '../../types'
-import { assert } from '../../utility/assert'
+import { assert } from '../../utilities/assert'
 import type { DefaultInputBooleanReducer } from './types'
 
 const invert = (value: boolean, pass: boolean) => (value ? pass : !pass)

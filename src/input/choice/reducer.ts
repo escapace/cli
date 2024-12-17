@@ -1,7 +1,7 @@
 import { differenceWith, isEmpty, map, uniq } from 'lodash-es'
 import { CliError } from '../../error'
-import { message } from '../../utility/message'
-import { normalizeString } from '../../utility/normalize'
+import { message } from '../../utilities/message'
+import { normalizeString } from '../../utilities/normalize'
 import type { DefaultInputChoiceReducer } from './types'
 
 export const reducer: DefaultInputChoiceReducer = (values, properties) => {

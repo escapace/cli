@@ -37,10 +37,14 @@ export enum TypeAction {
   Subcommand,
 }
 
-type ValuesInput<
-  T extends Actions,
-  U = $.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>[typeof SYMBOL_STATE],
-> = $.Cast<
+type PayloadActionInput<T extends Action[]> = Payload<$.Values<T>, TypeAction.Input>
+type PayloadActionReducer<T extends Action[]> = Payload<$.Values<T>, TypeAction.Reducer>
+type PayloadActionSubcommand<T extends Action[]> = Payload<$.Values<T>, TypeAction.Subcommand>
+
+type CastPayloadActionSubcommand<T extends Action[]> = $.Cast<PayloadActionSubcommand<T>, Command>
+type CastPayloadInput<T extends Action[]> = $.Cast<PayloadActionInput<T>, Input>
+
+type ValuesInput<T extends Actions, U = CastPayloadInput<T>[typeof SYMBOL_STATE]> = $.Cast<
   UnionMerge<
     U extends { reducer: infer Y; reference: infer X }
       ? Record<$.Cast<X, Reference>, Unwrap<Y>>
@@ -51,7 +55,7 @@ type ValuesInput<
 
 type ValuesCommand<
   T extends Actions,
-  U = $.Cast<Payload<$.Values<T>, TypeAction.Subcommand>, Command>[typeof SYMBOL_STATE],
+  U = CastPayloadActionSubcommand<T>[typeof SYMBOL_STATE],
 > = U extends {
   reducer: GenericCommandReducer<infer Y>
   reference: infer X
@@ -61,8 +65,8 @@ type ValuesCommand<
   : never
 
 type Values<T extends Actions> = $.If<
-  $.Is.Never<Payload<$.Values<T>, TypeAction.Input>>,
-  $.If<$.Is.Never<Payload<$.Values<T>, TypeAction.Subcommand>>, {}, ValuesCommand<T>>,
+  $.Is.Never<PayloadActionInput<T>>,
+  $.If<$.Is.Never<PayloadActionSubcommand<T>>, {}, ValuesCommand<T>>,
   ValuesInput<T>
 >
 
@@ -105,50 +109,50 @@ export type Actions = Array<
   ActionDescription | ActionInput | ActionName | ActionReducer | ActionReference | ActionSubcommand
 >
 
+type InterfaceInput<T extends Model<State, Actions>> = <
+  U extends Input,
+  A extends Input[typeof SYMBOL_STATE] = CastPayloadInput<T['log']>[typeof SYMBOL_STATE],
+  B extends Input[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE],
+>(
+  input: U,
+) => $.If<
+  $.Or<
+    $.Has<A['reference'] | T['state']['reference'], B['reference']>,
+    $.Or<
+      $.Has<$.Values<A['options']>, $.Values<B['options']>>,
+      $.Has<$.Values<A['variables']>, $.Values<B['variables']>>
+    >
+  >,
+  unknown,
+  Next<Settings, T, ActionInput<U>>
+>
+
+type InterfaceSubcommand<T extends Model<State, Actions>> = <
+  U extends Command,
+  A extends Command[typeof SYMBOL_STATE] = CastPayloadActionSubcommand<
+    T['log']
+  >[typeof SYMBOL_STATE],
+  B extends Command[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE],
+>(
+  command: U,
+) => $.If<
+  $.Or<
+    $.Has<$.Values<A['names']>, $.Values<B['names']>>,
+    $.Has<A['reference'] | T['state']['reference'], B['reference']>
+  >,
+  unknown,
+  Next<Settings, T, ActionSubcommand<U>>
+>
+
 export interface Interface<T extends Model<State, Actions>> extends FluentInterface<T> {
   description: (description: string) => Next<Settings, T, ActionDescription>
-  input: <
-    U extends Input,
-    A extends Input[typeof SYMBOL_STATE] = $.Cast<
-      Payload<$.Values<T['log']>, TypeAction.Input>,
-      Input
-    >[typeof SYMBOL_STATE],
-    B extends Input[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE],
-  >(
-    input: U,
-  ) => $.If<
-    $.Or<
-      $.Has<A['reference'] | T['state']['reference'], B['reference']>,
-      $.Or<
-        $.Has<$.Values<A['options']>, $.Values<B['options']>>,
-        $.Has<$.Values<A['variables']>, $.Values<B['variables']>>
-      >
-    >,
-    unknown,
-    Next<Settings, T, ActionInput<U>>
-  >
+  input: InterfaceInput<T>
   name: <P extends string>(
     name: Exclude<P, $.Values<T['state']['names']>>,
   ) => Next<Settings, T, ActionName<P>>
   reducer: <U>(reducer: CommandReducer<U, T>) => Next<Settings, T, ActionReducer<U>>
   reference: <U extends Reference>(reference: U) => Next<Settings, T, ActionReference<U>>
-  subcommand: <
-    U extends Command,
-    A extends Command[typeof SYMBOL_STATE] = $.Cast<
-      Payload<$.Values<T['log']>, TypeAction.Subcommand>,
-      Command
-    >[typeof SYMBOL_STATE],
-    B extends Command[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE],
-  >(
-    command: U,
-  ) => $.If<
-    $.Or<
-      $.Has<$.Values<A['names']>, $.Values<B['names']>>,
-      $.Has<A['reference'] | T['state']['reference'], B['reference']>
-    >,
-    unknown,
-    Next<Settings, T, ActionSubcommand<U>>
-  >
+  subcommand: InterfaceSubcommand<T>
 }
 
 export interface Settings {
@@ -239,65 +243,86 @@ declare module '@escapace/typelevel/hkt' {
   }
 }
 
+// Input
+
+type ReducerInputOptions<T extends Action[]> = Array<
+  CastPayloadInput<T>[typeof SYMBOL_STATE] extends {
+    options: Array<infer X>
+  }
+    ? X
+    : never
+>
+
+type ReducerInputReducer<T extends Action[]> = $.If<
+  $.Is.Never<PayloadActionReducer<T>>,
+  GenericCommandReducer<ValuesInput<T>>,
+  PayloadActionReducer<T>
+>
+
+type ReducerInputVariables<T extends Action[]> = Array<
+  CastPayloadInput<T>[typeof SYMBOL_STATE] extends {
+    variables: Array<infer X>
+  }
+    ? X
+    : never
+>
+
+type ReducerInputInputs<T extends Action[]> = Array<CastPayloadInput<T>>
+
+// Subcommand
+
+// type ReducerSubcommand<T extends Action[]> =
+type ReducerSubcommandCommands<T extends Action[]> = Array<CastPayloadActionSubcommand<T>>
+
+type ReducerSubcommandOptions<T extends Action[]> = Array<
+  CastPayloadActionSubcommand<T>[typeof SYMBOL_STATE] extends {
+    options: Array<infer X>
+  }
+    ? X
+    : never
+>
+
+type ReducerSubcommandReducer<T extends Action[]> = $.If<
+  $.Is.Never<PayloadActionReducer<T>>,
+  GenericCommandReducer<ValuesCommand<T>>,
+  PayloadActionReducer<T>
+>
+
+type ReducerSubcommandVariables<T extends Action[]> = Array<
+  CastPayloadActionSubcommand<T>[typeof SYMBOL_STATE] extends {
+    variables: Array<infer X>
+  }
+    ? X
+    : never
+>
+
 export interface Reducer<T extends Action[]> {
   [TypeAction.Description]: {
     description: string
   }
   [TypeAction.Input]: {
-    inputs: Array<$.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>>
+    inputs: ReducerInputInputs<T>
     isEmpty: false
-    options: Array<
-      $.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>[typeof SYMBOL_STATE] extends {
-        options: Array<infer X>
-      }
-        ? X
-        : never
-    >
-    reducer: $.If<
-      $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
-      GenericCommandReducer<ValuesInput<T>>,
-      Payload<$.Values<T>, TypeAction.Reducer>
-    >
-    variables: Array<
-      $.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>[typeof SYMBOL_STATE] extends {
-        variables: Array<infer X>
-      }
-        ? X
-        : never
-    >
+    options: ReducerInputOptions<T>
+    reducer: ReducerInputReducer<T>
+    variables: ReducerInputVariables<T>
   }
   [TypeAction.Name]: {
     names: Array<Payload<$.Values<T>, TypeAction.Name>>
   }
   [TypeAction.Reducer]: {
     isEmpty: false
-    reducer: Payload<$.Values<T>, TypeAction.Reducer>
+    reducer: PayloadActionReducer<T>
   }
   [TypeAction.Reference]: {
     reference: Payload<$.Values<T>, TypeAction.Reference>
   }
   [TypeAction.Subcommand]: {
-    commands: Array<$.Cast<Payload<$.Values<T>, TypeAction.Subcommand>, Command>>
+    commands: ReducerSubcommandCommands<T>
     isEmpty: false
-    options: Array<
-      $.Cast<Payload<$.Values<T>, TypeAction.Subcommand>, Command>[typeof SYMBOL_STATE] extends {
-        options: Array<infer X>
-      }
-        ? X
-        : never
-    >
-    reducer: $.If<
-      $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
-      GenericCommandReducer<ValuesCommand<T>>,
-      Payload<$.Values<T>, TypeAction.Reducer>
-    >
-    variables: Array<
-      $.Cast<Payload<$.Values<T>, TypeAction.Subcommand>, Command>[typeof SYMBOL_STATE] extends {
-        variables: Array<infer X>
-      }
-        ? X
-        : never
-    >
+    options: ReducerSubcommandOptions<T>
+    reducer: ReducerSubcommandReducer<T>
+    variables: ReducerSubcommandVariables<T>
   }
 }
 

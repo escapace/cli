@@ -2,8 +2,8 @@
 import { builder, Options } from '@escapace/fluent'
 import { filter, find, map, reverse, some } from 'lodash-es'
 import { type Reference, SYMBOL_INPUT_STRING } from '../../types'
-import { assert } from '../../utility/assert'
-import { normalizeString } from '../../utility/normalize'
+import { assert } from '../../utilities/assert'
+import { normalizeString } from '../../utilities/normalize'
 import { reducer as reducerDefault } from './reducer'
 import {
   type ActionDefault,

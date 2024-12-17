@@ -2,9 +2,9 @@
 import { builder, Options, SYMBOL_STATE } from '@escapace/fluent'
 import { filter, find, map, flatMap, reverse } from 'lodash-es'
 import { type Reference, SYMBOL_INPUT_GROUP, type Input } from '../../types'
-import { assert } from '../../utility/assert'
+import { assert } from '../../utilities/assert'
 import { wrap, reducer as reducerDefault } from './reducer'
-import { extract } from '../../utility/extract'
+import { extract } from '../../utilities/extract'
 import {
   type ActionDescription,
   type GenericInputGroupReducer,

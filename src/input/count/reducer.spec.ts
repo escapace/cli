@@ -1,6 +1,6 @@
 import { assert, describe, it, vi } from 'vitest'
 import { command } from '../../command/domain-language'
-import { createCompose } from '../../exports/node-test'
+import { createCompose } from '../../test-utilities/create-compose'
 import { count } from './domain-language'
 
 const factory = () => {

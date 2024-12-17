@@ -1,10 +1,10 @@
 import { SYMBOL_STATE } from '@escapace/fluent'
 import { flatMap, map, union } from 'lodash-es'
 import type { Command } from '../command/types'
+import { PLACEHOLDER_REFERENCES, type Intent } from '../types'
 import { addPlaceholder } from './add-placeholder'
-import { placeholderCommand, PLACEHOLDER_REFERENCES } from './placeholder'
-import type { Intent } from '../types'
 import { getSpecification } from './get-specification'
+import { placeholderCommandHelp } from './placeholder-command-help'
 
 export const listIntent = (command: Command): Intent[] => {
   const next = (command: Command, intentOrUdefined?: Intent): Intent[] => {
@@ -14,7 +14,7 @@ export const listIntent = (command: Command): Intent[] => {
 
     if (hasSubcommands) {
       if (isRoot) {
-        const placeholder = placeholderCommand([command])
+        const placeholder = placeholderCommandHelp([command])
 
         return [
           ...flatMap(command[SYMBOL_STATE].commands, (value) =>
@@ -32,7 +32,7 @@ export const listIntent = (command: Command): Intent[] => {
         ]
       } else {
         const commands = union(intent.commands, [command])
-        const placeholder = placeholderCommand(commands)
+        const placeholder = placeholderCommandHelp(commands)
 
         return flatMap(command[SYMBOL_STATE].names, (name) =>
           flatMap(command[SYMBOL_STATE].commands, (value) => [

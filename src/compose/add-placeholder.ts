@@ -1,11 +1,12 @@
 import { intersection, slice, findIndex } from 'lodash-es'
 import { SYMBOL_STATE, SYMBOL_LOG } from '@escapace/fluent'
 import { type Command, TypeAction } from '../command/types'
-import { placeholderInput } from './placeholder'
+import { placeholderInputHelpGroup } from './placeholder-input-help-group'
 
 export const addPlaceholder = (command: Command): Command => {
   const hasFlag =
-    intersection(placeholderInput[SYMBOL_STATE].options, command[SYMBOL_STATE].options).length !== 0
+    intersection(placeholderInputHelpGroup[SYMBOL_STATE].options, command[SYMBOL_STATE].options)
+      .length !== 0
 
   if (hasFlag) {
     return command
@@ -16,13 +17,16 @@ export const addPlaceholder = (command: Command): Command => {
   return {
     [SYMBOL_LOG]: [
       ...slice(command[SYMBOL_LOG], 0, index),
-      { payload: placeholderInput, type: TypeAction.Input },
+      { payload: placeholderInputHelpGroup, type: TypeAction.Input },
       ...slice(command[SYMBOL_LOG], index, command[SYMBOL_LOG].length),
     ],
     [SYMBOL_STATE]: {
       ...command[SYMBOL_STATE],
-      inputs: [...command[SYMBOL_STATE].inputs, placeholderInput],
-      options: [...command[SYMBOL_STATE].options, ...placeholderInput[SYMBOL_STATE].options],
+      inputs: [...command[SYMBOL_STATE].inputs, placeholderInputHelpGroup],
+      options: [
+        ...command[SYMBOL_STATE].options,
+        ...placeholderInputHelpGroup[SYMBOL_STATE].options,
+      ],
     },
   }
 }

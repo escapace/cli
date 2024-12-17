@@ -1,8 +1,7 @@
 import { SYMBOL_STATE } from '@escapace/fluent'
 import { filter, join, map, minBy } from 'lodash-es'
-import type { Intent } from '../types'
-import { levenshtein } from '../utility/levenshtein'
-import { PLACEHOLDER_REFERENCES } from './placeholder'
+import { PLACEHOLDER_REFERENCES, type Intent } from '../types'
+import { levenshtein } from '../utilities/levenshtein'
 
 export const suggest = (argv: string[], intents: Intent[]) => {
   const string = join(argv, ' ')

@@ -1,7 +1,7 @@
 import { log, state, SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
 import { assert, describe, it } from 'vitest'
 import { type LookupValues, SYMBOL_INPUT_GROUP } from '../../types'
-import { extract } from '../../utility/extract'
+import { extract } from '../../utilities/extract'
 import { boolean } from '../boolean/domain-language'
 import { count } from '../count/domain-language'
 import { group } from './domain-language'

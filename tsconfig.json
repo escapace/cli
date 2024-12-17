@@ -13,6 +13,7 @@
     "lib": ["DOM", "DOM.Iterable", "es2015", "es2015.promise", "es2016", "es2017", "esnext"],
     "module": "esnext",
     "moduleResolution": "bundler",
+    "noErrorTruncation": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,

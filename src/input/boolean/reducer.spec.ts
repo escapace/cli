@@ -1,7 +1,7 @@
 import { assert, describe, it, vi } from 'vitest'
-import { createCompose } from '../../exports/node-test'
 import { command } from '../../command/domain-language'
 import { boolean } from './domain-language'
+import { createCompose } from '../../test-utilities/create-compose'
 
 const factory = () => {
   const spy = vi.fn()

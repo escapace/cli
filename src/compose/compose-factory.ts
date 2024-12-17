@@ -8,12 +8,17 @@ import type { Command } from '../command/types'
 import { getOptionsVariables } from '../compose/get-options-variables'
 import { listIntent } from '../compose/list-intent'
 import { matchIntent } from '../compose/match-intent'
-import { PLACEHOLDER_REFERENCES } from '../compose/placeholder'
 import { CliError } from '../error'
 import { help } from '../help/help'
-import type { Compose, Context, PropertiesInput, Settings } from '../types'
-import { assert } from '../utility/assert'
-import { extract } from '../utility/extract'
+import {
+  PLACEHOLDER_REFERENCES,
+  type Compose,
+  type Context,
+  type PropertiesInput,
+  type Settings,
+} from '../types'
+import { assert } from '../utilities/assert'
+import { extract } from '../utilities/extract'
 import { suggest } from './suggest'
 
 const defaultContext = (

@@ -25,5 +25,3 @@ export const createCompose = () => {
     spyLog,
   }
 }
-
-export * from '../index'

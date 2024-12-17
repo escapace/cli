@@ -1,5 +1,5 @@
 import { assert, describe, it, vi } from 'vitest'
-import { createCompose } from '../../exports/node-test'
+import { createCompose } from '../../test-utilities/create-compose'
 import { command } from '../../command/domain-language'
 import { choice } from './domain-language'
 

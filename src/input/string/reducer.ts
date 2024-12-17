@@ -1,5 +1,5 @@
 import { isEmpty, map, uniq } from 'lodash-es'
-import { normalizeString } from '../../utility/normalize'
+import { normalizeString } from '../../utilities/normalize'
 import type { DefaultInputStringReducer } from './types'
 
 export const reducer: DefaultInputStringReducer = (_values, properties) => {

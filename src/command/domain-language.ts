@@ -1,9 +1,9 @@
 import { builder, Options, SYMBOL_STATE } from '@escapace/fluent'
 import { filter, find, map, reduce, reverse, some, union } from 'lodash-es'
 import { type Reference, SYMBOL_COMMAND, type Input } from '../types'
-import { assert } from '../utility/assert'
-import { extract } from '../utility/extract'
-import { fallback } from '../utility/fallback'
+import { assert } from '../utilities/assert'
+import { extract } from '../utilities/extract'
+import { fallback } from '../utilities/fallback'
 import { reducer } from './reducer'
 import {
   type ActionDescription,
