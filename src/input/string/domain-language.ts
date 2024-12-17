@@ -1,20 +1,16 @@
-/* eslint-disable typescript/no-unsafe-argument */
 import { builder, Options } from '@escapace/fluent'
 import { filter, find, map, reverse, some } from 'lodash-es'
 import { type Reference, SYMBOL_INPUT_STRING } from '../../types'
 import { assert } from '../../utilities/assert'
-import { normalizeString } from '../../utilities/normalize'
-import { reducer as reducerDefault } from './reducer'
+import { reducer } from './reducer'
 import {
   type ActionDefault,
   type ActionDescription,
   type ActionOption,
-  type ActionReducer,
   type ActionReference,
   type ActionRepeat,
   type Actions,
   type ActionVariable,
-  type GenericInputStringReducer,
   type Settings,
   type State,
   TypeAction,
@@ -32,15 +28,6 @@ const fluentReducer = (log: Actions): State => {
   )?.payload
 
   const repeat = Boolean(find(log, ({ type }) => type === TypeAction.Repeat))
-
-  const reducerMaybe = (
-    find(log, (action) => action.type === TypeAction.Reducer) as ActionReducer | undefined
-  )?.payload
-
-  const reducer: GenericInputStringReducer =
-    reducerMaybe === undefined
-      ? reducerDefault
-      : (values, properties) => reducerMaybe(normalizeString(values, properties), properties)
 
   const isEmpty =
     log.length === 0 ||
@@ -122,7 +109,7 @@ export const string = builder<Settings>([
     [Options.Type]: TypeAction.Repeat,
   },
   {
-    [Options.Conflicts]: [TypeAction.Reducer, TypeAction.Default],
+    [Options.Conflicts]: [TypeAction.Default],
     [Options.Dependencies]: [TypeAction.Description],
     [Options.Interface]: (dispatch, _, { options }) => ({
       option(value: string) {
@@ -142,7 +129,7 @@ export const string = builder<Settings>([
     [Options.Type]: TypeAction.Option,
   },
   {
-    [Options.Conflicts]: [TypeAction.Reducer, TypeAction.Default],
+    [Options.Conflicts]: [TypeAction.Default],
     [Options.Dependencies]: [TypeAction.Description],
     [Options.Interface]: (dispatch, _, { variables }) => ({
       variable(value: string) {
@@ -160,7 +147,7 @@ export const string = builder<Settings>([
     [Options.Type]: TypeAction.Variable,
   },
   {
-    [Options.Conflicts]: [TypeAction.Reducer],
+    [Options.Conflicts]: [],
     [Options.Dependencies]: [TypeAction.Description],
     [Options.Enabled]: (_, state) => !state.isEmpty,
     [Options.Interface]: (dispatch, _, { repeat }) => ({
@@ -177,23 +164,5 @@ export const string = builder<Settings>([
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
     [Options.Type]: TypeAction.Default,
-  },
-  {
-    [Options.Conflicts]: [TypeAction.Default],
-    [Options.Enabled]: (_, state) => !state.isEmpty,
-    [Options.Interface]: (dispatch) => ({
-      reducer(value: GenericInputStringReducer) {
-        assert.function(value)
-
-        return dispatch<ActionReducer>({
-          payload: value,
-          type: TypeAction.Reducer,
-        })
-      },
-    }),
-    [Options.Keys]: ['reducer'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Reducer,
   },
 ])

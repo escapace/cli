@@ -1,6 +1,6 @@
 import { log, state, SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
 import { assert, describe, it } from 'vitest'
-import { type LookupValues, SYMBOL_INPUT_STRING } from '../../types'
+import { SYMBOL_INPUT_STRING } from '../../types'
 import { string } from './domain-language'
 import { reducer } from './reducer'
 import { TypeAction } from './types'
@@ -92,7 +92,7 @@ describe('input/choice', () => {
 
     const test4 = test3.option('--option')
 
-    assert.hasAllKeys(test4, [SYMBOL_LOG, SYMBOL_STATE, 'default', 'reducer', 'option', 'variable'])
+    assert.hasAllKeys(test4, [SYMBOL_LOG, SYMBOL_STATE, 'default', 'option', 'variable'])
 
     assert.deepEqual(log(test4), [
       {
@@ -120,7 +120,7 @@ describe('input/choice', () => {
 
     const test5 = test4.variable('VARIABLE')
 
-    assert.hasAllKeys(test5, [SYMBOL_LOG, SYMBOL_STATE, 'default', 'reducer', 'option', 'variable'])
+    assert.hasAllKeys(test5, [SYMBOL_LOG, SYMBOL_STATE, 'default', 'option', 'variable'])
 
     assert.deepEqual(log(test5), [
       {
@@ -177,44 +177,6 @@ describe('input/choice', () => {
       isEmpty: false,
       options: ['--option'],
       reducer,
-      reference,
-      repeat: true,
-      type: SYMBOL_INPUT_STRING,
-      variables: ['VARIABLE'],
-    })
-
-    const function_ = (_: LookupValues<typeof test5>) => 1 as const
-
-    const test7 = test5.reducer(function_)
-
-    assert.hasAllKeys(test7, [SYMBOL_LOG, SYMBOL_STATE])
-
-    assert.deepEqual(log(test7), [
-      {
-        payload: function_,
-        type: TypeAction.Reducer,
-      },
-      {
-        payload: 'VARIABLE',
-        type: TypeAction.Variable,
-      },
-      {
-        payload: {
-          name: '--option',
-        },
-        type: TypeAction.Option,
-      },
-      { payload: undefined, type: TypeAction.Repeat },
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
-    ])
-
-    assert.deepEqual(state(test7), {
-      default: undefined,
-      description: 'ABC',
-      isEmpty: false,
-      options: ['--option'],
-      reducer: state(test7).reducer,
       reference,
       repeat: true,
       type: SYMBOL_INPUT_STRING,

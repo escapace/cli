@@ -6,7 +6,6 @@ import { count } from './input/count/domain-language'
 import { group } from './input/group/domain-language'
 import { string } from './input/string/domain-language'
 
-// TODO: remove string reducer
 export const grant = string()
   .reference('GRANT')
   .description(

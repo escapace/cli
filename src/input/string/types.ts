@@ -27,7 +27,6 @@ export declare const INPUT_STRING_REDUCER: unique symbol
 export enum TypeAction {
   Default,
   Description,
-  Reducer,
   Option,
   Reference,
   Repeat,
@@ -54,11 +53,6 @@ export interface ActionDefault<T extends string | string[] = string | string[]> 
   type: TypeAction.Default
 }
 
-export interface ActionReducer<T = unknown> {
-  payload: GenericInputStringReducer<T>
-  type: TypeAction.Reducer
-}
-
 export interface ActionVariable<T extends string = string> {
   payload: T
   type: TypeAction.Variable
@@ -72,13 +66,7 @@ export interface ActionOption<T extends string = string> {
 }
 
 export type Actions = Array<
-  | ActionDefault
-  | ActionDescription
-  | ActionOption
-  | ActionReducer
-  | ActionReference
-  | ActionRepeat
-  | ActionVariable
+  ActionDefault | ActionDescription | ActionOption | ActionReference | ActionRepeat | ActionVariable
 >
 
 export type LookupDefault<T extends Model<State, Actions>> = $.If<
@@ -93,7 +81,6 @@ export interface Interface<T extends Model<State, Actions>> extends FluentInterf
   option: <P extends string>(
     option: Exclude<P, $.Values<T['state']['options']>>,
   ) => Next<Settings, T, ActionOption<P>>
-  reducer: <U>(reducer: InputStringReducer<U, T>) => Next<Settings, T, ActionReducer<U>>
   reference: <U extends Reference>(reference: U) => Next<Settings, T, ActionReference<U>>
   repeat: () => Next<Settings, T, ActionRepeat>
   variable: <P extends string>(
@@ -152,7 +139,7 @@ export interface Specification<T extends Model<State>> {
   }
 
   [TypeAction.Option]: {
-    [Options.Conflicts]: typeof TypeAction.Default | typeof TypeAction.Reducer
+    [Options.Conflicts]: typeof TypeAction.Default
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Enabled]: $.True
     [Options.Keys]: 'option'
@@ -161,7 +148,7 @@ export interface Specification<T extends Model<State>> {
   }
 
   [TypeAction.Variable]: {
-    [Options.Conflicts]: typeof TypeAction.Default | typeof TypeAction.Reducer
+    [Options.Conflicts]: typeof TypeAction.Default
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Enabled]: $.True
     [Options.Keys]: 'variable'
@@ -170,21 +157,12 @@ export interface Specification<T extends Model<State>> {
   }
 
   [TypeAction.Default]: {
-    [Options.Conflicts]: typeof TypeAction.Reducer
+    [Options.Conflicts]: never
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Enabled]: $.Equal<T['state']['isEmpty'], false>
     [Options.Keys]: 'default'
     [Options.Once]: $.True
     [Options.Type]: typeof TypeAction.Default
-  }
-
-  [TypeAction.Reducer]: {
-    [Options.Conflicts]: typeof TypeAction.Default
-    [Options.Dependencies]: never
-    [Options.Enabled]: $.Equal<T['state']['isEmpty'], false>
-    [Options.Keys]: 'reducer'
-    [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Reducer
   }
 }
 
@@ -197,17 +175,13 @@ declare module '@escapace/typelevel/hkt' {
 }
 
 export type ReducerReducer<T extends Action[]> = $.If<
-  $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
+  $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
   $.If<
-    $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
-    $.If<
-      $.Is.Never<Payload<$.Values<T>, TypeAction.Default>>,
-      GenericInputStringReducer<string | undefined>,
-      GenericInputStringReducer<string>
-    >,
-    GenericInputStringReducer<string[]>
+    $.Is.Never<Payload<$.Values<T>, TypeAction.Default>>,
+    GenericInputStringReducer<string | undefined>,
+    GenericInputStringReducer<string>
   >,
-  GenericInputStringReducer<ReturnType<Payload<$.Values<T>, TypeAction.Reducer>>>
+  GenericInputStringReducer<string[]>
 >
 
 export interface Reducer<T extends Action[]> {
@@ -221,9 +195,6 @@ export interface Reducer<T extends Action[]> {
   [TypeAction.Option]: {
     isEmpty: false
     options: Array<Payload<$.Values<T>, TypeAction.Option> extends { name: infer U } ? U : never>
-  }
-  [TypeAction.Reducer]: {
-    reducer: GenericInputStringReducer<ReturnType<Payload<$.Values<T>, TypeAction.Reducer>>>
   }
   [TypeAction.Reference]: {
     reference: Payload<$.Values<T>, TypeAction.Reference>
