@@ -1,75 +1,55 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { SYMBOL_STATE } from '@escapace/fluent'
 import arg, {
-  Result as ArgResult,
-  Spec as ArgSpec,
-  Options as ArgOptions
+  type Options as ArgumentOptions,
+  type Result as ArgumentResult,
+  type Spec as ArgumentSpec,
 } from 'arg'
-import { xor, omitBy, pick, map, get, slice, isError } from 'lodash-es'
+import { isError, omitBy, pick, xor } from 'lodash-es'
 import { CliError } from '../error'
-import { Intent, Match, Context } from '../types'
+import type { Context, Intent, Match } from '../types'
 
-const wrapArg = <T extends ArgSpec>(
-  spec: ArgSpec,
-  options: ArgOptions | undefined
-): ArgResult<T> => {
+const wrapArgument = <T extends ArgumentSpec>(
+  spec: ArgumentSpec,
+  options: ArgumentOptions | undefined,
+): ArgumentResult<T> => {
   try {
     return arg(spec, options)
-  } catch (e) {
-    if (isError(e)) {
-      throw new CliError(e.message)
-    } else {
-      throw new Error('Unexpected Error')
-    }
+  } catch (_error) {
+    const error = isError(_error) ? new CliError(_error.message) : new Error('Unexpected Error')
+    throw error
   }
 }
 
-export const matchIntent = (
-  intents: Intent[],
-  context: Context
-): Match | undefined => {
+export const matchIntent = (intents: Intent[], context: Context): Match | undefined => {
   let match: Match | undefined
   let index = 0
 
   while (index < intents.length) {
     const intent = intents[index]
 
-    const options: Record<
+    const options: { _: string[] } & Record<
       string,
-      boolean | string | number | string[] | number[] | undefined
-    > & { _: string[] } = wrapArg(
+      boolean | number | string | number[] | string[] | undefined
+    > = wrapArgument(
       intent.specification,
       {
+        argv: context.argv,
         permissive: true,
-        argv: context.argv
-      }
+      },
       // context
     )
 
-    const variables = pick(
-      context.env,
-      intent.commands.slice(-1)[0][SYMBOL_STATE].variables
-    )
+    const variables = pick(context.env, intent.commands.slice(-1)[0][SYMBOL_STATE].variables)
 
     if (xor(intent._, options._).length === 0) {
       match = {
-        options: omitBy(
-          options,
-          (value, key) => key === '_' || value === undefined
-        ) as Record<string, string | number | string[] | number[]>,
-        variables,
         _: options._.slice(intent._.length),
         commands: intent.commands,
-        configuration:
-          intent.commands.length === 1
-            ? context.configuration
-            : get(
-                context.configuration,
-                map(
-                  slice(intent.commands, 1),
-                  (command) => command[SYMBOL_STATE].reference!
-                )
-              )
+        options: omitBy(options, (value, key) => key === '_' || value === undefined) as Record<
+          string,
+          number | string | number[] | string[]
+        >,
+        variables,
       }
 
       break

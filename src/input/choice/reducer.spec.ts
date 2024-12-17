@@ -1,21 +1,12 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-
-import chai, { assert } from 'chai'
-import promised from 'chai-as-promised'
-import { spy as Spy } from 'sinon'
-import { compose, exitSpy } from '../../exports/node-test'
+import { assert, describe, it, vi } from 'vitest'
+import { createCompose } from '../../exports/node-test'
 import { command } from '../../command/domain-language'
 import { choice } from './domain-language'
 
-chai.use(promised)
-
 const factory = () => {
-  const spy = Spy()
+  const spy = vi.fn()
 
-  const base = choice()
-    .reference('choice')
-    .description('choice')
-    .choices('AA', 'BB', 'CC', 'DD')
+  const base = choice().reference('choice').description('choice').choices('AA', 'BB', 'CC', 'DD')
 
   const withRepeat = base
     .repeat()
@@ -26,6 +17,8 @@ const factory = () => {
 
   // const withoutRepeat = base.option('--choice').option('-c').variable('CHOICE')
 
+  const { compose, ...spies } = createCompose()
+
   const cmd = compose(
     command()
       .reference('cmd')
@@ -34,56 +27,51 @@ const factory = () => {
       .input(withRepeat)
       .reducer((values) => {
         spy(values)
-      })
+      }),
   )
 
-  return { spy, cmd }
+  return { cmd, spy, ...spies }
 }
 
 describe('input/choice/reducer', () => {
   it('input', async () => {
-    const { spy, cmd } = factory()
+    const { cmd, spy } = factory()
 
     await cmd({ argv: [], env: {} })
 
-    assert.deepEqual(spy.getCall(0).args[0], {
-      choice: ['DD']
+    assert.deepEqual(spy.mock.calls[0][0], {
+      choice: ['DD'],
     })
 
     await cmd({ argv: ['-c', 'CC'], env: { CHOICE: 'AA:BB' } })
 
-    assert.deepEqual(spy.getCall(1).args[0], {
-      choice: ['CC', 'AA', 'BB']
+    assert.deepEqual(spy.mock.calls[1][0], {
+      choice: ['CC', 'AA', 'BB'],
     })
   })
 
   it('unexpected input', async () => {
-    const { cmd } = factory()
-
-    exitSpy.resetHistory()
+    const { cmd, spyExit } = factory()
 
     await cmd({
       argv: ['-c', 'FF', '--choice', 'QQ'],
-      env: { CHOICE: 'ZZ:XX' }
+      env: { CHOICE: 'ZZ:XX' },
     })
 
-    assert.deepEqual(exitSpy.firstCall.args, [1])
-    assert.equal(exitSpy.callCount, 1)
-
-    exitSpy.resetHistory()
+    assert.deepEqual(spyExit.mock.calls[0], [1])
+    assert.equal(spyExit.mock.calls.length, 1)
   })
 
   it('precedence order', async () => {
-    const { spy, cmd } = factory()
+    const { cmd, spy } = factory()
 
     await cmd({
-      argv: ['-c', 'CC'],
+      argv: ['-c', 'CC', '-c', 'AA'],
       env: { CHOICE: 'BB' },
-      configuration: { choice: ['AA'] }
     })
 
-    assert.deepEqual(spy.getCall(0).args[0], {
-      choice: ['CC', 'BB', 'AA']
+    assert.deepEqual(spy.mock.calls[0][0], {
+      choice: ['CC', 'AA', 'BB'],
     })
   })
 })

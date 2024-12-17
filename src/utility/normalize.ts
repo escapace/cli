@@ -1,21 +1,21 @@
 import { flatMap, map, split } from 'lodash-es'
-import { PropsInputChoice } from '../input/choice/types'
-import { PropsInputString } from '../input/string/types'
+import type { PropertiesInputChoice } from '../input/choice/types'
+import type { PropertiesInputString } from '../input/string/types'
 import {
-  DeNormalizedStringValue,
-  GenericConfiguration,
-  GenericOption,
-  GenericVariable,
+  type DeNormalizedStringValue,
+  type GenericConfiguration,
+  type GenericOption,
+  type GenericVariable,
   InputType,
-  NormalizedStringValue
+  type NormalizedStringValue,
 } from '../types'
 import { assert } from './assert'
 
 export function normalizeString(
   previousValues: DeNormalizedStringValue[],
-  props: PropsInputChoice | PropsInputString
+  properties: PropertiesInputChoice | PropertiesInputString,
 ): NormalizedStringValue[] {
-  const { repeat } = props.model.state
+  const { repeat } = properties.model.state
 
   return flatMap(previousValues, (previousValue) => {
     if (previousValue.type === InputType.Option) {
@@ -24,18 +24,18 @@ export function normalizeString(
             previousValue.value as string[],
             (value): GenericOption<string> => ({
               ...previousValue,
-              value
-            })
+              value,
+            }),
           )
         : (previousValue as GenericOption<string>)
     } else if (previousValue.type === InputType.Variable) {
       return repeat
         ? map(
-            split(previousValue.value, props.settings.split),
+            split(previousValue.value, properties.settings.split),
             (value): GenericVariable<string> => ({
               ...previousValue,
-              value
-            })
+              value,
+            }),
           )
         : previousValue
     } else {
@@ -47,8 +47,8 @@ export function normalizeString(
           previousValue.value,
           (value): GenericConfiguration<string> => ({
             ...previousValue,
-            value
-          })
+            value,
+          }),
         )
       } else {
         // TODO: error handling assert or message?

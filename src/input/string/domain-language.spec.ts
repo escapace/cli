@@ -1,13 +1,13 @@
 import { log, state, SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
-import { assert } from 'chai'
-import { LookupValues, SYMBOL_INPUT_STRING } from '../../types'
+import { assert, describe, it } from 'vitest'
+import { type LookupValues, SYMBOL_INPUT_STRING } from '../../types'
 import { string } from './domain-language'
 import { reducer } from './reducer'
 import { TypeAction } from './types'
 
 describe('input/choice', () => {
   it('domain-language', () => {
-    const reference = 'test' as const
+    const reference = 'test'
 
     assert.isFunction(string)
 
@@ -18,62 +18,54 @@ describe('input/choice', () => {
     assert.deepEqual(log(test0), [])
 
     assert.deepEqual(state(test0), {
-      type: SYMBOL_INPUT_STRING,
       default: undefined,
-      reducer,
       description: undefined,
       isEmpty: true,
       options: [],
+      reducer,
       reference: undefined,
       repeat: false,
-      variables: []
+      type: SYMBOL_INPUT_STRING,
+      variables: [],
     })
 
     const test1 = test0.reference(reference)
 
     assert.hasAllKeys(test1, [SYMBOL_LOG, SYMBOL_STATE, 'description'])
 
-    assert.deepEqual(log(test1), [
-      { type: TypeAction.Reference, payload: reference }
-    ])
+    assert.deepEqual(log(test1), [{ payload: reference, type: TypeAction.Reference }])
 
     assert.deepEqual(state(test1), {
-      type: SYMBOL_INPUT_STRING,
       default: undefined,
       description: undefined,
-      reducer,
       isEmpty: true,
       options: [],
+      reducer,
       reference,
       repeat: false,
-      variables: []
+      type: SYMBOL_INPUT_STRING,
+      variables: [],
     })
 
     const test2 = test1.description('ABC')
 
-    assert.hasAllKeys(test2, [
-      SYMBOL_LOG,
-      SYMBOL_STATE,
-      'repeat',
-      'option',
-      'variable'
-    ])
+    assert.hasAllKeys(test2, [SYMBOL_LOG, SYMBOL_STATE, 'repeat', 'option', 'variable'])
 
     assert.deepEqual(log(test2), [
-      { type: TypeAction.Description, payload: 'ABC' },
-      { type: TypeAction.Reference, payload: reference }
+      { payload: 'ABC', type: TypeAction.Description },
+      { payload: reference, type: TypeAction.Reference },
     ])
 
     assert.deepEqual(state(test2), {
-      type: SYMBOL_INPUT_STRING,
       default: undefined,
       description: 'ABC',
-      reducer,
       isEmpty: true,
       options: [],
+      reducer,
       reference,
       repeat: false,
-      variables: []
+      type: SYMBOL_INPUT_STRING,
+      variables: [],
     })
 
     const test3 = test2.repeat()
@@ -81,95 +73,81 @@ describe('input/choice', () => {
     assert.hasAllKeys(test3, [SYMBOL_LOG, SYMBOL_STATE, 'option', 'variable'])
 
     assert.deepEqual(log(test3), [
-      { type: TypeAction.Repeat, payload: undefined },
-      { type: TypeAction.Description, payload: 'ABC' },
-      { type: TypeAction.Reference, payload: reference }
+      { payload: undefined, type: TypeAction.Repeat },
+      { payload: 'ABC', type: TypeAction.Description },
+      { payload: reference, type: TypeAction.Reference },
     ])
 
     assert.deepEqual(state(test3), {
-      type: SYMBOL_INPUT_STRING,
       default: undefined,
       description: 'ABC',
-      reducer,
       isEmpty: true,
       options: [],
+      reducer,
       reference,
       repeat: true,
-      variables: []
+      type: SYMBOL_INPUT_STRING,
+      variables: [],
     })
 
     const test4 = test3.option('--option')
 
-    assert.hasAllKeys(test4, [
-      SYMBOL_LOG,
-      SYMBOL_STATE,
-      'default',
-      'reducer',
-      'option',
-      'variable'
-    ])
+    assert.hasAllKeys(test4, [SYMBOL_LOG, SYMBOL_STATE, 'default', 'reducer', 'option', 'variable'])
 
     assert.deepEqual(log(test4), [
       {
-        type: TypeAction.Option,
         payload: {
-          name: '--option'
-        }
+          name: '--option',
+        },
+        type: TypeAction.Option,
       },
-      { type: TypeAction.Repeat, payload: undefined },
-      { type: TypeAction.Description, payload: 'ABC' },
-      { type: TypeAction.Reference, payload: reference }
+      { payload: undefined, type: TypeAction.Repeat },
+      { payload: 'ABC', type: TypeAction.Description },
+      { payload: reference, type: TypeAction.Reference },
     ])
 
     assert.deepEqual(state(test4), {
-      type: SYMBOL_INPUT_STRING,
       default: undefined,
       description: 'ABC',
-      reducer,
       isEmpty: false,
       options: ['--option'],
+      reducer,
       reference,
       repeat: true,
-      variables: []
+      type: SYMBOL_INPUT_STRING,
+      variables: [],
     })
 
     const test5 = test4.variable('VARIABLE')
 
-    assert.hasAllKeys(test5, [
-      SYMBOL_LOG,
-      SYMBOL_STATE,
-      'default',
-      'reducer',
-      'option',
-      'variable'
-    ])
+    assert.hasAllKeys(test5, [SYMBOL_LOG, SYMBOL_STATE, 'default', 'reducer', 'option', 'variable'])
 
     assert.deepEqual(log(test5), [
       {
+        payload: 'VARIABLE',
         type: TypeAction.Variable,
-        payload: 'VARIABLE'
       },
       {
-        type: TypeAction.Option,
         payload: {
-          name: '--option'
-        }
+          name: '--option',
+        },
+        type: TypeAction.Option,
       },
-      { type: TypeAction.Repeat, payload: undefined },
-      { type: TypeAction.Description, payload: 'ABC' },
-      { type: TypeAction.Reference, payload: reference }
+      { payload: undefined, type: TypeAction.Repeat },
+      { payload: 'ABC', type: TypeAction.Description },
+      { payload: reference, type: TypeAction.Reference },
     ])
 
     assert.deepEqual(state(test5), {
-      type: SYMBOL_INPUT_STRING,
       default: undefined,
       description: 'ABC',
-      reducer,
       isEmpty: false,
       options: ['--option'],
+      reducer,
       reference,
       repeat: true,
-      variables: ['VARIABLE']
+      type: SYMBOL_INPUT_STRING,
+      variables: ['VARIABLE'],
     })
 
     const test6 = test5.default(['A', 'B', 'C'])
@@ -177,72 +155,70 @@ describe('input/choice', () => {
     assert.hasAllKeys(test6, [SYMBOL_LOG, SYMBOL_STATE])
 
     assert.deepEqual(log(test6), [
-      { type: TypeAction.Default, payload: ['A', 'B', 'C'] },
+      { payload: ['A', 'B', 'C'], type: TypeAction.Default },
       {
+        payload: 'VARIABLE',
         type: TypeAction.Variable,
-        payload: 'VARIABLE'
       },
       {
-        type: TypeAction.Option,
         payload: {
-          name: '--option'
-        }
+          name: '--option',
+        },
+        type: TypeAction.Option,
       },
-      { type: TypeAction.Repeat, payload: undefined },
-      { type: TypeAction.Description, payload: 'ABC' },
-      { type: TypeAction.Reference, payload: reference }
+      { payload: undefined, type: TypeAction.Repeat },
+      { payload: 'ABC', type: TypeAction.Description },
+      { payload: reference, type: TypeAction.Reference },
     ])
 
     assert.deepEqual(state(test6), {
-      type: SYMBOL_INPUT_STRING,
       default: ['A', 'B', 'C'],
       description: 'ABC',
-      reducer,
       isEmpty: false,
       options: ['--option'],
+      reducer,
       reference,
       repeat: true,
-      variables: ['VARIABLE']
+      type: SYMBOL_INPUT_STRING,
+      variables: ['VARIABLE'],
     })
 
-    const fn = (_: LookupValues<typeof test5>) => {
-      return 1 as const
-    }
+    const function_ = (_: LookupValues<typeof test5>) => 1 as const
 
-    const test7 = test5.reducer(fn)
+    const test7 = test5.reducer(function_)
 
     assert.hasAllKeys(test7, [SYMBOL_LOG, SYMBOL_STATE])
 
     assert.deepEqual(log(test7), [
       {
+        payload: function_,
         type: TypeAction.Reducer,
-        payload: fn
       },
       {
+        payload: 'VARIABLE',
         type: TypeAction.Variable,
-        payload: 'VARIABLE'
       },
       {
-        type: TypeAction.Option,
         payload: {
-          name: '--option'
-        }
+          name: '--option',
+        },
+        type: TypeAction.Option,
       },
-      { type: TypeAction.Repeat, payload: undefined },
-      { type: TypeAction.Description, payload: 'ABC' },
-      { type: TypeAction.Reference, payload: reference }
+      { payload: undefined, type: TypeAction.Repeat },
+      { payload: 'ABC', type: TypeAction.Description },
+      { payload: reference, type: TypeAction.Reference },
     ])
 
     assert.deepEqual(state(test7), {
-      type: SYMBOL_INPUT_STRING,
       default: undefined,
       description: 'ABC',
-      reducer: state(test7).reducer,
       isEmpty: false,
       options: ['--option'],
+      reducer: state(test7).reducer,
       reference,
       repeat: true,
-      variables: ['VARIABLE']
+      type: SYMBOL_INPUT_STRING,
+      variables: ['VARIABLE'],
     })
   })
 })

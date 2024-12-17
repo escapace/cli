@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { filter, flatten, includes, max, repeat, zipWith } from 'lodash-es'
 import stringWidth from 'string-width'
-import { HelpOptions } from '../types'
+import type { HelpOptions } from '../types'
 import { joinLines } from './join-lines'
 import { wrap } from './wrap'
 
 export const columns = (
   values: Array<[string, string | undefined, number | undefined]>,
-  options: HelpOptions
+  options: HelpOptions,
 ) => {
   const spacing = Math.min(Math.max(Math.floor(options.width / 16), 5), 12)
   const leftEstimate = options.width - Math.floor(options.width / options.ratio)
@@ -27,32 +26,30 @@ export const columns = (
       leftStrings.push([
         wrap(value[0], {
           ...options,
+          indent: repeat(spaceSmall, depth),
           width: options.width,
-          indent: repeat(spaceSmall, depth)
-        })
+        }),
       ])
 
       leftStringsLabelIndexes.push(index)
     } else {
       const result = wrap(value[0], {
         ...options,
+        indent: repeat(spaceSmall, depth),
         width: leftEstimate,
-        indent: repeat(spaceSmall, depth)
       })
         .split(options.newline)
-        .map((str) => `${str}${spaceBig}`)
+        .map((string_) => `${string_}${spaceBig}`)
 
       leftStrings.push(result)
     }
   })
 
+  // eslint-disable-next-line typescript/no-non-null-assertion
   const leftWidth = max(
-    flatten(
-      filter(
-        leftStrings,
-        (_, index) => !includes(leftStringsLabelIndexes, index)
-      )
-    ).map((str) => stringWidth(str))
+    flatten(filter(leftStrings, (_, index) => !includes(leftStringsLabelIndexes, index))).map(
+      (string_) => stringWidth(string_),
+    ),
   )!
 
   // TODO: single table mode
@@ -68,10 +65,5 @@ export const columns = (
       : wrap(value[1], { ...options, width }).split(options.newline)
   })
 
-  return flatten(
-    zipWith(leftStrings, rightStrings, (a, b) => [
-      ...joinLines(a, b, leftWidth),
-      ''
-    ])
-  )
+  return flatten(zipWith(leftStrings, rightStrings, (a, b) => [...joinLines(a, b, leftWidth), '']))
 }

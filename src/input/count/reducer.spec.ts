@@ -1,16 +1,11 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-
-import chai, { assert } from 'chai'
-import promised from 'chai-as-promised'
-import { spy as Spy } from 'sinon'
-import { compose } from '../../exports/node-test'
+import { assert, describe, it, vi } from 'vitest'
 import { command } from '../../command/domain-language'
+import { createCompose } from '../../exports/node-test'
 import { count } from './domain-language'
 
-chai.use(promised)
-
 const factory = () => {
-  const spy = Spy()
+  const spy = vi.fn()
+  const { compose } = createCompose()
 
   const cmd = compose(
     command()
@@ -23,30 +18,30 @@ const factory = () => {
           .description('count')
           .option(undefined, '--quiet')
           .option('-v', '-q')
-          .default(2)
+          .default(2),
       )
       .reducer((values) => {
         spy(values)
-      })
+      }),
   )
 
-  return { spy, cmd }
+  return { cmd, spy }
 }
 
 describe('input/count/reducer', () => {
   it('input', async () => {
-    const { spy, cmd } = factory()
+    const { cmd, spy } = factory()
 
     await cmd({ argv: [], env: {} })
 
-    assert.deepEqual(spy.getCall(0).args[0], {
-      count: 2
+    assert.deepEqual(spy.mock.calls[0][0], {
+      count: 2,
     })
 
     await cmd({ argv: ['-vv', '--quiet', '-v'], env: {} })
 
-    assert.deepEqual(spy.getCall(1).args[0], {
-      count: 2
+    assert.deepEqual(spy.mock.calls[1][0], {
+      count: 2,
     })
   })
 })

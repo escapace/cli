@@ -1,44 +1,38 @@
 import { builder, Options, SYMBOL_STATE } from '@escapace/fluent'
 import { filter, find, map, reduce, reverse, some, union } from 'lodash-es'
-import { Reference, SYMBOL_COMMAND, Input } from '../types'
+import { type Reference, SYMBOL_COMMAND, type Input } from '../types'
 import { assert } from '../utility/assert'
 import { extract } from '../utility/extract'
 import { fallback } from '../utility/fallback'
 import { reducer } from './reducer'
 import {
-  ActionDescription,
-  ActionInput,
-  ActionName,
-  ActionReducer,
-  ActionReference,
-  Actions,
-  ActionSubcommand,
-  Command,
-  CommandReducer,
-  Settings,
-  State,
-  TypeAction
+  type ActionDescription,
+  type ActionInput,
+  type ActionName,
+  type ActionReducer,
+  type ActionReference,
+  type Actions,
+  type ActionSubcommand,
+  type Command,
+  type CommandReducer,
+  type Settings,
+  type State,
+  TypeAction,
 } from './types'
 
-export const fluentReducer = (log: Actions): State => {
+const fluentReducer = (log: Actions): State => {
   const reference = (
-    find(log, (action) => action.type === TypeAction.Reference) as
-      | ActionReference
-      | undefined
+    find(log, (action) => action.type === TypeAction.Reference) as ActionReference | undefined
   )?.payload
 
   const rlog = reverse([...log])
 
   const names = map(
     filter(rlog, (action) => action.type === TypeAction.Name) as ActionName[],
-    ({ payload }) => payload
+    ({ payload }) => payload,
   )
 
-  const description = (
-    find(log, (action) => action.type === TypeAction.Description) as
-      | ActionDescription
-      | undefined
-  )?.payload
+  const description = find(log, (action) => action.type === TypeAction.Description)?.payload
 
   const isEmpty =
     log.length === 0 ||
@@ -47,47 +41,40 @@ export const fluentReducer = (log: Actions): State => {
       (action) =>
         action.type === TypeAction.Input ||
         action.type === TypeAction.Subcommand ||
-        action.type === TypeAction.Reducer
+        action.type === TypeAction.Reducer,
     )
 
-  const { variables, options } = reduce(
+  const { options, variables } = reduce(
     filter(
       rlog,
-      ({ type }) => type === TypeAction.Subcommand || type === TypeAction.Input
-    ) as Array<ActionSubcommand | ActionInput>,
-    (acc: { variables: string[]; options: string[] }, n) => {
-      acc.variables = union(acc.variables, n.payload[SYMBOL_STATE].variables)
-      acc.options = union(acc.options, n.payload[SYMBOL_STATE].options)
+      ({ type }) => type === TypeAction.Subcommand || type === TypeAction.Input,
+    ) as Array<ActionInput | ActionSubcommand>,
+    (accumulator: { options: string[]; variables: string[] }, n) => {
+      accumulator.variables = union(accumulator.variables, n.payload[SYMBOL_STATE].variables)
+      accumulator.options = union(accumulator.options, n.payload[SYMBOL_STATE].options)
 
-      return acc
+      return accumulator
     },
-    { variables: [], options: [] }
+    { options: [], variables: [] },
   )
 
   const inputs = map(
     filter(rlog, (action) => action.type === TypeAction.Input) as ActionInput[],
-    ({ payload }) => payload
+    ({ payload }) => payload,
   )
 
   const commands = map(
-    filter(
-      rlog,
-      (action) => action.type === TypeAction.Subcommand
-    ) as ActionSubcommand[],
-    ({ payload }) => payload
+    filter(rlog, (action) => action.type === TypeAction.Subcommand) as ActionSubcommand[],
+    ({ payload }) => payload,
   )
 
   const _reducer: CommandReducer = fallback(
     reducer,
-    (
-      find(log, (action) => action.type === TypeAction.Reducer) as
-        | ActionReducer
-        | undefined
-    )?.payload
+    (find(log, (action) => action.type === TypeAction.Reducer) as ActionReducer | undefined)
+      ?.payload,
   )
 
   return {
-    type: SYMBOL_COMMAND,
     commands,
     description,
     inputs,
@@ -96,69 +83,66 @@ export const fluentReducer = (log: Actions): State => {
     options,
     reducer: _reducer,
     reference,
-    variables
+    type: SYMBOL_COMMAND,
+    variables,
   }
 }
 
 export const command = builder<Settings>([
   {
-    [Options.Type]: TypeAction.Reference,
-    [Options.Keys]: ['reference'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
     [Options.Interface]: (dispatch) => ({
       reference(reference: Reference) {
         assert.reference(reference)
 
         return dispatch<ActionReference>({
+          payload: reference,
           type: TypeAction.Reference,
-          payload: reference
         })
-      }
-    })
+      },
+    }),
+    [Options.Keys]: ['reference'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Reference,
   },
   {
-    [Options.Type]: TypeAction.Name,
-    [Options.Keys]: ['name'],
-    [Options.Dependencies]: [TypeAction.Reference],
-    [Options.Once]: false,
-    [Options.Reducer]: fluentReducer,
     [Options.Conflicts]: [TypeAction.Description],
+    [Options.Dependencies]: [TypeAction.Reference],
     [Options.Interface]: (dispatch) => ({
       name(name: string) {
         assert.commandName(name)
 
         return dispatch<ActionName>({
+          payload: name,
           type: TypeAction.Name,
-          payload: name
         })
-      }
-    })
+      },
+    }),
+    [Options.Keys]: ['name'],
+    [Options.Once]: false,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Name,
   },
   {
-    [Options.Type]: TypeAction.Description,
     [Options.Dependencies]: [TypeAction.Name],
-    [Options.Keys]: ['description'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
     [Options.Interface]: (dispatch) => ({
       description(description: string) {
         assert.string(description)
 
         return dispatch<ActionDescription>({
+          payload: description,
           type: TypeAction.Description,
-          payload: description
         })
-      }
-    })
+      },
+    }),
+    [Options.Keys]: ['description'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Description,
   },
   {
-    [Options.Type]: TypeAction.Input,
-    [Options.Dependencies]: [TypeAction.Description],
     [Options.Conflicts]: [TypeAction.Subcommand, TypeAction.Reducer],
-    [Options.Keys]: ['input'],
-    [Options.Once]: false,
-    [Options.Reducer]: fluentReducer,
+    [Options.Dependencies]: [TypeAction.Description],
     [Options.Interface]: (dispatch, log, state) => ({
       input(value: Input) {
         assert.input(value, { log, state })
@@ -166,19 +150,19 @@ export const command = builder<Settings>([
         const payload = extract(value)
 
         return dispatch<ActionInput>({
+          payload,
           type: TypeAction.Input,
-          payload
         })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Subcommand,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['subcommand'],
-    [Options.Conflicts]: [TypeAction.Input, TypeAction.Reducer],
+      },
+    }),
+    [Options.Keys]: ['input'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Input,
+  },
+  {
+    [Options.Conflicts]: [TypeAction.Input, TypeAction.Reducer],
+    [Options.Dependencies]: [TypeAction.Description],
     [Options.Interface]: (dispatch, log, state) => ({
       subcommand(value: Command) {
         assert.command(value, { log, state })
@@ -186,28 +170,32 @@ export const command = builder<Settings>([
         const payload = extract(value)
 
         return dispatch<ActionSubcommand>({
+          payload,
           type: TypeAction.Subcommand,
-          payload
         })
-      }
-    })
+      },
+    }),
+    [Options.Keys]: ['subcommand'],
+    [Options.Once]: false,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Subcommand,
   },
   {
-    [Options.Type]: TypeAction.Reducer,
     [Options.Dependencies]: [TypeAction.Description],
+    [Options.Type]: TypeAction.Reducer,
     // [Options.Enabled]: (_, { isEmpty }) => !isEmpty,
-    [Options.Keys]: ['reducer'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
     [Options.Interface]: (dispatch) => ({
       reducer(value: CommandReducer) {
         assert.function(value)
 
         return dispatch<ActionReducer>({
+          payload: value,
           type: TypeAction.Reducer,
-          payload: value
         })
-      }
-    })
-  }
+      },
+    }),
+    [Options.Keys]: ['reducer'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+  },
 ])

@@ -1,8 +1,8 @@
-import { InputTypes, SYMBOL_INPUT_GROUP } from '../types'
+import type { InputTypes, SYMBOL_INPUT_GROUP } from '../types'
 
 export enum HelpType {
   Commands,
-  Inputs
+  Inputs,
 }
 
 export interface HelpHeader {
@@ -11,36 +11,36 @@ export interface HelpHeader {
 }
 
 export interface HelpCommands extends HelpHeader {
-  type: HelpType.Commands
   commands: Array<{
-    name: string
     description: string
+    name: string
   }>
+  type: HelpType.Commands
 }
 
 export interface HelpInputsExcluding<
   T extends Exclude<InputTypes, typeof SYMBOL_INPUT_GROUP> = Exclude<
     InputTypes,
     typeof SYMBOL_INPUT_GROUP
-  >
+  >,
 > {
-  type: T
-  options: string | undefined
-  variables: string | undefined
-  description: string
   depth: number
+  description: string
+  options: string | undefined
+  type: T
+  variables: string | undefined
 }
 
 export interface HelpInputs extends HelpHeader {
-  type: HelpType.Inputs
   inputs: Array<
     | HelpInputsExcluding
     | {
-        type: typeof SYMBOL_INPUT_GROUP
-        description: string
         depth: number
+        description: string
+        type: typeof SYMBOL_INPUT_GROUP
       }
   >
+  type: HelpType.Inputs
 }
 
 export type Help = HelpCommands | HelpInputs

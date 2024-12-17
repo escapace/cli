@@ -1,38 +1,29 @@
 import { intersection, slice, findIndex } from 'lodash-es'
 import { SYMBOL_STATE, SYMBOL_LOG } from '@escapace/fluent'
-import { Command, TypeAction } from '../command/types'
+import { type Command, TypeAction } from '../command/types'
 import { placeholderInput } from './placeholder'
 
 export const addPlaceholder = (command: Command): Command => {
   const hasFlag =
-    intersection(
-      placeholderInput[SYMBOL_STATE].options,
-      command[SYMBOL_STATE].options
-    ).length !== 0
+    intersection(placeholderInput[SYMBOL_STATE].options, command[SYMBOL_STATE].options).length !== 0
 
   if (hasFlag) {
     return command
   }
 
-  const index = findIndex(
-    command[SYMBOL_LOG],
-    ({ type }) => type === TypeAction.Input
-  )
+  const index = findIndex(command[SYMBOL_LOG], ({ type }) => type === TypeAction.Input)
 
   return {
-    [SYMBOL_STATE]: {
-      ...command[SYMBOL_STATE],
-      options: [
-        ...command[SYMBOL_STATE].options,
-        ...placeholderInput[SYMBOL_STATE].options
-      ],
-      inputs: [...command[SYMBOL_STATE].inputs, placeholderInput]
-    },
     [SYMBOL_LOG]: [
       ...slice(command[SYMBOL_LOG], 0, index),
-      { type: TypeAction.Input, payload: placeholderInput },
-      ...slice(command[SYMBOL_LOG], index, command[SYMBOL_LOG].length)
-    ]
+      { payload: placeholderInput, type: TypeAction.Input },
+      ...slice(command[SYMBOL_LOG], index, command[SYMBOL_LOG].length),
+    ],
+    [SYMBOL_STATE]: {
+      ...command[SYMBOL_STATE],
+      inputs: [...command[SYMBOL_STATE].inputs, placeholderInput],
+      options: [...command[SYMBOL_STATE].options, ...placeholderInput[SYMBOL_STATE].options],
+    },
   }
 }
 

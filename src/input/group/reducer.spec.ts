@@ -1,18 +1,12 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-
-import chai, { assert } from 'chai'
-import promised from 'chai-as-promised'
-import { spy as Spy } from 'sinon'
-import { compose } from '../../exports/node-test'
+import { assert, describe, it, vi } from 'vitest'
+import { createCompose } from '../../exports/node-test'
 import { command } from '../../command/domain-language'
 import { group } from './domain-language'
 import { boolean } from '../boolean/domain-language'
 import { choice } from '../choice/domain-language'
 
-chai.use(promised)
-
 const factory = () => {
-  const spy = Spy()
+  const spy = vi.fn()
 
   const inputA = choice()
     .reference('choice')
@@ -38,13 +32,12 @@ const factory = () => {
     .reducer(async (value) => {
       spy(value)
 
-      return Promise.resolve(Promise.resolve('groupA return' as const))
+      return await Promise.resolve(Promise.resolve('groupA return' as const))
     })
 
-  const groupB = group()
-    .reference('groupB')
-    .description('group B')
-    .input(groupA)
+  const groupB = group().reference('groupB').description('group B').input(groupA)
+
+  const { compose } = createCompose()
 
   const cmd = compose(
     command()
@@ -54,33 +47,32 @@ const factory = () => {
       .input(groupB)
       .reducer((values) => {
         spy(values)
-      })
+      }),
   )
 
-  return { spy, cmd }
+  return { cmd, spy }
 }
 
 describe('input/group/reducer', () => {
   it('...', async () => {
-    const { spy, cmd } = factory()
+    const { cmd, spy } = factory()
 
     await cmd({
-      argv: ['-c', 'B', '-c', 'A'],
+      argv: ['-c', 'B', '-c', 'A', '-c', 'C'],
       env: { BOOLEAN: 'yes' },
-      configuration: { groupB: { groupA: { choice: ['C'] } } }
     })
 
-    assert.equal(spy.callCount, 2)
+    assert.equal(spy.mock.calls.length, 2)
 
-    assert.deepEqual(spy.getCall(0).args[0], {
+    assert.deepEqual(spy.mock.calls[0][0], {
       boolean: true,
-      choice: ['B', 'A', 'C']
+      choice: ['B', 'A', 'C'],
     })
 
-    assert.deepEqual(spy.getCall(1).args[0], {
+    assert.deepEqual(spy.mock.calls[1][0], {
       groupB: {
-        groupA: 'groupA return'
-      }
+        groupA: 'groupA return',
+      },
     })
   })
 })

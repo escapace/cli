@@ -1,8 +1,8 @@
 import { repeat } from 'lodash-es'
 import stringWidth from 'string-width'
 
-export const space = (str: string, len: number): string => {
-  const w = stringWidth(str)
+export const space = (string_: string, length: number): string => {
+  const w = stringWidth(string_)
 
-  return w >= len ? str : `${str}${repeat(' ', len - w)}`
+  return w >= length ? string_ : `${string_}${repeat(' ', length - w)}`
 }

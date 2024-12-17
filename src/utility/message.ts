@@ -1,17 +1,15 @@
 import {
-  GenericConfiguration,
-  GenericOption,
-  GenericVariable,
-  InputType
+  type GenericConfiguration,
+  type GenericOption,
+  type GenericVariable,
+  InputType,
 } from '../types'
 import { map, includes, join } from 'lodash-es'
 
 export const message = (
   array: Array<
-    | GenericOption<string | string[]>
-    | GenericVariable<string>
-    | GenericConfiguration<any>
-  >
+    GenericConfiguration<any> | GenericOption<string | string[]> | GenericVariable<string>
+  >,
   // Array<{
   //   type: InputType.Option | InputType.Variable
   //   name: string
@@ -21,10 +19,7 @@ export const message = (
 
   return [
     ...map(array, (value, index) => {
-      const name =
-        value.type === InputType.Configuration
-          ? join(value.name, '.')
-          : value.name
+      const name = value.type === InputType.Configuration ? join(value.name, '.') : value.name
 
       if (includes(seen, name)) {
         return ''
@@ -35,8 +30,8 @@ export const message = (
           /* (index === 0 ? capitalize : identity)( */
           {
             [InputType.Configuration]: 'configuration path',
+            [InputType.Option]: 'option',
             [InputType.Variable]: 'variable',
-            [InputType.Option]: 'option'
           }[value.type]
           // type === InputType.Variable ? 'variable' : 'option'
           /* ) */
@@ -44,13 +39,13 @@ export const message = (
           array.length === 1
             ? ''
             : index === array.length - 1
-            ? ''
-            : index === array.length - 2
-            ? ', and '
-            : ', '
+              ? ''
+              : index === array.length - 2
+                ? ', and '
+                : ', '
         }`
       }
     }),
-    '.'
+    '.',
   ].join('')
 }

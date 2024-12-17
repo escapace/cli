@@ -1,52 +1,39 @@
+/* eslint-disable typescript/no-unsafe-assignment */
 import { builder, Options } from '@escapace/fluent'
 import { filter, find, some, assign, map, keys, reverse } from 'lodash-es'
-import { Reference, SYMBOL_INPUT_COUNT } from '../../types'
+import { type Reference, SYMBOL_INPUT_COUNT } from '../../types'
 import { assert } from '../../utility/assert'
 import { fallback } from '../../utility/fallback'
 import { reducer } from './reducer'
 import {
-  ActionDefault,
-  ActionDescription,
-  ActionOption,
-  ActionReference,
-  Actions,
-  Settings,
-  State,
-  TypeAction
+  type ActionDefault,
+  type ActionDescription,
+  type ActionOption,
+  type ActionReference,
+  type Actions,
+  type Settings,
+  type State,
+  TypeAction,
 } from './types'
 
-export const fluentReducer = (log: Actions): State => {
+const fluentReducer = (log: Actions): State => {
   const reference = (
-    find(log, (action) => action.type === TypeAction.Reference) as
-      | ActionReference
-      | undefined
+    find(log, (action) => action.type === TypeAction.Reference) as ActionReference | undefined
   )?.payload
 
-  const description = (
-    find(log, (action) => action.type === TypeAction.Description) as
-      | ActionDescription
-      | undefined
-  )?.payload
+  const description = find(log, (action) => action.type === TypeAction.Description)?.payload
 
   const rlog = reverse([...log])
 
   const _default = fallback(
     0,
-    (
-      find(log, (action) => action.type === TypeAction.Default) as
-        | ActionDefault
-        | undefined
-    )?.payload
+    (find(log, (action) => action.type === TypeAction.Default) as ActionDefault | undefined)
+      ?.payload,
   )
 
-  const isEmpty =
-    log.length === 0 ||
-    !some(log, (action) => action.type === TypeAction.Option)
+  const isEmpty = log.length === 0 || !some(log, (action) => action.type === TypeAction.Option)
 
-  const options = filter(
-    rlog,
-    ({ type }) => type === TypeAction.Option
-  ) as ActionOption[]
+  const options = filter(rlog, ({ type }) => type === TypeAction.Option) as ActionOption[]
 
   const table = assign(
     {},
@@ -54,13 +41,12 @@ export const fluentReducer = (log: Actions): State => {
       assign(
         {},
         payload.increase === undefined ? undefined : { [payload.increase]: 1 },
-        payload.decrease === undefined ? undefined : { [payload.decrease]: -1 }
-      )
-    )
+        payload.decrease === undefined ? undefined : { [payload.decrease]: -1 },
+      ),
+    ),
   )
 
   return {
-    type: SYMBOL_INPUT_COUNT,
     default: _default,
     description,
     isEmpty,
@@ -68,80 +54,81 @@ export const fluentReducer = (log: Actions): State => {
     reducer,
     reference,
     table,
-    variables: []
+    type: SYMBOL_INPUT_COUNT,
+    variables: [],
   }
 }
 
 export const count = builder<Settings>([
   {
-    [Options.Type]: TypeAction.Reference,
-    [Options.Keys]: ['reference'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
     [Options.Interface]: (dispatch) => ({
       reference(reference: Reference) {
         assert.reference(reference)
 
         return dispatch<ActionReference>({
+          payload: reference,
           type: TypeAction.Reference,
-          payload: reference
         })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Description,
-    [Options.Dependencies]: [TypeAction.Reference],
-    [Options.Keys]: ['description'],
+      },
+    }),
+    [Options.Keys]: ['reference'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Reference,
+  },
+  {
+    [Options.Dependencies]: [TypeAction.Reference],
     [Options.Interface]: (dispatch) => ({
       description(description: string) {
         assert.string(description)
 
         return dispatch<ActionDescription>({
+          payload: description,
           type: TypeAction.Description,
-          payload: description
         })
-      }
-    })
+      },
+    }),
+    [Options.Keys]: ['description'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Description,
   },
   {
-    [Options.Type]: TypeAction.Option,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['option'],
-    [Options.Once]: false,
-    [Options.Reducer]: fluentReducer,
     [Options.Conflicts]: [TypeAction.Default],
+    [Options.Dependencies]: [TypeAction.Description],
     [Options.Interface]: (dispatch, _, { options }) => ({
       option(...value: [string | undefined, string | undefined]) {
         assert.inputDichotomousOption(value, options)
 
         return dispatch<ActionOption>({
-          type: TypeAction.Option,
           payload: {
+            decrease: value[1],
             increase: value[0],
-            decrease: value[1]
-          }
+          },
+          type: TypeAction.Option,
         })
-      }
-    })
+      },
+    }),
+    [Options.Keys]: ['option'],
+    [Options.Once]: false,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Option,
   },
   {
-    [Options.Type]: TypeAction.Default,
     [Options.Dependencies]: [TypeAction.Option],
-    [Options.Keys]: ['default'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
     [Options.Interface]: (dispatch) => ({
       default(value: number) {
         assert.number(value)
 
         return dispatch<ActionDefault>({
+          payload: value,
           type: TypeAction.Default,
-          payload: value
         })
-      }
-    })
-  }
+      },
+    }),
+    [Options.Keys]: ['default'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Default,
+  },
 ])

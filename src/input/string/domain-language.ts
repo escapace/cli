@@ -1,215 +1,199 @@
+/* eslint-disable typescript/no-unsafe-argument */
 import { builder, Options } from '@escapace/fluent'
 import { filter, find, map, reverse, some } from 'lodash-es'
-import { Reference, SYMBOL_INPUT_STRING } from '../../types'
+import { type Reference, SYMBOL_INPUT_STRING } from '../../types'
 import { assert } from '../../utility/assert'
 import { normalizeString } from '../../utility/normalize'
 import { reducer as reducerDefault } from './reducer'
 import {
-  ActionDefault,
-  ActionDescription,
-  ActionOption,
-  ActionReducer,
-  ActionReference,
-  ActionRepeat,
-  Actions,
-  ActionVariable,
-  GenericInputStringReducer,
-  Settings,
-  State,
-  TypeAction
+  type ActionDefault,
+  type ActionDescription,
+  type ActionOption,
+  type ActionReducer,
+  type ActionReference,
+  type ActionRepeat,
+  type Actions,
+  type ActionVariable,
+  type GenericInputStringReducer,
+  type Settings,
+  type State,
+  TypeAction,
 } from './types'
 
-export const fluentReducer = (log: Actions): State => {
+const fluentReducer = (log: Actions): State => {
   const reference = (
-    find(log, (action) => action.type === TypeAction.Reference) as
-      | ActionReference
-      | undefined
+    find(log, (action) => action.type === TypeAction.Reference) as ActionReference | undefined
   )?.payload
 
-  const description = (
-    find(log, (action) => action.type === TypeAction.Description) as
-      | ActionDescription
-      | undefined
-  )?.payload
+  const description = find(log, (action) => action.type === TypeAction.Description)?.payload
 
   const _default = (
-    find(log, (action) => action.type === TypeAction.Default) as
-      | ActionDefault
-      | undefined
+    find(log, (action) => action.type === TypeAction.Default) as ActionDefault | undefined
   )?.payload
 
   const repeat = Boolean(find(log, ({ type }) => type === TypeAction.Repeat))
 
   const reducerMaybe = (
-    find(log, (action) => action.type === TypeAction.Reducer) as
-      | ActionReducer
-      | undefined
+    find(log, (action) => action.type === TypeAction.Reducer) as ActionReducer | undefined
   )?.payload
 
   const reducer: GenericInputStringReducer =
     reducerMaybe === undefined
       ? reducerDefault
-      : (values, props) => reducerMaybe(normalizeString(values, props), props)
+      : (values, properties) => reducerMaybe(normalizeString(values, properties), properties)
 
   const isEmpty =
     log.length === 0 ||
-    !some(
-      log,
-      (action) =>
-        action.type === TypeAction.Option || action.type === TypeAction.Variable
-    )
+    !some(log, (action) => action.type === TypeAction.Option || action.type === TypeAction.Variable)
 
   const rlog = reverse([...log])
 
   const options = map(
     filter(rlog, ({ type }) => type === TypeAction.Option) as ActionOption[],
-    ({ payload }) => payload.name
+    ({ payload }) => payload.name,
   )
 
   const variables = map(
-    filter(
-      rlog,
-      ({ type }) => type === TypeAction.Variable
-    ) as ActionVariable[],
-    ({ payload }) => payload
+    filter(rlog, ({ type }) => type === TypeAction.Variable) as ActionVariable[],
+    ({ payload }) => payload,
   )
 
   return {
-    type: SYMBOL_INPUT_STRING,
     default: _default,
     description,
     isEmpty,
-    reducer,
     options,
+    reducer,
     reference,
     repeat,
-    variables
+    type: SYMBOL_INPUT_STRING,
+    variables,
   }
 }
 
 export const string = builder<Settings>([
   {
-    [Options.Type]: TypeAction.Reference,
-    [Options.Keys]: ['reference'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
     [Options.Interface]: (dispatch) => ({
       reference(reference: Reference) {
         assert.reference(reference)
 
         return dispatch<ActionReference>({
+          payload: reference,
           type: TypeAction.Reference,
-          payload: reference
         })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Description,
-    [Options.Dependencies]: [TypeAction.Reference],
-    [Options.Keys]: ['description'],
+      },
+    }),
+    [Options.Keys]: ['reference'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Reference,
+  },
+  {
+    [Options.Dependencies]: [TypeAction.Reference],
     [Options.Interface]: (dispatch) => ({
       description(description: string) {
         assert.string(description)
 
         return dispatch<ActionDescription>({
+          payload: description,
           type: TypeAction.Description,
-          payload: description
         })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Repeat,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['repeat'],
+      },
+    }),
+    [Options.Keys]: ['description'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Description,
+  },
+  {
     [Options.Conflicts]: [TypeAction.Option, TypeAction.Variable],
+    [Options.Dependencies]: [TypeAction.Description],
     [Options.Interface]: (dispatch) => ({
       repeat() {
         return dispatch<ActionRepeat>({
+          payload: undefined,
           type: TypeAction.Repeat,
-          payload: undefined
         })
-      }
-    })
+      },
+    }),
+    [Options.Keys]: ['repeat'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Repeat,
   },
   {
-    [Options.Type]: TypeAction.Option,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['option'],
-    [Options.Once]: false,
-    [Options.Reducer]: fluentReducer,
     [Options.Conflicts]: [TypeAction.Reducer, TypeAction.Default],
+    [Options.Dependencies]: [TypeAction.Description],
     [Options.Interface]: (dispatch, _, { options }) => ({
       option(value: string) {
         assert.option(value, options)
 
         return dispatch<ActionOption>({
-          type: TypeAction.Option,
           payload: {
-            name: value
-          }
+            name: value,
+          },
+          type: TypeAction.Option,
         })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Variable,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['variable'],
+      },
+    }),
+    [Options.Keys]: ['option'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Option,
+  },
+  {
     [Options.Conflicts]: [TypeAction.Reducer, TypeAction.Default],
+    [Options.Dependencies]: [TypeAction.Description],
     [Options.Interface]: (dispatch, _, { variables }) => ({
       variable(value: string) {
         assert.variable(value, variables)
 
         return dispatch<ActionVariable>({
+          payload: value,
           type: TypeAction.Variable,
-          payload: value
         })
-      }
-    })
+      },
+    }),
+    [Options.Keys]: ['variable'],
+    [Options.Once]: false,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Variable,
   },
   {
-    [Options.Type]: TypeAction.Default,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['default'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
     [Options.Conflicts]: [TypeAction.Reducer],
+    [Options.Dependencies]: [TypeAction.Description],
     [Options.Enabled]: (_, state) => !state.isEmpty,
     [Options.Interface]: (dispatch, _, { repeat }) => ({
       default(value: string | string[]) {
         assert.inputStringDefault(value, repeat)
 
         return dispatch<ActionDefault>({
+          payload: value,
           type: TypeAction.Default,
-          payload: value
         })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Reducer,
-    [Options.Keys]: ['reducer'],
+      },
+    }),
+    [Options.Keys]: ['default'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Enabled]: (_, state) => !state.isEmpty,
+    [Options.Type]: TypeAction.Default,
+  },
+  {
     [Options.Conflicts]: [TypeAction.Default],
+    [Options.Enabled]: (_, state) => !state.isEmpty,
     [Options.Interface]: (dispatch) => ({
       reducer(value: GenericInputStringReducer) {
         assert.function(value)
 
         return dispatch<ActionReducer>({
+          payload: value,
           type: TypeAction.Reducer,
-          payload: value
         })
-      }
-    })
-  }
+      },
+    }),
+    [Options.Keys]: ['reducer'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Reducer,
+  },
 ])

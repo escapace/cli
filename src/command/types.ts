@@ -1,26 +1,27 @@
-import $ from '@escapace/typelevel'
+import type $ from '@escapace/typelevel'
+import type { SimplifyDeep } from 'type-fest'
 
-import {
+import type {
   Action,
-  Payload,
   FluentInterface,
   Model,
   Next,
   Options,
+  Payload,
+  SYMBOL_LOG,
   SYMBOL_STATE,
-  SYMBOL_LOG
 } from '@escapace/fluent'
 
-import {
+import type {
   Input,
   LookupModel,
+  PropertiesShared,
   Reference,
+  SharedInitialState,
+  SharedState,
   SYMBOL_COMMAND,
-  PropsShared,
   UnionMerge,
   Unwrap,
-  SharedInitialState,
-  SharedState
 } from '../types'
 
 export declare const COMMAND_INTERFACE: unique symbol
@@ -33,15 +34,15 @@ export enum TypeAction {
   Name,
   Reducer,
   Reference,
-  Subcommand
+  Subcommand,
 }
 
 type ValuesInput<
   T extends Actions,
-  U = $.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>[typeof SYMBOL_STATE]
+  U = $.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>[typeof SYMBOL_STATE],
 > = $.Cast<
   UnionMerge<
-    U extends { reference: infer X; reducer: infer Y }
+    U extends { reducer: infer Y; reference: infer X }
       ? Record<$.Cast<X, Reference>, Unwrap<Y>>
       : never
   >,
@@ -50,80 +51,61 @@ type ValuesInput<
 
 type ValuesCommand<
   T extends Actions,
-  U = $.Cast<
-    Payload<$.Values<T>, TypeAction.Subcommand>,
-    Command
-  >[typeof SYMBOL_STATE]
+  U = $.Cast<Payload<$.Values<T>, TypeAction.Subcommand>, Command>[typeof SYMBOL_STATE],
 > = U extends {
-  type: typeof SYMBOL_COMMAND
-  reference: infer X
   reducer: GenericCommandReducer<infer Y>
+  reference: infer X
+  type: typeof SYMBOL_COMMAND
 }
   ? { reference: $.Cast<X, Reference>; value: Y }
   : never
 
 type Values<T extends Actions> = $.If<
-  $.Is.Never<Payload<$.Values<T>, TypeAction.Input, never>>,
-  $.If<
-    $.Is.Never<Payload<$.Values<T>, TypeAction.Subcommand, never>>,
-    {},
-    ValuesCommand<T>
-  >,
+  $.Is.Never<Payload<$.Values<T>, TypeAction.Input>>,
+  $.If<$.Is.Never<Payload<$.Values<T>, TypeAction.Subcommand>>, {}, ValuesCommand<T>>,
   ValuesInput<T>
 >
 
-export type CommandReducer<
-  T = unknown,
-  U extends Model<State, Actions> = Model<State, Actions>
-> = (values: Values<U['log']>, model: PropsCommand) => T | Promise<T>
+export type CommandReducer<T = unknown, U extends Model<State, Actions> = Model<State, Actions>> = (
+  values: SimplifyDeep<Values<U['log']>>,
+  model: PropertiesCommand,
+) => Promise<T> | T
 
 export interface ActionReference<T extends Reference = Reference> {
-  type: TypeAction.Reference
   payload: T
+  type: TypeAction.Reference
 }
 
 export interface ActionDescription {
-  type: TypeAction.Description
   payload: string
+  type: TypeAction.Description
 }
 
 export interface ActionName<T extends string = string> {
-  type: TypeAction.Name
   payload: T
+  type: TypeAction.Name
 }
 
 export interface ActionSubcommand<T extends Command = Command> {
-  type: TypeAction.Subcommand
   payload: T
+  type: TypeAction.Subcommand
 }
 
 export interface ActionInput<T extends Input = Input> {
-  type: TypeAction.Input
   payload: T
+  type: TypeAction.Input
 }
 
 export interface ActionReducer<T = unknown> {
-  type: TypeAction.Reducer
   payload: GenericCommandReducer<T>
+  type: TypeAction.Reducer
 }
 
 export type Actions = Array<
-  | ActionDescription
-  | ActionInput
-  | ActionName
-  | ActionReducer
-  | ActionReference
-  | ActionSubcommand
+  ActionDescription | ActionInput | ActionName | ActionReducer | ActionReference | ActionSubcommand
 >
 
-export interface Interface<T extends Model<State, Actions>>
-  extends FluentInterface<T> {
-  reference: <U extends Reference>(
-    reference: U
-  ) => Next<Settings, T, ActionReference<U>>
-  name: <P extends string>(
-    name: Exclude<P, $.Values<T['state']['names']>>
-  ) => Next<Settings, T, ActionName<P>>
+export interface Interface<T extends Model<State, Actions>> extends FluentInterface<T> {
   description: (description: string) => Next<Settings, T, ActionDescription>
   input: <
     U extends Input,
@@ -131,9 +113,9 @@ export interface Interface<T extends Model<State, Actions>>
       Payload<$.Values<T['log']>, TypeAction.Input>,
       Input
     >[typeof SYMBOL_STATE],
-    B extends Input[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE]
+    B extends Input[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE],
   >(
-    input: U
+    input: U,
   ) => $.If<
     $.Or<
       $.Has<A['reference'] | T['state']['reference'], B['reference']>,
@@ -145,15 +127,20 @@ export interface Interface<T extends Model<State, Actions>>
     unknown,
     Next<Settings, T, ActionInput<U>>
   >
+  name: <P extends string>(
+    name: Exclude<P, $.Values<T['state']['names']>>,
+  ) => Next<Settings, T, ActionName<P>>
+  reducer: <U>(reducer: CommandReducer<U, T>) => Next<Settings, T, ActionReducer<U>>
+  reference: <U extends Reference>(reference: U) => Next<Settings, T, ActionReference<U>>
   subcommand: <
     U extends Command,
     A extends Command[typeof SYMBOL_STATE] = $.Cast<
       Payload<$.Values<T['log']>, TypeAction.Subcommand>,
       Command
     >[typeof SYMBOL_STATE],
-    B extends Command[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE]
+    B extends Command[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE],
   >(
-    command: U
+    command: U,
   ) => $.If<
     $.Or<
       $.Has<$.Values<A['names']>, $.Values<B['names']>>,
@@ -162,162 +149,106 @@ export interface Interface<T extends Model<State, Actions>>
     unknown,
     Next<Settings, T, ActionSubcommand<U>>
   >
-  reducer: <U>(
-    reducer: CommandReducer<U, T>
-  ) => Next<Settings, T, ActionReducer<U>>
 }
 
 export interface Settings {
-  [Options.Interface]: typeof COMMAND_INTERFACE
-  [Options.Specification]: typeof COMMAND_SPECIFICATION
-  [Options.Reducer]: typeof COMMAND_REDUCER
   [Options.InitialState]: InitialState
+  [Options.Interface]: typeof COMMAND_INTERFACE
+  [Options.Reducer]: typeof COMMAND_REDUCER
+  [Options.Specification]: typeof COMMAND_SPECIFICATION
   [Options.State]: State
 }
 
 export interface State extends SharedState {
-  type: typeof SYMBOL_COMMAND
-  names: string[]
-  reducer: GenericCommandReducer
   commands: Command[]
   inputs: Input[]
+  names: string[]
+  reducer: GenericCommandReducer
+  type: typeof SYMBOL_COMMAND
 }
 
 export interface InitialState extends SharedInitialState {
-  type: typeof SYMBOL_COMMAND
-  names: []
-  reducer: GenericCommandReducer
   commands: []
   inputs: []
+  names: []
+  reducer: GenericCommandReducer
+  type: typeof SYMBOL_COMMAND
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface Specification<_ extends Model<State>> {
   [TypeAction.Reference]: {
-    [Options.Type]: typeof TypeAction.Reference
-    [Options.Once]: $.True
-    [Options.Dependencies]: never
-    [Options.Keys]: 'reference'
-    [Options.Enabled]: $.True
     [Options.Conflicts]: never
+    [Options.Dependencies]: never
+    [Options.Enabled]: $.True
+    [Options.Keys]: 'reference'
+    [Options.Once]: $.True
+    [Options.Type]: typeof TypeAction.Reference
   }
 
   [TypeAction.Name]: {
-    [Options.Type]: typeof TypeAction.Name
-    [Options.Once]: $.False
-    [Options.Dependencies]: typeof TypeAction.Reference
-    [Options.Keys]: 'name'
-    [Options.Enabled]: $.True
     [Options.Conflicts]: typeof TypeAction.Description
+    [Options.Dependencies]: typeof TypeAction.Reference
+    [Options.Enabled]: $.True
+    [Options.Keys]: 'name'
+    [Options.Once]: $.False
+    [Options.Type]: typeof TypeAction.Name
   }
 
   [TypeAction.Description]: {
-    [Options.Type]: typeof TypeAction.Description
-    [Options.Once]: $.True
-    [Options.Dependencies]: typeof TypeAction.Name
-    [Options.Keys]: 'description'
-    [Options.Enabled]: $.True
     [Options.Conflicts]: never
+    [Options.Dependencies]: typeof TypeAction.Name
+    [Options.Enabled]: $.True
+    [Options.Keys]: 'description'
+    [Options.Once]: $.True
+    [Options.Type]: typeof TypeAction.Description
   }
 
   [TypeAction.Input]: {
-    [Options.Type]: typeof TypeAction.Input
-    [Options.Once]: $.False
+    [Options.Conflicts]: typeof TypeAction.Reducer | typeof TypeAction.Subcommand
     [Options.Dependencies]: typeof TypeAction.Description
-    [Options.Keys]: 'input'
     [Options.Enabled]: $.True
-    [Options.Conflicts]:
-      | typeof TypeAction.Subcommand
-      | typeof TypeAction.Reducer
+    [Options.Keys]: 'input'
+    [Options.Once]: $.False
+    [Options.Type]: typeof TypeAction.Input
   }
 
   [TypeAction.Subcommand]: {
-    [Options.Type]: typeof TypeAction.Subcommand
-    [Options.Once]: $.False
-    [Options.Dependencies]: typeof TypeAction.Description
-    [Options.Keys]: 'subcommand'
-    [Options.Enabled]: $.True
     [Options.Conflicts]: typeof TypeAction.Input | typeof TypeAction.Reducer
+    [Options.Dependencies]: typeof TypeAction.Description
+    [Options.Enabled]: $.True
+    [Options.Keys]: 'subcommand'
+    [Options.Once]: $.False
+    [Options.Type]: typeof TypeAction.Subcommand
   }
 
   [TypeAction.Reducer]: {
-    [Options.Type]: typeof TypeAction.Reducer
-    [Options.Once]: $.True
+    [Options.Conflicts]: never
     [Options.Dependencies]: typeof TypeAction.Description
     [Options.Enabled]: $.True
     [Options.Keys]: 'reducer'
-    [Options.Conflicts]: never
+    [Options.Once]: $.True
+    [Options.Type]: typeof TypeAction.Reducer
   }
 }
 
 declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
     [COMMAND_INTERFACE]: Interface<$.Cast<A, Model<State>>>
-    [COMMAND_SPECIFICATION]: Specification<$.Cast<A, Model<State>>>
     [COMMAND_REDUCER]: Reducer<$.Cast<A, Action[]>>
+    [COMMAND_SPECIFICATION]: Specification<$.Cast<A, Model<State>>>
   }
 }
 
 export interface Reducer<T extends Action[]> {
-  [TypeAction.Reference]: {
-    reference: Payload<$.Values<T>, TypeAction.Reference>
-  }
-  [TypeAction.Name]: {
-    names: Array<Payload<$.Values<T>, TypeAction.Name>>
-  }
   [TypeAction.Description]: {
     description: string
   }
-  [TypeAction.Subcommand]: {
-    isEmpty: false
-    commands: Array<
-      $.Cast<Payload<$.Values<T>, TypeAction.Subcommand>, Command>
-    >
-    options: Array<
-      $.Cast<
-        Payload<$.Values<T>, TypeAction.Subcommand>,
-        Command
-      >[typeof SYMBOL_STATE] extends {
-        options: Array<infer X>
-      }
-        ? X
-        : never
-    >
-    variables: Array<
-      $.Cast<
-        Payload<$.Values<T>, TypeAction.Subcommand>,
-        Command
-      >[typeof SYMBOL_STATE] extends {
-        variables: Array<infer X>
-      }
-        ? X
-        : never
-    >
-    reducer: $.If<
-      $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
-      GenericCommandReducer<ValuesCommand<T>>,
-      Payload<$.Values<T>, TypeAction.Reducer>
-    >
-  }
   [TypeAction.Input]: {
-    isEmpty: false
     inputs: Array<$.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>>
+    isEmpty: false
     options: Array<
-      $.Cast<
-        Payload<$.Values<T>, TypeAction.Input>,
-        Input
-      >[typeof SYMBOL_STATE] extends {
+      $.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>[typeof SYMBOL_STATE] extends {
         options: Array<infer X>
-      }
-        ? X
-        : never
-    >
-    variables: Array<
-      $.Cast<
-        Payload<$.Values<T>, TypeAction.Input>,
-        Input
-      >[typeof SYMBOL_STATE] extends {
-        variables: Array<infer X>
       }
         ? X
         : never
@@ -327,10 +258,46 @@ export interface Reducer<T extends Action[]> {
       GenericCommandReducer<ValuesInput<T>>,
       Payload<$.Values<T>, TypeAction.Reducer>
     >
+    variables: Array<
+      $.Cast<Payload<$.Values<T>, TypeAction.Input>, Input>[typeof SYMBOL_STATE] extends {
+        variables: Array<infer X>
+      }
+        ? X
+        : never
+    >
+  }
+  [TypeAction.Name]: {
+    names: Array<Payload<$.Values<T>, TypeAction.Name>>
   }
   [TypeAction.Reducer]: {
     isEmpty: false
     reducer: Payload<$.Values<T>, TypeAction.Reducer>
+  }
+  [TypeAction.Reference]: {
+    reference: Payload<$.Values<T>, TypeAction.Reference>
+  }
+  [TypeAction.Subcommand]: {
+    commands: Array<$.Cast<Payload<$.Values<T>, TypeAction.Subcommand>, Command>>
+    isEmpty: false
+    options: Array<
+      $.Cast<Payload<$.Values<T>, TypeAction.Subcommand>, Command>[typeof SYMBOL_STATE] extends {
+        options: Array<infer X>
+      }
+        ? X
+        : never
+    >
+    reducer: $.If<
+      $.Is.Never<Payload<$.Values<T>, TypeAction.Reducer>>,
+      GenericCommandReducer<ValuesCommand<T>>,
+      Payload<$.Values<T>, TypeAction.Reducer>
+    >
+    variables: Array<
+      $.Cast<Payload<$.Values<T>, TypeAction.Subcommand>, Command>[typeof SYMBOL_STATE] extends {
+        variables: Array<infer X>
+      }
+        ? X
+        : never
+    >
   }
 }
 
@@ -338,22 +305,18 @@ export interface CommandState extends State {
   isEmpty: false
 }
 
-export interface Command
-  extends FluentInterface<Model<CommandState, Actions>> {}
+export interface Command extends FluentInterface<Model<CommandState, Actions>> {}
 
 export interface ModelCommand {
-  readonly state: Command[typeof SYMBOL_STATE]
   readonly log: Command[typeof SYMBOL_LOG]
+  readonly state: Command[typeof SYMBOL_STATE]
 }
 
-export interface PropsCommand extends PropsShared {
+export interface PropertiesCommand extends PropertiesShared {
   readonly model: ModelCommand
 }
 
-export type GenericCommandReducer<T = unknown> = (
-  values: any,
-  props: PropsCommand
-) => T
+export type GenericCommandReducer<T = unknown> = (values: any, properties: PropertiesCommand) => T
 
 export interface CommandEmpty extends FluentInterface<Model<State, Actions>> {}
 

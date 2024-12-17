@@ -6,19 +6,19 @@ export const levenshtein = (a: string, b: string): number => {
     return a.length
   }
   const matrix = new Array<number[]>(b.length + 1)
-  for (let i = 0; i <= b.length; i++) {
-    matrix[i] = new Array<number>(a.length + 1)
-    matrix[i][0] = i
+  for (let index = 0; index <= b.length; index++) {
+    matrix[index] = new Array<number>(a.length + 1)
+    matrix[index][0] = index
   }
-  for (let i = 1; i <= b.length; ++i) {
-    for (let j = 1; j <= a.length; ++j) {
-      matrix[i][j] =
-        b[i - 1] === a[j - 1]
-          ? matrix[i - 1][j - 1]
+  for (let index = 1; index <= b.length; ++index) {
+    for (let index_ = 1; index_ <= a.length; ++index_) {
+      matrix[index][index_] =
+        b[index - 1] === a[index_ - 1]
+          ? matrix[index - 1][index_ - 1]
           : Math.min(
-              matrix[i - 1][j - 1], // substitution
-              matrix[i][j - 1], // insertion
-              matrix[i - 1][j] // deletion
+              matrix[index - 1][index_ - 1], // substitution
+              matrix[index][index_ - 1], // insertion
+              matrix[index - 1][index_], // deletion
             ) + 1
     }
   }

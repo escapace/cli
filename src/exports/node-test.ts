@@ -1,20 +1,29 @@
 import { composeFactory } from '../compose/compose-factory'
-import { spy } from 'sinon'
+import { vi } from 'vitest'
 
-export const exitSpy = spy()
-export const log = spy()
-export const error = spy()
+export const createCompose = () => {
+  const spyExit = vi.fn()
+  const spyError = vi.fn()
+  const spyLog = vi.fn()
 
-export const compose = composeFactory({
-  env: process.env,
-  argv: process.argv.slice(2),
-  exit: (code) => {
-    exitSpy(code)
-  },
-  console: {
-    log,
-    error
+  const compose = composeFactory({
+    argv: process.argv.slice(2),
+    console: {
+      error: spyError,
+      log: spyLog,
+    },
+    env: process.env,
+    exit: (code) => {
+      spyExit(code)
+    },
+  })
+
+  return {
+    compose,
+    spyError,
+    spyExit,
+    spyLog,
   }
-})
+}
 
 export * from '../index'

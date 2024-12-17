@@ -1,21 +1,22 @@
-import { spy as Spy } from 'sinon'
+/* eslint-disable typescript/require-await */
+import { vi } from 'vitest'
 import { command } from './command/domain-language'
 import { choice } from './input/choice/domain-language'
 import { count } from './input/count/domain-language'
 
 export enum TypeFixture {
-  GRILLED_VEGETABLES = 'GRILLED_VEGETABLES',
-  SALAD = 'SALAD',
-  BRUNCH = 'BRUNCH',
-  TIP = 'TIP',
   BILL = 'BILL',
-  TAKEOUT = 'TAKEOUT',
+  BRUNCH = 'BRUNCH',
+  GRILLED_VEGETABLES = 'GRILLED_VEGETABLES',
   KITCHEN = 'KITCHEN',
-  OMAKASE = 'OMAKASE'
+  OMAKASE = 'OMAKASE',
+  SALAD = 'SALAD',
+  TAKEOUT = 'TAKEOUT',
+  TIP = 'TIP',
 }
 
 export const testFixture = () => {
-  const spy = Spy()
+  const spy = vi.fn()
 
   const grilledVegetables = choice()
     .reference(TypeFixture.GRILLED_VEGETABLES)
@@ -26,17 +27,9 @@ export const testFixture = () => {
   const salad = choice()
     .reference(TypeFixture.SALAD)
     .description(
-      'Fruit salads, fresh vegetable salads, and all the other combinations which make healthy taste so delicious.'
+      'Fruit salads, fresh vegetable salads, and all the other combinations which make healthy taste so delicious.',
     )
-    .choices(
-      'greek',
-      'watermelon-feta',
-      'caprese',
-      'tuna-poke',
-      'cesar',
-      'potato',
-      'seafood'
-    )
+    .choices('greek', 'watermelon-feta', 'caprese', 'tuna-poke', 'cesar', 'potato', 'seafood')
     .option('--salad')
     .option('-s')
     .default('greek')
@@ -66,10 +59,10 @@ export const testFixture = () => {
     .name('bill')
     .description('Ask for the bill')
     .input(tip)
-    .reducer(async (...args) => {
-      spy(...args)
+    .reducer(async (...arguments_) => {
+      spy(...arguments_)
 
-      return args[0]
+      return arguments_[0]
     })
 
   const takeout = command()
@@ -78,20 +71,20 @@ export const testFixture = () => {
     .description('Order a takeout')
     .subcommand(brunch)
     .subcommand(bill)
-    .reducer(async (...args) => {
-      spy(...args)
+    .reducer(async (...arguments_) => {
+      spy(...arguments_)
 
-      return args[0]
+      return arguments_[0]
     })
 
   const omakase = command()
     .reference(TypeFixture.OMAKASE)
     .name('omakase')
     .description("chef's choice")
-    .reducer(async (...args) => {
-      spy(...args)
+    .reducer(async (...arguments_) => {
+      spy(...arguments_)
 
-      return args[0]
+      return arguments_[0]
     })
 
   const kitchen = command()
@@ -103,10 +96,10 @@ export const testFixture = () => {
     .subcommand(bill)
     .subcommand(takeout)
     .subcommand(omakase)
-    .reducer(async (...args) => {
-      spy(...args)
+    .reducer(async (...arguments_) => {
+      spy(...arguments_)
 
-      return args[0]
+      return arguments_[0]
     })
 
   return {
@@ -117,6 +110,6 @@ export const testFixture = () => {
     salad,
     spy,
     takeout,
-    tip
+    tip,
   }
 }

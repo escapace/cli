@@ -1,14 +1,13 @@
-import { boolean } from './domain-language'
-
-import { SYMBOL_LOG, SYMBOL_STATE, log, state } from '@escapace/fluent'
-import { assert } from 'chai'
+import { log, state, SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
+import { assert, describe, it } from 'vitest'
 import { SYMBOL_INPUT_BOOLEAN } from '../../types'
-import { TypeAction } from './types'
+import { boolean } from './domain-language'
 import { reducer } from './reducer'
+import { TypeAction } from './types'
 
 describe('input/boolean', () => {
   it('domain-language', () => {
-    const reference = 'test' as const
+    const reference = 'test'
 
     assert.isFunction(boolean)
 
@@ -19,18 +18,18 @@ describe('input/boolean', () => {
     assert.deepEqual(log(test0), [])
 
     assert.deepEqual(state(test0), {
-      type: SYMBOL_INPUT_BOOLEAN,
-      isEmpty: true,
-      reference: undefined,
-      reducer,
-      description: undefined,
       default: undefined,
+      description: undefined,
+      isEmpty: true,
       options: [],
-      variables: [],
+      reducer,
+      reference: undefined,
       table: {
         options: {},
-        variables: {}
-      }
+        variables: {},
+      },
+      type: SYMBOL_INPUT_BOOLEAN,
+      variables: [],
     })
 
     const test1 = test0.reference(reference)
@@ -38,98 +37,88 @@ describe('input/boolean', () => {
     assert.hasAllKeys(test1, [SYMBOL_LOG, SYMBOL_STATE, 'description'])
 
     assert.deepEqual(state(test1), {
-      type: SYMBOL_INPUT_BOOLEAN,
-      isEmpty: true,
-      reference,
-      reducer,
-      description: undefined,
       default: undefined,
+      description: undefined,
+      isEmpty: true,
       options: [],
-      variables: [],
+      reducer,
+      reference,
       table: {
         options: {},
-        variables: {}
-      }
+        variables: {},
+      },
+      type: SYMBOL_INPUT_BOOLEAN,
+      variables: [],
     })
 
-    assert.deepEqual(log(test1), [
-      { type: TypeAction.Reference, payload: reference }
-    ])
+    assert.deepEqual(log(test1), [{ payload: reference, type: TypeAction.Reference }])
 
     const test2 = test1.description('ABC')
 
     assert.hasAllKeys(test2, [SYMBOL_LOG, SYMBOL_STATE, 'option', 'variable'])
 
     assert.deepEqual(state(test2), {
-      type: SYMBOL_INPUT_BOOLEAN,
-      isEmpty: true,
-      reference,
-      description: 'ABC',
       default: undefined,
-      reducer,
+      description: 'ABC',
+      isEmpty: true,
       options: [],
-      variables: [],
+      reducer,
+      reference,
       table: {
         options: {},
-        variables: {}
-      }
+        variables: {},
+      },
+      type: SYMBOL_INPUT_BOOLEAN,
+      variables: [],
     })
 
     assert.deepEqual(log(test2), [
-      { type: TypeAction.Description, payload: 'ABC' },
-      { type: TypeAction.Reference, payload: reference }
+      { payload: 'ABC', type: TypeAction.Description },
+      { payload: reference, type: TypeAction.Reference },
     ])
 
-    const test3 = test2
-      .variable('VARIABLE', 'NO_VARIABLE')
-      .option('--option', '--no-option')
+    const test3 = test2.variable('VARIABLE', 'NO_VARIABLE').option('--option', '--no-option')
 
-    assert.hasAllKeys(test3, [
-      SYMBOL_LOG,
-      SYMBOL_STATE,
-      'option',
-      'variable',
-      'default'
-    ])
+    assert.hasAllKeys(test3, [SYMBOL_LOG, SYMBOL_STATE, 'option', 'variable', 'default'])
 
     assert.deepEqual(state(test3), {
-      type: SYMBOL_INPUT_BOOLEAN,
-      isEmpty: false,
-      reference,
-      description: 'ABC',
-      reducer,
       default: undefined,
+      description: 'ABC',
+      isEmpty: false,
       options: ['--option', '--no-option'],
-      variables: ['VARIABLE', 'NO_VARIABLE'],
+      reducer,
+      reference,
       table: {
         options: {
           '--no-option': false,
-          '--option': true
+          '--option': true,
         },
         variables: {
           NO_VARIABLE: false,
-          VARIABLE: true
-        }
-      }
+          VARIABLE: true,
+        },
+      },
+      type: SYMBOL_INPUT_BOOLEAN,
+      variables: ['VARIABLE', 'NO_VARIABLE'],
     })
 
     assert.deepEqual(log(test3), [
       {
-        type: TypeAction.Option,
         payload: {
+          false: '--no-option',
           true: '--option',
-          false: '--no-option'
-        }
+        },
+        type: TypeAction.Option,
       },
       {
-        type: TypeAction.Variable,
         payload: {
+          false: 'NO_VARIABLE',
           true: 'VARIABLE',
-          false: 'NO_VARIABLE'
-        }
+        },
+        type: TypeAction.Variable,
       },
-      { type: TypeAction.Description, payload: 'ABC' },
-      { type: TypeAction.Reference, payload: reference }
+      { payload: 'ABC', type: TypeAction.Description },
+      { payload: reference, type: TypeAction.Reference },
     ])
 
     const test4 = test3.default(false)
@@ -137,44 +126,44 @@ describe('input/boolean', () => {
     assert.hasAllKeys(test4, [SYMBOL_LOG, SYMBOL_STATE])
 
     assert.deepEqual(state(test4), {
-      type: SYMBOL_INPUT_BOOLEAN,
-      isEmpty: false,
-      reference,
-      description: 'ABC',
-      reducer,
       default: false,
+      description: 'ABC',
+      isEmpty: false,
       options: ['--option', '--no-option'],
-      variables: ['VARIABLE', 'NO_VARIABLE'],
+      reducer,
+      reference,
       table: {
         options: {
           '--no-option': false,
-          '--option': true
+          '--option': true,
         },
         variables: {
           NO_VARIABLE: false,
-          VARIABLE: true
-        }
-      }
+          VARIABLE: true,
+        },
+      },
+      type: SYMBOL_INPUT_BOOLEAN,
+      variables: ['VARIABLE', 'NO_VARIABLE'],
     })
 
     assert.deepEqual(log(test4), [
-      { type: TypeAction.Default, payload: false },
+      { payload: false, type: TypeAction.Default },
       {
-        type: TypeAction.Option,
         payload: {
+          false: '--no-option',
           true: '--option',
-          false: '--no-option'
-        }
+        },
+        type: TypeAction.Option,
       },
       {
-        type: TypeAction.Variable,
         payload: {
+          false: 'NO_VARIABLE',
           true: 'VARIABLE',
-          false: 'NO_VARIABLE'
-        }
+        },
+        type: TypeAction.Variable,
       },
-      { type: TypeAction.Description, payload: 'ABC' },
-      { type: TypeAction.Reference, payload: reference }
+      { payload: 'ABC', type: TypeAction.Description },
+      { payload: reference, type: TypeAction.Reference },
     ])
   })
 })

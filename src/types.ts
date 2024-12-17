@@ -1,34 +1,26 @@
-import $ from '@escapace/typelevel'
-import {
-  FluentInterface,
-  Model,
-  SYMBOL_LOG,
-  SYMBOL_STATE
-} from '@escapace/fluent'
-import { InputBoolean } from './input/boolean/types'
-import { InputChoice } from './input/choice/types'
-import { InputCount } from './input/count/types'
-import {
+/* eslint-disable typescript/no-unsafe-function-type */
+
+import type { FluentInterface, Model, SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
+import type $ from '@escapace/typelevel'
+import type { InputBoolean } from './input/boolean/types'
+import type { InputChoice } from './input/choice/types'
+import type { InputCount } from './input/count/types'
+import type {
   InputGroup,
+  InputGroupEmpty,
   LookupValues as InputGroupLookupValues,
-  InputGroupEmpty
 } from './input/group/types'
 
-import {
+import type {
   InputString,
+  InputStringEmpty,
   LookupValues as InputStringLookupValues,
-  InputStringEmpty
 } from './input/string/types'
 
-import {
-  Command,
-  LookupValues as CommandLookupValues,
-  CommandEmpty
-} from './command/types'
+import type { Command, CommandEmpty, LookupValues as CommandLookupValues } from './command/types'
 
-import { Spec as Specification } from 'arg'
-import { Configuration } from './configuration'
-export { Spec as Specification, Handler as SpecificationHandler } from 'arg'
+import type { Spec as Specification } from 'arg'
+export type { Spec as Specification, Handler as SpecificationHandler } from 'arg'
 
 export const SYMBOL_INPUT_BOOLEAN = Symbol.for('ESCAPACE_CLI_INPUT_BOOLEAN')
 export const SYMBOL_INPUT_CHOICE = Symbol.for('ESCAPACE_CLI_INPUT_CHOICE')
@@ -41,15 +33,15 @@ export type InputTypes =
   | typeof SYMBOL_INPUT_BOOLEAN
   | typeof SYMBOL_INPUT_CHOICE
   | typeof SYMBOL_INPUT_COUNT
-  | typeof SYMBOL_INPUT_STRING
   | typeof SYMBOL_INPUT_GROUP
+  | typeof SYMBOL_INPUT_STRING
 
-export type Reference = string | number
+export type Reference = number | string
 
 export enum InputType {
   Option,
   Variable,
-  Configuration
+  Configuration,
 }
 
 export interface SharedState {
@@ -71,114 +63,102 @@ export interface SharedInitialState {
 export type LookupModel<T extends FluentInterface<Model>> =
   T extends FluentInterface<Model<infer S, infer L>> ? Model<S, L> : never
 
-export type Input =
-  | InputBoolean
-  | InputChoice
-  | InputCount
-  | InputString
-  | InputGroup
+export type Input = InputBoolean | InputChoice | InputCount | InputGroup | InputString
 
 export interface GenericOption<T> {
-  type: InputType.Option
   name: string
+  type: InputType.Option
   value: T
 }
 
 export interface GenericVariable<T> {
-  type: InputType.Variable
   name: string
+  type: InputType.Variable
   value: T
 }
 
 export interface GenericConfiguration<T> {
-  type: InputType.Configuration
   name: string[]
+  type: InputType.Configuration
   value: T
 }
 
 export type DeNormalizedStringValue =
+  | GenericConfiguration<any>
   | GenericOption<string | string[]>
   | GenericVariable<string>
-  | GenericConfiguration<any>
 
 export type DeNormalizedNumberValue =
+  | GenericConfiguration<any>
   | GenericOption<number | number[]>
   | GenericVariable<string>
-  | GenericConfiguration<any>
 
 export type NormalizedStringValue =
+  | GenericConfiguration<string>
   | GenericOption<string>
   | GenericVariable<string>
-  | GenericConfiguration<string>
 
 export type NormalizedNumberValue =
+  | GenericConfiguration<number>
   | GenericOption<number>
   | GenericVariable<number>
-  | GenericConfiguration<number>
 
-export type Unwrap<T> = T extends (...args: any[]) => infer U
+export type Unwrap<T> = T extends (...arguments_: any[]) => infer U
   ? U extends PromiseLike<infer R>
     ? R
     : U
   : never
 
-export type UnionToIntersection<U> = (
-  U extends any ? (k: U) => void : never
-) extends (k: infer I) => void
+export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I,
+) => void
   ? I
   : never
 
-export type Merge<T extends object, U extends object> = Pick<
-  T,
-  $.Difference<keyof T, keyof U>
-> &
-  Pick<U, $.Difference<keyof U, keyof T>> &
-  {
-    [K in $.Intersection<keyof T, keyof U>]: T[K] | U[K]
-  }
+export type Merge<T extends object, U extends object> = {
+  [K in $.Intersection<keyof T, keyof U>]: T[K] | U[K]
+} & Pick<T, $.Difference<keyof T, keyof U>> &
+  Pick<U, $.Difference<keyof U, keyof T>>
 
-export type UnionMerge<T extends object> = UnionToIntersection<
-  T extends any ? (t: T) => T : never
-> extends (_: any) => infer W
-  ? W extends object
-    ? Merge<$.Cast<UnionToIntersection<Exclude<T, W>>, object>, W>
+export type UnionMerge<T extends object> =
+  UnionToIntersection<T extends any ? (t: T) => T : never> extends (_: any) => infer W
+    ? W extends object
+      ? Merge<$.Cast<UnionToIntersection<Exclude<T, W>>, object>, W>
+      : never
     : never
-  : never
 
 export interface Settings {
   // TODO: custom help function
-  help: Boolean | Function
+  help: boolean | Function
   split: string
 }
 
 export interface Console {
-  log: (message?: any, ...optionalParams: any[]) => void | Promise<void>
-  error: (message?: any, ...optionalParams: any[]) => void | Promise<void>
+  error: (message?: any, ...optionalParameters: any[]) => Promise<void> | void
+  log: (message?: any, ...optionalParameters: any[]) => Promise<void> | void
 }
 
 export interface Context {
-  env: Record<string, string | undefined>
   argv: string[]
   console: Console
-  // TODO: unknown or Record<Reference, any>?
-  configuration: unknown
-  exit: (code?: number | undefined) => void | Promise<void>
+  env: Record<string, string | undefined>
+  exit: (code?: number) => Promise<void> | void
   exited: boolean
 }
 
 export interface ModelInput {
-  readonly state: Input[typeof SYMBOL_STATE]
   readonly log: Input[typeof SYMBOL_LOG]
+  readonly state: Input[typeof SYMBOL_STATE]
 }
 
-export interface PropsShared {
+export interface PropertiesShared {
   // readonly _: string[]
   readonly commands: Command[]
   readonly context: Context
   readonly settings: Settings
 }
 
-export interface PropsInputShared extends PropsShared {}
+export interface PropertiesInputShared extends PropertiesShared {}
 
 export interface Intent {
   _: string[]
@@ -189,23 +169,18 @@ export interface Intent {
 export interface Match {
   _: string[]
   commands: Command[]
-  options: Record<string, boolean | string | string[] | number | number[]>
+  options: Record<string, boolean | number | string | number[] | string[]>
   variables: Record<string, string | undefined>
-  configuration: Record<Reference, any>
 }
 
-export interface PropsInput extends PropsShared {
+export interface PropertiesInput extends PropertiesShared {
   readonly model: ModelInput
 }
 
 export type Compose = <T extends Command>(
   command: T,
-  settings?: Partial<Settings>
-) => (
-  context?: Partial<Omit<Context, 'configuration' | 'exited'>> & {
-    configuration?: Configuration<T>
-  }
-) => Promise<void>
+  settings?: Partial<Settings>,
+) => (context?: Partial<Omit<Context, 'exited'>>) => Promise<void>
 
 export interface HelpOptions {
   indent: string
@@ -214,12 +189,11 @@ export interface HelpOptions {
   width: number
 }
 
-export type LookupValues<
-  T extends CommandEmpty | InputGroupEmpty | InputStringEmpty
-> = T extends CommandEmpty
-  ? CommandLookupValues<T>
-  : T extends InputGroupEmpty
-  ? InputGroupLookupValues<T>
-  : T extends InputStringEmpty
-  ? InputStringLookupValues<T>
-  : never
+export type LookupValues<T extends CommandEmpty | InputGroupEmpty | InputStringEmpty> =
+  T extends CommandEmpty
+    ? CommandLookupValues<T>
+    : T extends InputGroupEmpty
+      ? InputGroupLookupValues<T>
+      : T extends InputStringEmpty
+        ? InputStringLookupValues<T>
+        : never

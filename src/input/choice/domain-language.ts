@@ -1,74 +1,57 @@
 import { builder, Options } from '@escapace/fluent'
 import { filter, find, isArray, map, reverse, some, uniq } from 'lodash-es'
-import { Reference, SYMBOL_INPUT_CHOICE } from '../../types'
+import { type Reference, SYMBOL_INPUT_CHOICE } from '../../types'
 import { assert } from '../../utility/assert'
 import { fallback } from '../../utility/fallback'
 import { reducer } from './reducer'
 import {
-  ActionChoices,
-  ActionDefault,
-  ActionDescription,
-  ActionOption,
-  ActionReference,
-  ActionRepeat,
-  Actions,
-  ActionVariable,
-  Settings,
-  State,
-  TypeAction
+  type ActionChoices,
+  type ActionDefault,
+  type ActionDescription,
+  type ActionOption,
+  type ActionReference,
+  type ActionRepeat,
+  type Actions,
+  type ActionVariable,
+  type Settings,
+  type State,
+  TypeAction,
 } from './types'
 
-export const fluentReducer = (log: Actions): State => {
+const fluentReducer = (log: Actions): State => {
   const reference = (
-    find(log, (action) => action.type === TypeAction.Reference) as
-      | ActionReference
-      | undefined
+    find(log, (action) => action.type === TypeAction.Reference) as ActionReference | undefined
   )?.payload
 
-  const description = (
-    find(log, (action) => action.type === TypeAction.Description) as
-      | ActionDescription
-      | undefined
-  )?.payload
+  const description = find(log, (action) => action.type === TypeAction.Description)?.payload
 
   const rlog = reverse([...log])
 
   const choices = fallback(
     [] as [],
-    (
-      find(rlog, (action) => action.type === TypeAction.Choices) as
-        | ActionChoices
-        | undefined
-    )?.payload
+    (find(rlog, (action) => action.type === TypeAction.Choices) as ActionChoices | undefined)
+      ?.payload,
   )
 
   const _default = (
-    find(log, (action) => action.type === TypeAction.Default) as
-      | ActionDefault
-      | undefined
+    find(log, (action) => action.type === TypeAction.Default) as ActionDefault | undefined
   )?.payload
 
   const repeat = Boolean(find(log, ({ type }) => type === TypeAction.Repeat))
 
-  const isEmpty =
-    log.length === 0 ||
-    !some(log, (action) => action.type === TypeAction.Choices)
+  const isEmpty = log.length === 0 || !some(log, (action) => action.type === TypeAction.Choices)
 
   const options = map(
     filter(rlog, ({ type }) => type === TypeAction.Option) as ActionOption[],
-    ({ payload }) => payload.name
+    ({ payload }) => payload.name,
   )
 
   const variables = map(
-    filter(
-      rlog,
-      ({ type }) => type === TypeAction.Variable
-    ) as ActionVariable[],
-    ({ payload }) => payload
+    filter(rlog, ({ type }) => type === TypeAction.Variable) as ActionVariable[],
+    ({ payload }) => payload,
   )
 
   return {
-    type: SYMBOL_INPUT_CHOICE,
     choices,
     default: _default,
     description,
@@ -77,137 +60,136 @@ export const fluentReducer = (log: Actions): State => {
     reducer,
     reference,
     repeat,
-    variables
+    type: SYMBOL_INPUT_CHOICE,
+    variables,
   }
 }
 
 export const choice = builder<Settings>([
   {
-    [Options.Type]: TypeAction.Reference,
-    [Options.Keys]: ['reference'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
     [Options.Interface]: (dispatch) => ({
       reference(reference: Reference) {
         assert.reference(reference)
 
         return dispatch<ActionReference>({
+          payload: reference,
           type: TypeAction.Reference,
-          payload: reference
         })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Description,
-    [Options.Dependencies]: [TypeAction.Reference],
-    [Options.Keys]: ['description'],
+      },
+    }),
+    [Options.Keys]: ['reference'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Reference,
+  },
+  {
+    [Options.Dependencies]: [TypeAction.Reference],
     [Options.Interface]: (dispatch) => ({
       description(description: string) {
         assert.string(description)
 
         return dispatch<ActionDescription>({
+          payload: description,
           type: TypeAction.Description,
-          payload: description
         })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Choices,
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Keys]: ['choices'],
+      },
+    }),
+    [Options.Keys]: ['description'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Description,
+  },
+  {
+    [Options.Dependencies]: [TypeAction.Description],
     [Options.Interface]: (dispatch) => ({
       choices(...value: string[]) {
         assert.strings(value)
 
         return dispatch<ActionChoices>({
+          payload: value,
           type: TypeAction.Choices,
-          payload: value
         })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Repeat,
-    [Options.Dependencies]: [TypeAction.Choices],
-    [Options.Keys]: ['repeat'],
+      },
+    }),
+    [Options.Keys]: ['choices'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Choices,
+  },
+  {
     [Options.Conflicts]: [TypeAction.Option, TypeAction.Variable],
+    [Options.Dependencies]: [TypeAction.Choices],
     [Options.Interface]: (dispatch) => ({
       repeat() {
         return dispatch<ActionRepeat>({
+          payload: undefined,
           type: TypeAction.Repeat,
-          payload: undefined
         })
-      }
-    })
+      },
+    }),
+    [Options.Keys]: ['repeat'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Repeat,
   },
   {
-    [Options.Type]: TypeAction.Option,
-    [Options.Dependencies]: [TypeAction.Choices],
-    [Options.Keys]: ['option'],
-    [Options.Once]: false,
-    [Options.Reducer]: fluentReducer,
     [Options.Conflicts]: [TypeAction.Default],
+    [Options.Dependencies]: [TypeAction.Choices],
     [Options.Interface]: (dispatch, _, { options }) => ({
       option(value: string) {
         assert.option(value, options)
 
         return dispatch<ActionOption>({
-          type: TypeAction.Option,
           payload: {
-            name: value
-          }
+            name: value,
+          },
+          type: TypeAction.Option,
         })
-      }
-    })
-  },
-  {
-    [Options.Type]: TypeAction.Variable,
-    [Options.Dependencies]: [TypeAction.Choices],
-    [Options.Keys]: ['variable'],
+      },
+    }),
+    [Options.Keys]: ['option'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Option,
+  },
+  {
     [Options.Conflicts]: [TypeAction.Default],
+    [Options.Dependencies]: [TypeAction.Choices],
     [Options.Interface]: (dispatch, _, { variables }) => ({
       variable(value: string) {
         assert.variable(value, variables)
 
         return dispatch<ActionVariable>({
+          payload: value,
           type: TypeAction.Variable,
-          payload: value
         })
-      }
-    })
+      },
+    }),
+    [Options.Keys]: ['variable'],
+    [Options.Once]: false,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Variable,
   },
   {
-    [Options.Type]: TypeAction.Default,
     [Options.Dependencies]: [TypeAction.Choices],
-    [Options.Keys]: ['default'],
-    [Options.Once]: true,
-    [Options.Reducer]: fluentReducer,
     [Options.Enabled]: (log) =>
       some(
         log,
-        (action) =>
-          action.type === TypeAction.Option ||
-          action.type === TypeAction.Variable
+        (action) => action.type === TypeAction.Option || action.type === TypeAction.Variable,
       ),
     [Options.Interface]: (dispatch, _, { choices, repeat }) => ({
       default(value: string | string[]) {
         assert.inputChoiceDefault(value, choices, repeat)
 
         return dispatch<ActionDefault>({
+          payload: isArray(value) ? uniq(value) : value,
           type: TypeAction.Default,
-          payload: isArray(value) ? uniq(value) : value
         })
-      }
-    })
-  }
+      },
+    }),
+    [Options.Keys]: ['default'],
+    [Options.Once]: true,
+    [Options.Reducer]: fluentReducer,
+    [Options.Type]: TypeAction.Default,
+  },
 ])
