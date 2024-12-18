@@ -36,13 +36,13 @@ export const placeholderInputHelpGroup: FluentInterface<
     .description('Help')
     .input(placeholderInputHelpBoolean)
     .reducer(async (values, properties): Promise<boolean | undefined> => {
-      if (values[PLACEHOLDER_REFERENCES.HELP_BOOLEAN]) {
+      if (values[PLACEHOLDER_REFERENCES.BOOLEAN]) {
         await help(properties)
         await properties.context.exit()
 
         return
       } else {
-        return values[PLACEHOLDER_REFERENCES.HELP_BOOLEAN]
+        return values[PLACEHOLDER_REFERENCES.BOOLEAN]
       }
     }),
 )

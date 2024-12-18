@@ -164,8 +164,8 @@ export type LookupValues<T extends CommandEmpty | InputGroupEmpty> = T extends C
     : never
 
 export enum PLACEHOLDER_REFERENCES {
-  COMMAND = '@escapace/cli/placeholder-command',
-  HELP_BOOLEAN = '@escapace/cli/placeholder-help-boolean',
-  INPUT = '@escapace/cli/placeholder-input',
-  NAME = 'placeholder',
+  BOOLEAN = '@escapace/cli/placeholder-help-boolean',
+  COMMAND = '@escapace/cli/placeholder-help-command',
+  INPUT = '@escapace/cli/placeholder-help-input',
+  NAME = '@escapace/cli/placeholder-help-name',
 }

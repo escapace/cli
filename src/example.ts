@@ -112,6 +112,10 @@ export const tilt = command()
   .description('Knoll knoll koala for the banknote lookout of the dybbuk outlook and trekked.')
   .input(drown)
 
+const swash = command().reference('SWASH').name('swash').description('Lorem Ipsum').input(grant)
+
+const rise = command().reference('RISE').name('rise').description('Lorem Ipsum').subcommand(swash)
+
 export const sharpie = command()
   .reference('SHARPIE')
   .name('sharpie')
@@ -119,6 +123,7 @@ export const sharpie = command()
   .description('Blind blind bodice for the submit oboe of the club snob and abbot')
   .subcommand(tilt)
   .subcommand(purge)
+  .subcommand(rise)
   .reducer((abc) => {
     console.log('Reducer:', JSON.stringify(abc.value, null, '  '))
     // if (abc.reference === 'TILT') {

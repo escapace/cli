@@ -19,7 +19,7 @@ export const placeholderInputHelpBoolean: FluentInterface<
         InputBooleanActionOption<'--help', undefined>,
         InputBooleanActionOption<'-h', undefined>,
         InputBooleanActionDescription,
-        InputBooleanActionReference<PLACEHOLDER_REFERENCES.HELP_BOOLEAN>,
+        InputBooleanActionReference<PLACEHOLDER_REFERENCES.BOOLEAN>,
       ]
     >,
     [
@@ -27,12 +27,12 @@ export const placeholderInputHelpBoolean: FluentInterface<
       InputBooleanActionOption<'--help', undefined>,
       InputBooleanActionOption<'-h', undefined>,
       InputBooleanActionDescription,
-      InputBooleanActionReference<PLACEHOLDER_REFERENCES.HELP_BOOLEAN>,
+      InputBooleanActionReference<PLACEHOLDER_REFERENCES.BOOLEAN>,
     ]
   >
 > = extract(
   boolean()
-    .reference(PLACEHOLDER_REFERENCES.HELP_BOOLEAN)
+    .reference(PLACEHOLDER_REFERENCES.BOOLEAN)
     .description('Prints the synopsis and a list of all available commands.')
     .option('-h')
     .option('--help')
