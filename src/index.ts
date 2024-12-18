@@ -19,6 +19,8 @@ export type * from './command/types'
 export type * from './input/boolean/types'
 export type * from './input/choice/types'
 export type * from './input/count/types'
+export type * from './input/group/types'
+export type * from './input/string/types'
 
 import { noop } from 'lodash-es'
 import { composeFactory } from './compose/compose-factory'

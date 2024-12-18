@@ -5,23 +5,11 @@ import type $ from '@escapace/typelevel'
 import type { InputBoolean } from './input/boolean/types'
 import type { InputChoice } from './input/choice/types'
 import type { InputCount } from './input/count/types'
-import type {
-  InputGroup,
-  InputGroupEmpty,
-  LookupValues as InputGroupLookupValues,
-} from './input/group/types'
+import type { InputGroup, InputGroupEmpty, InputGroupValuesLookup } from './input/group/types'
 
-import type {
-  InputString,
-  InputStringEmpty,
-  InputStringValuesLookup as InputStringLookupValues,
-} from './input/string/types'
+import type { InputString } from './input/string/types'
 
-import type {
-  Command,
-  CommandEmpty,
-  CommandValuesLookup as CommandLookupValues,
-} from './command/types'
+import type { Command, CommandEmpty, CommandLookupValues } from './command/types'
 
 import type { Spec as Specification } from 'arg'
 export type { Spec as Specification, Handler as SpecificationHandler } from 'arg'
@@ -169,14 +157,11 @@ export interface HelpOptions {
   width: number
 }
 
-export type LookupValues<T extends CommandEmpty | InputGroupEmpty | InputStringEmpty> =
-  T extends CommandEmpty
-    ? CommandLookupValues<T>
-    : T extends InputGroupEmpty
-      ? InputGroupLookupValues<T>
-      : T extends InputStringEmpty
-        ? InputStringLookupValues<T>
-        : never
+export type LookupValues<T extends CommandEmpty | InputGroupEmpty> = T extends CommandEmpty
+  ? CommandLookupValues<T>
+  : T extends InputGroupEmpty
+    ? InputGroupValuesLookup<T>
+    : never
 
 export enum PLACEHOLDER_REFERENCES {
   COMMAND = '@escapace/cli/placeholder-command',

@@ -26,38 +26,43 @@ export declare const INPUT_GROUP_INTERFACE: unique symbol
 export declare const INPUT_GROUP_SPECIFICATION: unique symbol
 export declare const INPUT_GROUP_REDUCER: unique symbol
 
-export enum TypeAction {
+export enum InputGroupTypeAction {
   Description,
   Input,
   Reducer,
   Reference,
 }
 
-export interface ActionReference<T extends Reference = Reference> {
+export interface InputGroupActionReference<T extends Reference = Reference> {
   payload: T
-  type: TypeAction.Reference
+  type: InputGroupTypeAction.Reference
 }
 
-export interface ActionDescription {
+export interface InputGroupActionDescription {
   payload: string
-  type: TypeAction.Description
+  type: InputGroupTypeAction.Description
 }
 
-export interface ActionReducer<T = unknown> {
-  payload: GenericInputGroupReducer<T>
-  type: TypeAction.Reducer
+export interface InputGroupActionReducer<T = unknown> {
+  payload: InputGroupReducerGeneric<T>
+  type: InputGroupTypeAction.Reducer
 }
 
-export interface ActionInput<T extends Input = Input> {
+export interface InputGroupActionInput<T extends Input = Input> {
   payload: T
-  type: TypeAction.Input
+  type: InputGroupTypeAction.Input
 }
 
-export type Actions = Array<ActionDescription | ActionInput | ActionReducer | ActionReference>
+export type InputGroupActions = Array<
+  | InputGroupActionDescription
+  | InputGroupActionInput
+  | InputGroupActionReducer
+  | InputGroupActionReference
+>
 
-type InterfaceDescription<T extends Model<State, Actions>> = (
+type InterfaceDescription<T extends Model<InputGroupState, InputGroupActions>> = (
   description: string,
-) => Next<Settings, T, ActionDescription>
+) => Next<InputGroupSettings, T, InputGroupActionDescription>
 
 type InterfaceInputValues<
   T extends Reference | undefined,
@@ -71,7 +76,7 @@ type InterfaceInputValues<
   >
 >
 
-type InterfaceInput<T extends Model<State, Actions>> = <
+type InterfaceInput<T extends Model<InputGroupState, InputGroupActions>> = <
   U extends Input,
   A extends Input[typeof SYMBOL_STATE] = CastActionPayloadInputState<T['log']>,
   B extends Input[typeof SYMBOL_STATE] = U[typeof SYMBOL_STATE],
@@ -80,103 +85,109 @@ type InterfaceInput<T extends Model<State, Actions>> = <
 ) => $.If<
   InterfaceInputValues<T['state']['reference'], A, B>,
   unknown,
-  Next<Settings, T, ActionInput<U>>
+  Next<InputGroupSettings, T, InputGroupActionInput<U>>
 >
 
-type InterfaceReducer<T extends Model<State, Actions>> = <U>(
+type InterfaceReducer<T extends Model<InputGroupState, InputGroupActions>> = <U>(
   reducer: InputGroupReducer<U, T>,
-) => Next<Settings, T, ActionReducer<U>>
+) => Next<InputGroupSettings, T, InputGroupActionReducer<U>>
 
-type InterfaceReference<T extends Model<State, Actions>> = <U extends Reference>(
+type InterfaceReference<T extends Model<InputGroupState, InputGroupActions>> = <
+  U extends Reference,
+>(
   reference: U,
-) => Next<Settings, T, ActionReference<U>>
+) => Next<InputGroupSettings, T, InputGroupActionReference<U>>
 
-interface Interface<T extends Model<State, Actions>> extends FluentInterface<T> {
+interface Interface<T extends Model<InputGroupState, InputGroupActions>>
+  extends FluentInterface<T> {
   description: InterfaceDescription<T>
   input: InterfaceInput<T>
   reducer: InterfaceReducer<T>
   reference: InterfaceReference<T>
 }
 
-export interface Settings {
+export interface InputGroupSettings {
   [Options.InitialState]: InitialState
   [Options.Interface]: typeof INPUT_GROUP_INTERFACE
   [Options.Reducer]: typeof INPUT_GROUP_REDUCER
   [Options.Specification]: typeof INPUT_GROUP_SPECIFICATION
-  [Options.State]: State
+  [Options.State]: InputGroupState
 }
 
-export interface State extends StateShared {
+export interface InputGroupState extends StateShared {
   inputs: Input[]
-  reducer: GenericInputGroupReducer
+  reducer: InputGroupReducerGeneric
   type: typeof SYMBOL_INPUT_GROUP
 }
 
 interface InitialState extends StateSharedInitial {
   inputs: []
-  reducer: GenericInputGroupReducer
+  reducer: InputGroupReducerGeneric
   type: typeof SYMBOL_INPUT_GROUP
 }
 
-interface Specification<_ extends Model<State>> {
-  [TypeAction.Reference]: {
+interface Specification<_ extends Model<InputGroupState>> {
+  [InputGroupTypeAction.Reference]: {
     [Options.Conflicts]: never
     [Options.Dependencies]: never
     [Options.Enabled]: $.True
     [Options.Keys]: 'reference'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Reference
+    [Options.Type]: typeof InputGroupTypeAction.Reference
   }
 
-  [TypeAction.Description]: {
+  [InputGroupTypeAction.Description]: {
     [Options.Conflicts]: never
-    [Options.Dependencies]: typeof TypeAction.Reference
+    [Options.Dependencies]: typeof InputGroupTypeAction.Reference
     [Options.Enabled]: $.True
     [Options.Keys]: 'description'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Description
+    [Options.Type]: typeof InputGroupTypeAction.Description
   }
 
-  [TypeAction.Input]: {
-    [Options.Conflicts]: typeof TypeAction.Reducer
-    [Options.Dependencies]: typeof TypeAction.Description
+  [InputGroupTypeAction.Input]: {
+    [Options.Conflicts]: typeof InputGroupTypeAction.Reducer
+    [Options.Dependencies]: typeof InputGroupTypeAction.Description
     [Options.Enabled]: $.True
     [Options.Keys]: 'input'
     [Options.Once]: $.False
-    [Options.Type]: typeof TypeAction.Input
+    [Options.Type]: typeof InputGroupTypeAction.Input
   }
 
-  [TypeAction.Reducer]: {
+  [InputGroupTypeAction.Reducer]: {
     [Options.Conflicts]: never
-    [Options.Dependencies]: typeof TypeAction.Input
+    [Options.Dependencies]: typeof InputGroupTypeAction.Input
     [Options.Enabled]: $.True
     [Options.Keys]: 'reducer'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Reducer
+    [Options.Type]: typeof InputGroupTypeAction.Reducer
   }
 }
 
 declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
-    [INPUT_GROUP_INTERFACE]: Interface<$.Cast<A, Model<State>>>
+    [INPUT_GROUP_INTERFACE]: Interface<$.Cast<A, Model<InputGroupState>>>
     [INPUT_GROUP_REDUCER]: Reducer<$.Cast<A, Action[]>>
-    [INPUT_GROUP_SPECIFICATION]: Specification<$.Cast<A, Model<State>>>
+    [INPUT_GROUP_SPECIFICATION]: Specification<$.Cast<A, Model<InputGroupState>>>
   }
 }
 
-type ActionPayloadInput<T extends Action[]> = Payload<$.Values<T>, TypeAction.Input>
-type ActionPayloadReducer<T extends Action[]> = Payload<$.Values<T>, TypeAction.Reducer>
-type ActionPayloadReference<T extends Action[]> = Payload<$.Values<T>, TypeAction.Reference>
+type ActionPayloadInput<T extends Action[]> = Payload<$.Values<T>, InputGroupTypeAction.Input>
+type ActionPayloadReducer<T extends Action[]> = Payload<$.Values<T>, InputGroupTypeAction.Reducer>
+type ActionPayloadReference<T extends Action[]> = Payload<
+  $.Values<T>,
+  InputGroupTypeAction.Reference
+>
 type CastActionPayloadInputState<T extends Action[]> = $.Cast<
   ActionPayloadInput<T>,
   Input
 >[typeof SYMBOL_STATE]
 
 interface Reducer<T extends Action[]> {
-  [TypeAction.Description]: {
+  [InputGroupTypeAction.Description]: {
     description: string
   }
-  [TypeAction.Input]: {
+  [InputGroupTypeAction.Input]: {
     inputs: Array<$.Cast<ActionPayloadInput<T>, Input>>
     isEmpty: false
     options: Array<
@@ -186,7 +197,7 @@ interface Reducer<T extends Action[]> {
         ? X
         : never
     >
-    reducer: GenericInputGroupReducer<Values<T>>
+    reducer: InputGroupReducerGeneric<Values<T>>
     variables: Array<
       CastActionPayloadInputState<T> extends {
         variables: Array<infer X>
@@ -195,21 +206,22 @@ interface Reducer<T extends Action[]> {
         : never
     >
   }
-  [TypeAction.Reducer]: {
+  [InputGroupTypeAction.Reducer]: {
     reducer: ActionPayloadReducer<T>
   }
-  [TypeAction.Reference]: {
+  [InputGroupTypeAction.Reference]: {
     reference: ActionPayloadReference<T>
   }
 }
 
-export interface InputGroupState extends State {
+export interface InputGroupStateInitial extends InputGroupState {
   isEmpty: false
 }
 
-export interface InputGroup extends FluentInterface<Model<InputGroupState, Actions>> {}
+export interface InputGroup
+  extends FluentInterface<Model<InputGroupStateInitial, InputGroupActions>> {}
 
-type Values<T extends Actions, U = CastActionPayloadInputState<T>> = $.Cast<
+type Values<T extends InputGroupActions, U = CastActionPayloadInputState<T>> = $.Cast<
   UnionMerge<
     U extends { reducer: infer Y; reference: infer X }
       ? Record<$.Cast<X, Reference>, Unwrap<Y>>
@@ -218,25 +230,29 @@ type Values<T extends Actions, U = CastActionPayloadInputState<T>> = $.Cast<
   object
 >
 
-interface ModelInputGroup {
+interface InputGroupModel {
   readonly log: InputGroup[typeof SYMBOL_LOG]
   readonly state: InputGroup[typeof SYMBOL_STATE]
 }
 
-export interface PropertiesInputGroup extends InputPropertiesShared {
-  readonly model: ModelInputGroup
+export interface InputGroupProperties extends InputPropertiesShared {
+  readonly model: InputGroupModel
 }
 
-export type GenericInputGroupReducer<T = unknown, U = any> = (
+export type InputGroupReducerGeneric<T = unknown, U = any> = (
   values: U,
-  properties: PropertiesInputGroup,
+  properties: InputGroupProperties,
 ) => T
 
-type InputGroupReducer<T = unknown, U extends Model<State, Actions> = Model<State, Actions>> = (
+type InputGroupReducer<
+  T = unknown,
+  U extends Model<InputGroupState, InputGroupActions> = Model<InputGroupState, InputGroupActions>,
+> = (
   values: SimplifyDeep<Values<U['log']>>,
   properties: { model: { log: U['log']; state: U['state'] } } & InputPropertiesShared,
 ) => Promise<T> | T
 
-export interface InputGroupEmpty extends FluentInterface<Model<State, Actions>> {}
+export interface InputGroupEmpty
+  extends FluentInterface<Model<InputGroupState, InputGroupActions>> {}
 
-export type LookupValues<T extends InputGroupEmpty> = Values<LookupModel<T>['log']>
+export type InputGroupValuesLookup<T extends InputGroupEmpty> = Values<LookupModel<T>['log']>

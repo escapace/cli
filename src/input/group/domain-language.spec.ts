@@ -6,7 +6,7 @@ import { boolean } from '../boolean/domain-language'
 import { count } from '../count/domain-language'
 import { group } from './domain-language'
 import { reducer } from './reducer'
-import { type PropertiesInputGroup, TypeAction } from './types'
+import { type InputGroupProperties, InputGroupTypeAction } from './types'
 
 describe('input/group', () => {
   it('domain-language', () => {
@@ -22,7 +22,7 @@ describe('input/group', () => {
     assert.deepEqual(log(test0), [
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: InputGroupTypeAction.Reference,
       },
     ])
 
@@ -44,11 +44,11 @@ describe('input/group', () => {
     assert.deepEqual(log(test1), [
       {
         payload: 'description',
-        type: TypeAction.Description,
+        type: InputGroupTypeAction.Description,
       },
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: InputGroupTypeAction.Reference,
       },
     ])
 
@@ -78,19 +78,19 @@ describe('input/group', () => {
     assert.deepEqual(log(test2), [
       {
         payload: inputB,
-        type: TypeAction.Input,
+        type: InputGroupTypeAction.Input,
       },
       {
         payload: inputA,
-        type: TypeAction.Input,
+        type: InputGroupTypeAction.Input,
       },
       {
         payload: 'description',
-        type: TypeAction.Description,
+        type: InputGroupTypeAction.Description,
       },
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: InputGroupTypeAction.Reference,
       },
     ])
 
@@ -105,7 +105,7 @@ describe('input/group', () => {
       variables: [],
     })
 
-    const function_ = (value: LookupValues<typeof test2>, _: PropertiesInputGroup) => value
+    const function_ = (value: LookupValues<typeof test2>, _: InputGroupProperties) => value
 
     const test3 = test2.reducer(function_)
 
@@ -114,23 +114,23 @@ describe('input/group', () => {
     assert.deepEqual(log(test3), [
       {
         payload: function_,
-        type: TypeAction.Reducer,
+        type: InputGroupTypeAction.Reducer,
       },
       {
         payload: inputB,
-        type: TypeAction.Input,
+        type: InputGroupTypeAction.Input,
       },
       {
         payload: inputA,
-        type: TypeAction.Input,
+        type: InputGroupTypeAction.Input,
       },
       {
         payload: 'description',
-        type: TypeAction.Description,
+        type: InputGroupTypeAction.Description,
       },
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: InputGroupTypeAction.Reference,
       },
     ])
 

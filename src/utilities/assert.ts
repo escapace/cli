@@ -25,7 +25,7 @@ import {
   CommandTypeAction,
 } from '../command/types'
 
-import type { Actions as InputGroupActions, State as InputGroupState } from '../input/group/types'
+import type { InputGroupActions, InputGroupState } from '../input/group/types'
 
 import {
   type Input,

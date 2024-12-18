@@ -2,7 +2,7 @@ import { compact, intersection, keys } from 'lodash-es'
 import type { InputBooleanStateInitial } from '../input/boolean/types'
 import type { InputChoiceStateInitial } from '../input/choice/types'
 import type { InputCountStateInitial } from '../input/count/types'
-import type { InputGroupState } from '../input/group/types'
+import type { InputGroupStateInitial } from '../input/group/types'
 import type { InputStringStateInitial } from '../input/string/types'
 import { type GenericOption, type GenericVariable, InputType, type Match } from '../types'
 
@@ -11,7 +11,7 @@ export const getOptionsVariables = (
     | InputBooleanStateInitial
     | InputChoiceStateInitial
     | InputCountStateInitial
-    | InputGroupState
+    | InputGroupStateInitial
     | InputStringStateInitial,
   match: Match,
 ) => {

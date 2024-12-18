@@ -376,4 +376,4 @@ type CommandGenericReducer<T = unknown> = (values: any, properties: CommandPrope
 
 export interface CommandEmpty extends FluentInterface<Model<CommandState, CommandActions>> {}
 
-export type CommandValuesLookup<T extends CommandEmpty> = Values<LookupModel<T>['log']>
+export type CommandLookupValues<T extends CommandEmpty> = Values<LookupModel<T>['log']>

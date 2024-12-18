@@ -280,13 +280,13 @@ type Values<T extends Model<InputStringState, InputStringActions>> = Array<
   | ValuesVariables<$.Values<T['state']['variables']>>
 >
 
-interface ModelInputString {
+interface InputStringModel {
   readonly log: InputString[typeof SYMBOL_LOG]
   readonly state: InputString[typeof SYMBOL_STATE]
 }
 
 export interface InputStringProperties extends InputPropertiesShared {
-  readonly model: ModelInputString
+  readonly model: InputStringModel
 }
 
 type InputStringReducerGeneric<T = unknown, U = any> = (

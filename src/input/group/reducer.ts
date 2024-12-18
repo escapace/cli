@@ -3,11 +3,11 @@
 import { SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
 import { assign, filter, includes, map, omit } from 'lodash-es'
 import { type GenericOption, type GenericVariable, InputType, type Reference } from './../../types'
-import type { GenericInputGroupReducer, PropertiesInputGroup } from './types'
+import type { InputGroupReducerGeneric, InputGroupProperties } from './types'
 
 export const wrap = async (
   values: Array<GenericOption<any> | GenericVariable<any>>,
-  properties: PropertiesInputGroup,
+  properties: InputGroupProperties,
 ): Promise<Record<Reference, any>> =>
   // eslint-disable-next-line typescript/no-unsafe-return
   assign(
@@ -33,7 +33,7 @@ export const wrap = async (
     )),
   )
 
-export const reducer: GenericInputGroupReducer = async (
+export const reducer: InputGroupReducerGeneric = async (
   values,
   properties,
 ): Promise<Record<Reference, any>> => await wrap(values, properties)

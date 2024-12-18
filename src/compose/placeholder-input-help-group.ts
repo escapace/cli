@@ -2,11 +2,11 @@ import type { FluentInterface, Model, Reducer } from '@escapace/fluent'
 import { help } from '../help/help'
 import { group } from '../input/group/domain-language'
 import type {
-  ActionDescription,
-  ActionInput,
-  ActionReducer,
-  ActionReference,
-  Settings,
+  InputGroupActionDescription,
+  InputGroupActionInput,
+  InputGroupActionReducer,
+  InputGroupActionReference,
+  InputGroupSettings,
 } from '../input/group/types'
 import { PLACEHOLDER_REFERENCES } from '../types'
 import { extract } from '../utilities/extract'
@@ -15,19 +15,19 @@ import { placeholderInputHelpBoolean } from './placeholder-input-boolean'
 export const placeholderInputHelpGroup: FluentInterface<
   Model<
     Reducer<
-      Settings,
+      InputGroupSettings,
       [
-        ActionReducer<boolean | undefined>,
-        ActionInput<typeof placeholderInputHelpBoolean>,
-        ActionDescription,
-        ActionReference<PLACEHOLDER_REFERENCES.INPUT>,
+        InputGroupActionReducer<boolean | undefined>,
+        InputGroupActionInput<typeof placeholderInputHelpBoolean>,
+        InputGroupActionDescription,
+        InputGroupActionReference<PLACEHOLDER_REFERENCES.INPUT>,
       ]
     >,
     [
-      ActionReducer<boolean | undefined>,
-      ActionInput<typeof placeholderInputHelpBoolean>,
-      ActionDescription,
-      ActionReference<PLACEHOLDER_REFERENCES.INPUT>,
+      InputGroupActionReducer<boolean | undefined>,
+      InputGroupActionInput<typeof placeholderInputHelpBoolean>,
+      InputGroupActionDescription,
+      InputGroupActionReference<PLACEHOLDER_REFERENCES.INPUT>,
     ]
   >
 > = extract(

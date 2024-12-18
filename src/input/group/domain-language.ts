@@ -6,28 +6,33 @@ import { assert } from '../../utilities/assert'
 import { wrap, reducer as reducerDefault } from './reducer'
 import { extract } from '../../utilities/extract'
 import {
-  type ActionDescription,
-  type GenericInputGroupReducer,
-  type ActionReducer,
-  type ActionInput,
-  type ActionReference,
-  type Actions,
-  type Settings,
-  type State,
-  TypeAction,
+  type InputGroupActionDescription,
+  type InputGroupReducerGeneric,
+  type InputGroupActionReducer,
+  type InputGroupActionInput,
+  type InputGroupActionReference,
+  type InputGroupActions,
+  type InputGroupSettings,
+  type InputGroupState,
+  InputGroupTypeAction,
 } from './types'
 
-const fluentReducer = (log: Actions): State => {
+const fluentReducer = (log: InputGroupActions): InputGroupState => {
   const reference = (
-    find(log, (action) => action.type === TypeAction.Reference) as ActionReference | undefined
+    find(log, (action) => action.type === InputGroupTypeAction.Reference) as
+      | InputGroupActionReference
+      | undefined
   )?.payload
 
-  const description = find(log, (action) => action.type === TypeAction.Description)?.payload
+  const description = find(
+    log,
+    (action) => action.type === InputGroupTypeAction.Description,
+  )?.payload
 
   const rlog = reverse([...log])
 
   const inputs = map(
-    filter(rlog, ({ type }) => type === TypeAction.Input) as ActionInput[],
+    filter(rlog, ({ type }) => type === InputGroupTypeAction.Input) as InputGroupActionInput[],
     (value) => value.payload,
   )
 
@@ -37,10 +42,12 @@ const fluentReducer = (log: Actions): State => {
   const variables = flatMap(inputs, (value) => value[SYMBOL_STATE].variables)
 
   const reducerMaybe = (
-    find(log, (action) => action.type === TypeAction.Reducer) as ActionReducer | undefined
+    find(log, (action) => action.type === InputGroupTypeAction.Reducer) as
+      | InputGroupActionReducer
+      | undefined
   )?.payload
 
-  const reducer: GenericInputGroupReducer =
+  const reducer: InputGroupReducerGeneric =
     reducerMaybe === undefined
       ? reducerDefault
       : async (values, properties) => reducerMaybe(await wrap(values, properties), properties)
@@ -57,75 +64,75 @@ const fluentReducer = (log: Actions): State => {
   }
 }
 
-export const group = builder<Settings>([
+export const group = builder<InputGroupSettings>([
   {
     [Options.Interface]: (dispatch) => ({
       reference(reference: Reference) {
         assert.reference(reference)
 
-        return dispatch<ActionReference>({
+        return dispatch<InputGroupActionReference>({
           payload: reference,
-          type: TypeAction.Reference,
+          type: InputGroupTypeAction.Reference,
         })
       },
     }),
     [Options.Keys]: ['reference'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Reference,
+    [Options.Type]: InputGroupTypeAction.Reference,
   },
   {
-    [Options.Dependencies]: [TypeAction.Reference],
+    [Options.Dependencies]: [InputGroupTypeAction.Reference],
     [Options.Interface]: (dispatch) => ({
       description(description: string) {
         assert.string(description)
 
-        return dispatch<ActionDescription>({
+        return dispatch<InputGroupActionDescription>({
           payload: description,
-          type: TypeAction.Description,
+          type: InputGroupTypeAction.Description,
         })
       },
     }),
     [Options.Keys]: ['description'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Description,
+    [Options.Type]: InputGroupTypeAction.Description,
   },
   {
-    [Options.Conflicts]: [TypeAction.Reducer],
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Conflicts]: [InputGroupTypeAction.Reducer],
+    [Options.Dependencies]: [InputGroupTypeAction.Description],
     [Options.Interface]: (dispatch, log, state) => ({
       input(value: Input) {
         assert.input(value, { log, state })
 
         const payload = extract(value)
 
-        return dispatch<ActionInput>({
+        return dispatch<InputGroupActionInput>({
           payload,
-          type: TypeAction.Input,
+          type: InputGroupTypeAction.Input,
         })
       },
     }),
     [Options.Keys]: ['input'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Input,
+    [Options.Type]: InputGroupTypeAction.Input,
   },
   {
     [Options.Enabled]: (_, state) => !state.isEmpty,
     [Options.Interface]: (dispatch) => ({
-      reducer(value: GenericInputGroupReducer) {
+      reducer(value: InputGroupReducerGeneric) {
         assert.function(value)
 
-        return dispatch<ActionReducer>({
+        return dispatch<InputGroupActionReducer>({
           payload: value,
-          type: TypeAction.Reducer,
+          type: InputGroupTypeAction.Reducer,
         })
       },
     }),
     [Options.Keys]: ['reducer'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Reducer,
+    [Options.Type]: InputGroupTypeAction.Reducer,
   },
 ])
