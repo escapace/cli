@@ -20,6 +20,7 @@ import type {
   UnionMerge,
   Unwrap,
 } from '../../types'
+import type { SimplifyDeep } from 'type-fest'
 
 export declare const INPUT_GROUP_INTERFACE: unique symbol
 export declare const INPUT_GROUP_SPECIFICATION: unique symbol
@@ -232,7 +233,7 @@ export type GenericInputGroupReducer<T = unknown, U = any> = (
 ) => T
 
 type InputGroupReducer<T = unknown, U extends Model<State, Actions> = Model<State, Actions>> = (
-  values: Values<U['log']>,
+  values: SimplifyDeep<Values<U['log']>>,
   properties: { model: { log: U['log']; state: U['state'] } } & PropertiesInputShared,
 ) => Promise<T> | T
 
