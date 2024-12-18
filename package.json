@@ -26,7 +26,7 @@
     "esroll": "0.3.1",
     "jsdom": "25.0.1",
     "knip": "5.41.0",
-    "lefthook": "1.9.2",
+    "lefthook": "1.9.3",
     "prettier": "3.4.2",
     "prettier-config-escapace": "1.2.1",
     "syncpack": "13.0.0",
@@ -68,7 +68,7 @@
   "homepage": "https://github.com/escapace/cli#readme",
   "license": "MPL-2.0",
   "peerDependencies": {
-    "@escapace/fluent": ">=4.3.1",
+    "@escapace/fluent": ">=4.3.2",
     "@escapace/typelevel": ">=2.0.2",
     "type-fest": ">=4.30.2"
   },
