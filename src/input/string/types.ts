@@ -13,10 +13,10 @@ import type {
   DeNormalizedStringValue,
   InputType,
   LookupModel,
-  PropertiesInputShared,
+  InputPropertiesShared,
   Reference,
-  SharedInitialState,
-  SharedState,
+  StateSharedInitial,
+  StateShared,
   SYMBOL_INPUT_STRING,
 } from '../../types'
 
@@ -109,14 +109,14 @@ export interface Settings {
   [Options.State]: State
 }
 
-export interface State extends SharedState {
+export interface State extends StateShared {
   default: string | string[] | undefined
   reducer: GenericInputStringReducer
   repeat: boolean
   type: typeof SYMBOL_INPUT_STRING
 }
 
-interface InitialState extends SharedInitialState {
+interface InitialState extends StateSharedInitial {
   default: undefined
   reducer: GenericInputStringReducer<string | undefined>
   repeat: false
@@ -264,7 +264,7 @@ interface ModelInputString {
   readonly state: InputString[typeof SYMBOL_STATE]
 }
 
-export interface PropertiesInputString extends PropertiesInputShared {
+export interface PropertiesInputString extends InputPropertiesShared {
   readonly model: ModelInputString
 }
 

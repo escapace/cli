@@ -1,13 +1,13 @@
 import type { FluentInterface, Model, Reducer } from '@escapace/fluent'
 import { command } from '../command/domain-language'
 import type {
-  ActionDescription,
-  ActionInput,
-  ActionName,
-  ActionReducer,
-  ActionReference,
+  CommandActionDescription,
+  CommandActionInput,
+  CommandActionName,
+  CommandActionReducer,
+  CommandActionReference,
   Command,
-  Settings,
+  CommandSettings,
 } from '../command/types'
 import { help } from '../help/help'
 import { PLACEHOLDER_REFERENCES } from '../types'
@@ -19,21 +19,21 @@ export const placeholderCommandHelp = (
 ): FluentInterface<
   Model<
     Reducer<
-      Settings,
+      CommandSettings,
       [
-        ActionReducer<undefined>,
-        ActionInput<typeof placeholderInputHelpBoolean>,
-        ActionDescription,
-        ActionName<PLACEHOLDER_REFERENCES.NAME>,
-        ActionReference<PLACEHOLDER_REFERENCES.COMMAND>,
+        CommandActionReducer<undefined>,
+        CommandActionInput<typeof placeholderInputHelpBoolean>,
+        CommandActionDescription,
+        CommandActionName<PLACEHOLDER_REFERENCES.NAME>,
+        CommandActionReference<PLACEHOLDER_REFERENCES.COMMAND>,
       ]
     >,
     [
-      ActionReducer<undefined>,
-      ActionInput<typeof placeholderInputHelpBoolean>,
-      ActionDescription,
-      ActionName<PLACEHOLDER_REFERENCES.NAME>,
-      ActionReference<PLACEHOLDER_REFERENCES.COMMAND>,
+      CommandActionReducer<undefined>,
+      CommandActionInput<typeof placeholderInputHelpBoolean>,
+      CommandActionDescription,
+      CommandActionName<PLACEHOLDER_REFERENCES.NAME>,
+      CommandActionReference<PLACEHOLDER_REFERENCES.COMMAND>,
     ]
   >
 > =>

@@ -17,7 +17,11 @@ import type {
   LookupValues as InputStringLookupValues,
 } from './input/string/types'
 
-import type { Command, CommandEmpty, LookupValues as CommandLookupValues } from './command/types'
+import type {
+  Command,
+  CommandEmpty,
+  CommandValuesLookup as CommandLookupValues,
+} from './command/types'
 
 import type { Spec as Specification } from 'arg'
 export type { Spec as Specification, Handler as SpecificationHandler } from 'arg'
@@ -43,7 +47,7 @@ export enum InputType {
   Variable,
 }
 
-export interface SharedState {
+export interface StateShared {
   description: string | undefined
   isEmpty: boolean
   options: string[]
@@ -51,7 +55,7 @@ export interface SharedState {
   variables: string[]
 }
 
-export interface SharedInitialState {
+export interface StateSharedInitial {
   description: undefined
   isEmpty: true
   options: []
@@ -134,7 +138,11 @@ export interface PropertiesShared {
   readonly settings: Settings
 }
 
-export interface PropertiesInputShared extends PropertiesShared {}
+export interface InputPropertiesShared extends PropertiesShared {}
+
+export interface InputProperties extends PropertiesShared {
+  readonly model: ModelInput
+}
 
 export interface Intent {
   _: string[]
@@ -147,10 +155,6 @@ export interface Match {
   commands: Command[]
   options: Record<string, boolean | number | string | number[] | string[]>
   variables: Record<string, string | undefined>
-}
-
-export interface PropertiesInput extends PropertiesShared {
-  readonly model: ModelInput
 }
 
 export type Compose = <T extends Command>(

@@ -14,7 +14,7 @@ import {
   PLACEHOLDER_REFERENCES,
   type Compose,
   type Context,
-  type PropertiesInput,
+  type InputProperties,
   type Settings,
 } from '../types'
 import { assert } from '../utilities/assert'
@@ -100,7 +100,7 @@ export const composeFactory =
 
             const values = getOptionsVariables(state, match)
 
-            const properties: PropertiesInput = {
+            const properties: InputProperties = {
               commands: match.commands,
               context,
               model: {

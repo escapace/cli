@@ -11,10 +11,10 @@ import type {
 import type $ from '@escapace/typelevel'
 import type {
   DeNormalizedStringValue,
-  PropertiesInputShared,
+  InputPropertiesShared,
   Reference,
-  SharedInitialState,
-  SharedState,
+  StateSharedInitial,
+  StateShared,
   SYMBOL_INPUT_CHOICE,
 } from '../../types'
 
@@ -125,7 +125,7 @@ export interface Settings {
   [Options.State]: State
 }
 
-export interface State extends SharedState {
+export interface State extends StateShared {
   choices: string[]
   default: string | string[] | undefined
   reducer: GenericInputChoiceReducer<string | string[] | undefined>
@@ -133,7 +133,7 @@ export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_CHOICE
 }
 
-interface InitialState extends SharedInitialState {
+interface InitialState extends StateSharedInitial {
   choices: []
   default: undefined
   reducer: GenericInputChoiceReducer<string | undefined>
@@ -271,7 +271,7 @@ interface ModelInputChoice {
   readonly state: InputChoice[typeof SYMBOL_STATE]
 }
 
-export interface PropertiesInputChoice extends PropertiesInputShared {
+export interface PropertiesInputChoice extends InputPropertiesShared {
   readonly model: ModelInputChoice
 }
 

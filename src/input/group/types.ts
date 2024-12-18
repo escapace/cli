@@ -12,10 +12,10 @@ import type $ from '@escapace/typelevel'
 import type {
   Input,
   LookupModel,
-  PropertiesInputShared,
+  InputPropertiesShared,
   Reference,
-  SharedInitialState,
-  SharedState,
+  StateSharedInitial,
+  StateShared,
   SYMBOL_INPUT_GROUP,
   UnionMerge,
   Unwrap,
@@ -106,13 +106,13 @@ export interface Settings {
   [Options.State]: State
 }
 
-export interface State extends SharedState {
+export interface State extends StateShared {
   inputs: Input[]
   reducer: GenericInputGroupReducer
   type: typeof SYMBOL_INPUT_GROUP
 }
 
-interface InitialState extends SharedInitialState {
+interface InitialState extends StateSharedInitial {
   inputs: []
   reducer: GenericInputGroupReducer
   type: typeof SYMBOL_INPUT_GROUP
@@ -223,7 +223,7 @@ interface ModelInputGroup {
   readonly state: InputGroup[typeof SYMBOL_STATE]
 }
 
-export interface PropertiesInputGroup extends PropertiesInputShared {
+export interface PropertiesInputGroup extends InputPropertiesShared {
   readonly model: ModelInputGroup
 }
 
@@ -234,7 +234,7 @@ export type GenericInputGroupReducer<T = unknown, U = any> = (
 
 type InputGroupReducer<T = unknown, U extends Model<State, Actions> = Model<State, Actions>> = (
   values: SimplifyDeep<Values<U['log']>>,
-  properties: { model: { log: U['log']; state: U['state'] } } & PropertiesInputShared,
+  properties: { model: { log: U['log']; state: U['state'] } } & InputPropertiesShared,
 ) => Promise<T> | T
 
 export interface InputGroupEmpty extends FluentInterface<Model<State, Actions>> {}

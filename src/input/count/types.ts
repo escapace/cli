@@ -11,10 +11,10 @@ import type {
 import type $ from '@escapace/typelevel'
 import type {
   GenericOption,
-  PropertiesInputShared,
+  InputPropertiesShared,
   Reference,
-  SharedInitialState,
-  SharedState,
+  StateSharedInitial,
+  StateShared,
   SYMBOL_INPUT_COUNT,
 } from '../../types'
 
@@ -105,14 +105,14 @@ export interface Settings {
   [Options.State]: State
 }
 
-export interface State extends SharedState {
+export interface State extends StateShared {
   default: number
   reducer: GenericInputCountReducer<number>
   table: Record<string, number>
   type: typeof SYMBOL_INPUT_COUNT
 }
 
-interface InitialState extends SharedInitialState {
+interface InitialState extends StateSharedInitial {
   default: 0
   reducer: GenericInputCountReducer<number>
   table: Record<string, number>
@@ -201,7 +201,7 @@ interface ModelInputCount {
   readonly state: InputCount[typeof SYMBOL_STATE]
 }
 
-export interface PropertiesInputCount extends PropertiesInputShared {
+export interface PropertiesInputCount extends InputPropertiesShared {
   readonly model: ModelInputCount
 }
 

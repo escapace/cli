@@ -18,10 +18,10 @@ import {
 } from 'lodash-es'
 
 import {
-  type Actions as CommandActions,
-  type ActionSubcommand as CommandActionSubcommand,
+  type CommandActions,
+  type CommandActionSubcommand,
   type Command,
-  type State as CommandState,
+  type CommandState,
   TypeAction as CommandTypeAction,
 } from '../command/types'
 

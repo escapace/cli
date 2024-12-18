@@ -6,7 +6,7 @@ import { type LookupValues, SYMBOL_COMMAND } from '../types'
 import { extract } from '../utilities/extract'
 import { command } from './domain-language'
 import { reducer } from './reducer'
-import { type PropertiesCommand, TypeAction } from './types'
+import { type CommandProperties, TypeAction } from './types'
 // import { TypeAction } from './types'
 
 describe('command', () => {
@@ -178,7 +178,7 @@ describe('command', () => {
       variables: [...state(booleanA).variables],
     })
 
-    const inputReducer = (values: LookupValues<typeof test4>, _: PropertiesCommand) => values
+    const inputReducer = (values: LookupValues<typeof test4>, _: CommandProperties) => values
 
     const test5 = test4.reducer(inputReducer)
 
@@ -284,7 +284,7 @@ describe('command', () => {
       variables: [...state(commandA).variables],
     })
 
-    const subcommandReducer = (values: LookupValues<typeof test6>, _: PropertiesCommand) => values
+    const subcommandReducer = (values: LookupValues<typeof test6>, _: CommandProperties) => values
 
     const test7 = test6.reducer(subcommandReducer)
 

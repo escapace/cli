@@ -13,10 +13,10 @@ import type {
 
 import type {
   InputType,
-  PropertiesInputShared,
+  InputPropertiesShared,
   Reference,
-  SharedInitialState,
-  SharedState,
+  StateSharedInitial,
+  StateShared,
   SYMBOL_INPUT_BOOLEAN,
 } from '../../types'
 
@@ -126,7 +126,7 @@ export interface Settings {
   [Options.State]: State
 }
 
-export interface State extends SharedState {
+export interface State extends StateShared {
   default: boolean | undefined
   reducer: GenericInputBooleanReducer<boolean | undefined>
   table: {
@@ -136,7 +136,7 @@ export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_BOOLEAN
 }
 
-interface InitialState extends SharedInitialState {
+interface InitialState extends StateSharedInitial {
   default: undefined
   reducer: GenericInputBooleanReducer<boolean | undefined>
   table: {
@@ -274,7 +274,7 @@ interface ModelInputBoolean {
   readonly state: InputBoolean[typeof SYMBOL_STATE]
 }
 
-export interface PropertiesInputBoolean extends PropertiesInputShared {
+export interface PropertiesInputBoolean extends InputPropertiesShared {
   readonly model: ModelInputBoolean
 }
 

@@ -6,29 +6,31 @@ import { extract } from '../utilities/extract'
 import { fallback } from '../utilities/fallback'
 import { reducer } from './reducer'
 import {
-  type ActionDescription,
-  type ActionInput,
-  type ActionName,
-  type ActionReducer,
-  type ActionReference,
-  type Actions,
-  type ActionSubcommand,
+  type CommandActionDescription,
+  type CommandActionInput,
+  type CommandActionName,
+  type CommandActionReducer,
+  type CommandActionReference,
+  type CommandActions,
+  type CommandActionSubcommand,
   type Command,
   type CommandReducer,
-  type Settings,
-  type State,
+  type CommandSettings,
+  type CommandState,
   TypeAction,
 } from './types'
 
-const fluentReducer = (log: Actions): State => {
+const fluentReducer = (log: CommandActions): CommandState => {
   const reference = (
-    find(log, (action) => action.type === TypeAction.Reference) as ActionReference | undefined
+    find(log, (action) => action.type === TypeAction.Reference) as
+      | CommandActionReference
+      | undefined
   )?.payload
 
   const rlog = reverse([...log])
 
   const names = map(
-    filter(rlog, (action) => action.type === TypeAction.Name) as ActionName[],
+    filter(rlog, (action) => action.type === TypeAction.Name) as CommandActionName[],
     ({ payload }) => payload,
   )
 
@@ -48,7 +50,7 @@ const fluentReducer = (log: Actions): State => {
     filter(
       rlog,
       ({ type }) => type === TypeAction.Subcommand || type === TypeAction.Input,
-    ) as Array<ActionInput | ActionSubcommand>,
+    ) as Array<CommandActionInput | CommandActionSubcommand>,
     (accumulator: { options: string[]; variables: string[] }, n) => {
       accumulator.variables = union(accumulator.variables, n.payload[SYMBOL_STATE].variables)
       accumulator.options = union(accumulator.options, n.payload[SYMBOL_STATE].options)
@@ -59,18 +61,18 @@ const fluentReducer = (log: Actions): State => {
   )
 
   const inputs = map(
-    filter(rlog, (action) => action.type === TypeAction.Input) as ActionInput[],
+    filter(rlog, (action) => action.type === TypeAction.Input) as CommandActionInput[],
     ({ payload }) => payload,
   )
 
   const commands = map(
-    filter(rlog, (action) => action.type === TypeAction.Subcommand) as ActionSubcommand[],
+    filter(rlog, (action) => action.type === TypeAction.Subcommand) as CommandActionSubcommand[],
     ({ payload }) => payload,
   )
 
   const _reducer: CommandReducer = fallback(
     reducer,
-    (find(log, (action) => action.type === TypeAction.Reducer) as ActionReducer | undefined)
+    (find(log, (action) => action.type === TypeAction.Reducer) as CommandActionReducer | undefined)
       ?.payload,
   )
 
@@ -88,13 +90,13 @@ const fluentReducer = (log: Actions): State => {
   }
 }
 
-export const command = builder<Settings>([
+export const command = builder<CommandSettings>([
   {
     [Options.Interface]: (dispatch) => ({
       reference(reference: Reference) {
         assert.reference(reference)
 
-        return dispatch<ActionReference>({
+        return dispatch<CommandActionReference>({
           payload: reference,
           type: TypeAction.Reference,
         })
@@ -112,7 +114,7 @@ export const command = builder<Settings>([
       name(name: string) {
         assert.commandName(name)
 
-        return dispatch<ActionName>({
+        return dispatch<CommandActionName>({
           payload: name,
           type: TypeAction.Name,
         })
@@ -129,7 +131,7 @@ export const command = builder<Settings>([
       description(description: string) {
         assert.string(description)
 
-        return dispatch<ActionDescription>({
+        return dispatch<CommandActionDescription>({
           payload: description,
           type: TypeAction.Description,
         })
@@ -149,7 +151,7 @@ export const command = builder<Settings>([
 
         const payload = extract(value)
 
-        return dispatch<ActionInput>({
+        return dispatch<CommandActionInput>({
           payload,
           type: TypeAction.Input,
         })
@@ -169,7 +171,7 @@ export const command = builder<Settings>([
 
         const payload = extract(value)
 
-        return dispatch<ActionSubcommand>({
+        return dispatch<CommandActionSubcommand>({
           payload,
           type: TypeAction.Subcommand,
         })
@@ -188,7 +190,7 @@ export const command = builder<Settings>([
       reducer(value: CommandReducer) {
         assert.function(value)
 
-        return dispatch<ActionReducer>({
+        return dispatch<CommandActionReducer>({
           payload: value,
           type: TypeAction.Reducer,
         })

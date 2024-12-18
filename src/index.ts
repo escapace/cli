@@ -2,7 +2,7 @@ import { noop } from 'lodash-es'
 import { composeFactory } from './compose/compose-factory'
 
 export { command } from './command/domain-language'
-export type { PropertiesCommand } from './command/types'
+export type { CommandProperties as PropertiesCommand } from './command/types'
 
 export { boolean } from './input/boolean/domain-language'
 export type { PropertiesInputBoolean } from './input/boolean/types'
