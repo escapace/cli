@@ -22,26 +22,26 @@ export declare const INPUT_COUNT_INTERFACE: unique symbol
 export declare const INPUT_COUNT_SPECIFICATION: unique symbol
 export declare const INPUT_COUNT_REDUCER: unique symbol
 
-export enum TypeAction {
+export enum InputCountTypeAction {
   Default,
   Description,
   Option,
   Reference,
 }
 
-export interface ActionReference<T extends Reference = Reference> {
+export interface InputCountActionReference<T extends Reference = Reference> {
   payload: T
-  type: TypeAction.Reference
+  type: InputCountTypeAction.Reference
 }
 
-export interface ActionDescription {
+export interface InputCountActionDescription {
   payload: string
-  type: TypeAction.Description
+  type: InputCountTypeAction.Description
 }
 
-export interface ActionDefault<T extends number = number> {
+export interface InputCountActionDefault<T extends number = number> {
   payload: T
-  type: TypeAction.Default
+  type: InputCountTypeAction.Default
 }
 
 interface FunctionTable<
@@ -52,23 +52,28 @@ interface FunctionTable<
   increase: T
 }
 
-export interface ActionOption<
+export interface InputCountActionOption<
   T extends string | undefined = string | undefined,
   U extends string | undefined = string | undefined,
 > {
   payload: FunctionTable<T, U>
-  type: TypeAction.Option
+  type: InputCountTypeAction.Option
 }
 
-export type Actions = Array<ActionDefault | ActionDescription | ActionOption | ActionReference>
+export type InputCountActions = Array<
+  | InputCountActionDefault
+  | InputCountActionDescription
+  | InputCountActionOption
+  | InputCountActionReference
+>
 
-type InterfaceDefault<T extends Model<State, Actions>> = <U extends number>(
+type InterfaceDefault<T extends Model<InputCountState, InputCountActions>> = <U extends number>(
   value: U,
-) => Next<Settings, T, ActionDefault<U>>
+) => Next<InputCountSettings, T, InputCountActionDefault<U>>
 
-type InterfaceDescription<T extends Model<State, Actions>> = (
+type InterfaceDescription<T extends Model<InputCountState, InputCountActions>> = (
   description: string,
-) => Next<Settings, T, ActionDescription>
+) => Next<InputCountSettings, T, InputCountActionDescription>
 
 type InterfaceOptionValue<
   T extends string,
@@ -79,104 +84,110 @@ type InterfaceOptionValue<
   | [Exclude<P, T | undefined>]
   | [undefined, Exclude<Q, T | undefined>]
 
-type InterfaceOption<T extends Model<State, Actions>> = <
+type InterfaceOption<T extends Model<InputCountState, InputCountActions>> = <
   P extends string | undefined = undefined,
   Q extends string | undefined = undefined,
 >(
   ...values: InterfaceOptionValue<$.Values<T['state']['options']>, P, Q>
-) => Next<Settings, T, ActionOption<P, Q>>
+) => Next<InputCountSettings, T, InputCountActionOption<P, Q>>
 
-type InterfaceReference<T extends Model<State, Actions>> = <U extends Reference>(
+type InterfaceReference<T extends Model<InputCountState, InputCountActions>> = <
+  U extends Reference,
+>(
   reference: U,
-) => Next<Settings, T, ActionReference<U>>
+) => Next<InputCountSettings, T, InputCountActionReference<U>>
 
-interface Interface<T extends Model<State, Actions>> extends FluentInterface<T> {
+interface Interface<T extends Model<InputCountState, InputCountActions>>
+  extends FluentInterface<T> {
   default: InterfaceDefault<T>
   description: InterfaceDescription<T>
   option: InterfaceOption<T>
   reference: InterfaceReference<T>
 }
 
-export interface Settings {
+export interface InputCountSettings {
   [Options.InitialState]: InitialState
   [Options.Interface]: typeof INPUT_COUNT_INTERFACE
   [Options.Reducer]: typeof INPUT_COUNT_REDUCER
   [Options.Specification]: typeof INPUT_COUNT_SPECIFICATION
-  [Options.State]: State
+  [Options.State]: InputCountState
 }
 
-export interface State extends StateShared {
+export interface InputCountState extends StateShared {
   default: number
-  reducer: GenericInputCountReducer<number>
+  reducer: InputCountReducerGeneric<number>
   table: Record<string, number>
   type: typeof SYMBOL_INPUT_COUNT
 }
 
 interface InitialState extends StateSharedInitial {
   default: 0
-  reducer: GenericInputCountReducer<number>
+  reducer: InputCountReducerGeneric<number>
   table: Record<string, number>
   type: typeof SYMBOL_INPUT_COUNT
 }
 
-interface Specification<_ extends Model<State>> {
-  [TypeAction.Reference]: {
+interface Specification<_ extends Model<InputCountState>> {
+  [InputCountTypeAction.Reference]: {
     [Options.Conflicts]: never
     [Options.Dependencies]: never
     [Options.Enabled]: $.True
     [Options.Keys]: 'reference'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Reference
+    [Options.Type]: typeof InputCountTypeAction.Reference
   }
 
-  [TypeAction.Description]: {
+  [InputCountTypeAction.Description]: {
     [Options.Conflicts]: never
-    [Options.Dependencies]: typeof TypeAction.Reference
+    [Options.Dependencies]: typeof InputCountTypeAction.Reference
     [Options.Enabled]: $.True
     [Options.Keys]: 'description'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Description
+    [Options.Type]: typeof InputCountTypeAction.Description
   }
 
-  [TypeAction.Option]: {
-    [Options.Conflicts]: typeof TypeAction.Default
-    [Options.Dependencies]: typeof TypeAction.Description
+  [InputCountTypeAction.Option]: {
+    [Options.Conflicts]: typeof InputCountTypeAction.Default
+    [Options.Dependencies]: typeof InputCountTypeAction.Description
     [Options.Enabled]: $.True
     [Options.Keys]: 'option'
     [Options.Once]: $.False
-    [Options.Type]: typeof TypeAction.Option
+    [Options.Type]: typeof InputCountTypeAction.Option
   }
 
-  [TypeAction.Default]: {
+  [InputCountTypeAction.Default]: {
     [Options.Conflicts]: never
-    [Options.Dependencies]: typeof TypeAction.Option
+    [Options.Dependencies]: typeof InputCountTypeAction.Option
     [Options.Enabled]: $.True
     [Options.Keys]: 'default'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Default
+    [Options.Type]: typeof InputCountTypeAction.Default
   }
 }
 
 declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
-    [INPUT_COUNT_INTERFACE]: Interface<$.Cast<A, Model<State, Action[]>>>
+    [INPUT_COUNT_INTERFACE]: Interface<$.Cast<A, Model<InputCountState, Action[]>>>
     [INPUT_COUNT_REDUCER]: Reducer<$.Cast<A, Action[]>>
-    [INPUT_COUNT_SPECIFICATION]: Specification<$.Cast<A, Model<State, Action[]>>>
+    [INPUT_COUNT_SPECIFICATION]: Specification<$.Cast<A, Model<InputCountState, Action[]>>>
   }
 }
 
-type PayloadActionDefault<T extends Action[]> = Payload<$.Values<T>, TypeAction.Default>
-type PayloadActionOption<T extends Action[]> = Payload<$.Values<T>, TypeAction.Option>
-type PayloadActionReference<T extends Action[]> = Payload<$.Values<T>, TypeAction.Reference>
+type PayloadActionDefault<T extends Action[]> = Payload<$.Values<T>, InputCountTypeAction.Default>
+type PayloadActionOption<T extends Action[]> = Payload<$.Values<T>, InputCountTypeAction.Option>
+type PayloadActionReference<T extends Action[]> = Payload<
+  $.Values<T>,
+  InputCountTypeAction.Reference
+>
 
 interface Reducer<T extends Action[]> {
-  [TypeAction.Default]: {
+  [InputCountTypeAction.Default]: {
     default: PayloadActionDefault<T>
   }
-  [TypeAction.Description]: {
+  [InputCountTypeAction.Description]: {
     description: string
   }
-  [TypeAction.Option]: {
+  [InputCountTypeAction.Option]: {
     isEmpty: false
     options: PayloadActionOption<T> extends {
       decrease: infer Q
@@ -185,32 +196,33 @@ interface Reducer<T extends Action[]> {
       ? Array<Exclude<P, undefined> | Exclude<Q, undefined>>
       : []
   }
-  [TypeAction.Reference]: {
+  [InputCountTypeAction.Reference]: {
     reference: PayloadActionReference<T>
   }
 }
 
-export interface InputCountState extends State {
+export interface InputCountStateInitial extends InputCountState {
   isEmpty: false
 }
 
-export interface InputCount extends FluentInterface<Model<InputCountState, Actions>> {}
+export interface InputCount
+  extends FluentInterface<Model<InputCountStateInitial, InputCountActions>> {}
 
-interface ModelInputCount {
+interface InputCountModel {
   readonly log: InputCount[typeof SYMBOL_LOG]
   readonly state: InputCount[typeof SYMBOL_STATE]
 }
 
-export interface PropertiesInputCount extends InputPropertiesShared {
-  readonly model: ModelInputCount
+export interface InputCountProperties extends InputPropertiesShared {
+  readonly model: InputCountModel
 }
 
-type GenericInputCountReducer<T = unknown, U = any> = (
+type InputCountReducerGeneric<T = unknown, U = any> = (
   values: U,
-  properties: PropertiesInputCount,
+  properties: InputCountProperties,
 ) => T
 
-export type DefaultInputCountReducer = GenericInputCountReducer<
+export type InputCountReducerDefault = InputCountReducerGeneric<
   number,
   Array<GenericOption<number>>
 >

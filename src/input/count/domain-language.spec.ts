@@ -3,7 +3,7 @@ import { assert, describe, it } from 'vitest'
 import { SYMBOL_INPUT_COUNT } from '../../types'
 import { count } from './domain-language'
 import { reducer } from './reducer'
-import { TypeAction } from './types'
+import { InputCountTypeAction } from './types'
 
 describe('input/count', () => {
   it('domain-language', () => {
@@ -45,7 +45,7 @@ describe('input/count', () => {
       variables: [],
     })
 
-    assert.deepEqual(log(test1), [{ payload: reference, type: TypeAction.Reference }])
+    assert.deepEqual(log(test1), [{ payload: reference, type: InputCountTypeAction.Reference }])
 
     const test2 = test1.description('ABC')
 
@@ -64,8 +64,8 @@ describe('input/count', () => {
     })
 
     assert.deepEqual(log(test2), [
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: 'ABC', type: InputCountTypeAction.Description },
+      { payload: reference, type: InputCountTypeAction.Reference },
     ])
 
     const test3 = test2.option('-v', '-q')
@@ -90,10 +90,10 @@ describe('input/count', () => {
           decrease: '-q',
           increase: '-v',
         },
-        type: TypeAction.Option,
+        type: InputCountTypeAction.Option,
       },
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: 'ABC', type: InputCountTypeAction.Description },
+      { payload: reference, type: InputCountTypeAction.Reference },
     ])
 
     const test4 = test3.default(10)
@@ -113,16 +113,16 @@ describe('input/count', () => {
     })
 
     assert.deepEqual(log(test4), [
-      { payload: 10, type: TypeAction.Default },
+      { payload: 10, type: InputCountTypeAction.Default },
       {
         payload: {
           decrease: '-q',
           increase: '-v',
         },
-        type: TypeAction.Option,
+        type: InputCountTypeAction.Option,
       },
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: 'ABC', type: InputCountTypeAction.Description },
+      { payload: reference, type: InputCountTypeAction.Reference },
     ])
   })
 })

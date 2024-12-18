@@ -6,34 +6,46 @@ import { assert } from '../../utilities/assert'
 import { fallback } from '../../utilities/fallback'
 import { reducer } from './reducer'
 import {
-  type ActionDefault,
-  type ActionDescription,
-  type ActionOption,
-  type ActionReference,
-  type Actions,
-  type Settings,
-  type State,
-  TypeAction,
+  type InputCountActionDefault,
+  type InputCountActionDescription,
+  type InputCountActionOption,
+  type InputCountActionReference,
+  type InputCountActions,
+  type InputCountSettings,
+  type InputCountState,
+  InputCountTypeAction,
 } from './types'
 
-const fluentReducer = (log: Actions): State => {
+const fluentReducer = (log: InputCountActions): InputCountState => {
   const reference = (
-    find(log, (action) => action.type === TypeAction.Reference) as ActionReference | undefined
+    find(log, (action) => action.type === InputCountTypeAction.Reference) as
+      | InputCountActionReference
+      | undefined
   )?.payload
 
-  const description = find(log, (action) => action.type === TypeAction.Description)?.payload
+  const description = find(
+    log,
+    (action) => action.type === InputCountTypeAction.Description,
+  )?.payload
 
   const rlog = reverse([...log])
 
   const _default = fallback(
     0,
-    (find(log, (action) => action.type === TypeAction.Default) as ActionDefault | undefined)
-      ?.payload,
+    (
+      find(log, (action) => action.type === InputCountTypeAction.Default) as
+        | InputCountActionDefault
+        | undefined
+    )?.payload,
   )
 
-  const isEmpty = log.length === 0 || !some(log, (action) => action.type === TypeAction.Option)
+  const isEmpty =
+    log.length === 0 || !some(log, (action) => action.type === InputCountTypeAction.Option)
 
-  const options = filter(rlog, ({ type }) => type === TypeAction.Option) as ActionOption[]
+  const options = filter(
+    rlog,
+    ({ type }) => type === InputCountTypeAction.Option,
+  ) as InputCountActionOption[]
 
   const table = assign(
     {},
@@ -59,76 +71,76 @@ const fluentReducer = (log: Actions): State => {
   }
 }
 
-export const count = builder<Settings>([
+export const count = builder<InputCountSettings>([
   {
     [Options.Interface]: (dispatch) => ({
       reference(reference: Reference) {
         assert.reference(reference)
 
-        return dispatch<ActionReference>({
+        return dispatch<InputCountActionReference>({
           payload: reference,
-          type: TypeAction.Reference,
+          type: InputCountTypeAction.Reference,
         })
       },
     }),
     [Options.Keys]: ['reference'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Reference,
+    [Options.Type]: InputCountTypeAction.Reference,
   },
   {
-    [Options.Dependencies]: [TypeAction.Reference],
+    [Options.Dependencies]: [InputCountTypeAction.Reference],
     [Options.Interface]: (dispatch) => ({
       description(description: string) {
         assert.string(description)
 
-        return dispatch<ActionDescription>({
+        return dispatch<InputCountActionDescription>({
           payload: description,
-          type: TypeAction.Description,
+          type: InputCountTypeAction.Description,
         })
       },
     }),
     [Options.Keys]: ['description'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Description,
+    [Options.Type]: InputCountTypeAction.Description,
   },
   {
-    [Options.Conflicts]: [TypeAction.Default],
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Conflicts]: [InputCountTypeAction.Default],
+    [Options.Dependencies]: [InputCountTypeAction.Description],
     [Options.Interface]: (dispatch, _, { options }) => ({
       option(...value: [string | undefined, string | undefined]) {
         assert.inputDichotomousOption(value, options)
 
-        return dispatch<ActionOption>({
+        return dispatch<InputCountActionOption>({
           payload: {
             decrease: value[1],
             increase: value[0],
           },
-          type: TypeAction.Option,
+          type: InputCountTypeAction.Option,
         })
       },
     }),
     [Options.Keys]: ['option'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Option,
+    [Options.Type]: InputCountTypeAction.Option,
   },
   {
-    [Options.Dependencies]: [TypeAction.Option],
+    [Options.Dependencies]: [InputCountTypeAction.Option],
     [Options.Interface]: (dispatch) => ({
       default(value: number) {
         assert.number(value)
 
-        return dispatch<ActionDefault>({
+        return dispatch<InputCountActionDefault>({
           payload: value,
-          type: TypeAction.Default,
+          type: InputCountTypeAction.Default,
         })
       },
     }),
     [Options.Keys]: ['default'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Default,
+    [Options.Type]: InputCountTypeAction.Default,
   },
 ])
