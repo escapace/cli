@@ -69,23 +69,36 @@ export type Actions = Array<
   ActionDefault | ActionDescription | ActionOption | ActionReference | ActionRepeat | ActionVariable
 >
 
-export type LookupDefault<T extends Model<State, Actions>> = $.If<
+type LookupDefault<T extends Model<State, Actions>> = $.If<
   $.Equal<T['state']['repeat'], true>,
   string[],
   string
 >
 
-export interface Interface<T extends Model<State, Actions>> extends FluentInterface<T> {
-  default: <U extends LookupDefault<T>>(value: U) => Next<Settings, T, ActionDefault<U>>
-  description: (description: string) => Next<Settings, T, ActionDescription>
-  option: <P extends string>(
-    option: Exclude<P, $.Values<T['state']['options']>>,
-  ) => Next<Settings, T, ActionOption<P>>
-  reference: <U extends Reference>(reference: U) => Next<Settings, T, ActionReference<U>>
-  repeat: () => Next<Settings, T, ActionRepeat>
-  variable: <P extends string>(
-    variable: Exclude<P, $.Values<T['state']['variables']>>,
-  ) => Next<Settings, T, ActionVariable<P>>
+type InterfaceDefault<T extends Model<State, Actions>> = <U extends LookupDefault<T>>(
+  value: U,
+) => Next<Settings, T, ActionDefault<U>>
+type InterfaceDescription<T extends Model<State, Actions>> = (
+  description: string,
+) => Next<Settings, T, ActionDescription>
+type InterfaceOption<T extends Model<State, Actions>> = <P extends string>(
+  option: Exclude<P, $.Values<T['state']['options']>>,
+) => Next<Settings, T, ActionOption<P>>
+type InterfaceReference<T extends Model<State, Actions>> = <U extends Reference>(
+  reference: U,
+) => Next<Settings, T, ActionReference<U>>
+type InterfaceRepeat<T extends Model<State, Actions>> = () => Next<Settings, T, ActionRepeat>
+type InterfaceVariable<T extends Model<State, Actions>> = <P extends string>(
+  variable: Exclude<P, $.Values<T['state']['variables']>>,
+) => Next<Settings, T, ActionVariable<P>>
+
+interface Interface<T extends Model<State, Actions>> extends FluentInterface<T> {
+  default: InterfaceDefault<T>
+  description: InterfaceDescription<T>
+  option: InterfaceOption<T>
+  reference: InterfaceReference<T>
+  repeat: InterfaceRepeat<T>
+  variable: InterfaceVariable<T>
 }
 
 export interface Settings {
@@ -103,14 +116,14 @@ export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_STRING
 }
 
-export interface InitialState extends SharedInitialState {
+interface InitialState extends SharedInitialState {
   default: undefined
   reducer: GenericInputStringReducer<string | undefined>
   repeat: false
   type: typeof SYMBOL_INPUT_STRING
 }
 
-export interface Specification<T extends Model<State>> {
+interface Specification<T extends Model<State>> {
   [TypeAction.Reference]: {
     [Options.Conflicts]: never
     [Options.Dependencies]: never
@@ -174,19 +187,25 @@ declare module '@escapace/typelevel/hkt' {
   }
 }
 
-export type ReducerReducer<T extends Action[]> = $.If<
-  $.Is.Never<Payload<$.Values<T>, TypeAction.Repeat>>,
+type ReducerReducer<T extends Action[]> = $.If<
+  $.Is.Never<PayloadActionRepeat<T>>,
   $.If<
-    $.Is.Never<Payload<$.Values<T>, TypeAction.Default>>,
+    $.Is.Never<PayloadActionDefault<T>>,
     GenericInputStringReducer<string | undefined>,
     GenericInputStringReducer<string>
   >,
   GenericInputStringReducer<string[]>
 >
 
-export interface Reducer<T extends Action[]> {
+type PayloadActionDefault<T extends Action[]> = Payload<$.Values<T>, TypeAction.Default>
+type PayloadActionOption<T extends Action[]> = Payload<$.Values<T>, TypeAction.Option>
+type PayloadActionReference<T extends Action[]> = Payload<$.Values<T>, TypeAction.Reference>
+type PayloadActionRepeat<T extends Action[]> = Payload<$.Values<T>, TypeAction.Repeat>
+type PayloadActionVariable<T extends Action[]> = Payload<$.Values<T>, TypeAction.Variable>
+
+interface Reducer<T extends Action[]> {
   [TypeAction.Default]: {
-    default: Payload<$.Values<T>, TypeAction.Default>
+    default: PayloadActionDefault<T>
     reducer: ReducerReducer<T>
   }
   [TypeAction.Description]: {
@@ -194,10 +213,10 @@ export interface Reducer<T extends Action[]> {
   }
   [TypeAction.Option]: {
     isEmpty: false
-    options: Array<Payload<$.Values<T>, TypeAction.Option> extends { name: infer U } ? U : never>
+    options: Array<PayloadActionOption<T> extends { name: infer U } ? U : never>
   }
   [TypeAction.Reference]: {
-    reference: Payload<$.Values<T>, TypeAction.Reference>
+    reference: PayloadActionReference<T>
   }
   [TypeAction.Repeat]: {
     reducer: ReducerReducer<T>
@@ -205,9 +224,7 @@ export interface Reducer<T extends Action[]> {
   }
   [TypeAction.Variable]: {
     isEmpty: false
-    variables: Array<
-      Payload<$.Values<T>, TypeAction.Variable> extends { name: infer U } ? U : never
-    >
+    variables: Array<PayloadActionVariable<T> extends { name: infer U } ? U : never>
   }
 }
 
@@ -217,28 +234,32 @@ export interface InputStringState extends State {
 
 export interface InputString extends FluentInterface<Model<InputStringState, Actions>> {}
 
-export type Values<T extends Model<State, Actions>> = Array<
-  | $.If<
-      $.Is.Never<$.Values<T['state']['options']>>,
-      never,
-      {
-        name: $.Values<T['state']['options']>
-        type: InputType.Option
-        value: string
-      }
-    >
-  | $.If<
-      $.Is.Never<$.Values<T['state']['variables']>>,
-      never,
-      {
-        name: $.Values<T['state']['variables']>
-        type: InputType.Variable
-        value: string
-      }
-    >
+type ValuesOptions<T extends string> = $.If<
+  $.Is.Never<T>,
+  never,
+  {
+    name: T
+    type: InputType.Option
+    value: string
+  }
 >
 
-export interface ModelInputString {
+type ValuesVariables<T extends string> = $.If<
+  $.Is.Never<T>,
+  never,
+  {
+    name: T
+    type: InputType.Variable
+    value: string
+  }
+>
+
+type Values<T extends Model<State, Actions>> = Array<
+  | ValuesOptions<$.Values<T['state']['options']>>
+  | ValuesVariables<$.Values<T['state']['variables']>>
+>
+
+interface ModelInputString {
   readonly log: InputString[typeof SYMBOL_LOG]
   readonly state: InputString[typeof SYMBOL_STATE]
 }
@@ -247,22 +268,12 @@ export interface PropertiesInputString extends PropertiesInputShared {
   readonly model: ModelInputString
 }
 
-export type GenericInputStringReducer<T = unknown, U = any> = (
+type GenericInputStringReducer<T = unknown, U = any> = (
   values: U,
   properties: PropertiesInputString,
 ) => T
 
 export type DefaultInputStringReducer = GenericInputStringReducer<any, DeNormalizedStringValue[]>
-
-export type InputStringReducer<
-  T = unknown,
-  U extends Model<State, Actions> = Model<State, Actions>,
-> = (
-  values: Values<U>,
-  properties: {
-    model: { log: U['log']; state: U['state'] }
-  } & PropertiesInputShared,
-) => Promise<T> | T
 
 export interface InputStringEmpty extends FluentInterface<Model<State, Actions>> {}
 

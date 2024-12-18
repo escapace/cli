@@ -41,7 +41,6 @@ export type Reference = number | string
 export enum InputType {
   Option,
   Variable,
-  Configuration,
 }
 
 export interface SharedState {
@@ -77,26 +76,14 @@ export interface GenericVariable<T> {
   value: T
 }
 
-export interface GenericConfiguration<T> {
-  name: string[]
-  type: InputType.Configuration
-  value: T
-}
-
-export type DeNormalizedStringValue =
-  | GenericConfiguration<any>
-  | GenericOption<string | string[]>
-  | GenericVariable<string>
+export type DeNormalizedStringValue = GenericOption<string | string[]> | GenericVariable<string>
 
 // export type DeNormalizedNumberValue =
 //   | GenericConfiguration<any>
 //   | GenericOption<number | number[]>
 //   | GenericVariable<string>
 
-export type NormalizedStringValue =
-  | GenericConfiguration<string>
-  | GenericOption<string>
-  | GenericVariable<string>
+export type NormalizedStringValue = GenericOption<string> | GenericVariable<string>
 
 // export type NormalizedNumberValue =
 //   | GenericConfiguration<number>
@@ -105,8 +92,8 @@ export type NormalizedStringValue =
 
 export type Unwrap<T> = T extends (...arguments_: any[]) => infer U ? Awaited<U> : never
 
-export type Merge<T extends object, U extends object> = {
-  [K in $.Intersection<keyof T, keyof U>]: T[K] | U[K]
+type Merge<T extends object, U extends object> = {
+  [K in Extract<keyof T, keyof U>]: T[K] | U[K]
 } & Pick<T, $.Difference<keyof T, keyof U>> &
   Pick<U, $.Difference<keyof U, keyof T>>
 
@@ -123,7 +110,7 @@ export interface Settings {
   split: string
 }
 
-export interface Console {
+interface Console {
   error: (message?: any, ...optionalParameters: any[]) => Promise<void> | void
   log: (message?: any, ...optionalParameters: any[]) => Promise<void> | void
 }
@@ -136,13 +123,12 @@ export interface Context {
   exited: boolean
 }
 
-export interface ModelInput {
+interface ModelInput {
   readonly log: Input[typeof SYMBOL_LOG]
   readonly state: Input[typeof SYMBOL_STATE]
 }
 
 export interface PropertiesShared {
-  // readonly _: string[]
   readonly commands: Command[]
   readonly context: Context
   readonly settings: Settings

@@ -5,7 +5,7 @@ export enum HelpType {
   Inputs,
 }
 
-export interface HelpHeader {
+interface HelpHeader {
   argv: string[]
   description: string
 }

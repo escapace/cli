@@ -10,7 +10,6 @@ import type {
 } from '@escapace/fluent'
 import type $ from '@escapace/typelevel'
 import type {
-  GenericConfiguration,
   GenericOption,
   PropertiesInputShared,
   Reference,
@@ -45,7 +44,7 @@ export interface ActionDefault<T extends number = number> {
   type: TypeAction.Default
 }
 
-export interface FunctionTable<
+interface FunctionTable<
   T extends string | undefined = string | undefined,
   U extends string | undefined = string | undefined,
 > {
@@ -63,22 +62,39 @@ export interface ActionOption<
 
 export type Actions = Array<ActionDefault | ActionDescription | ActionOption | ActionReference>
 
-export interface Interface<T extends Model<State, Actions>> extends FluentInterface<T> {
-  default: <U extends number>(value: U) => Next<Settings, T, ActionDefault<U>>
-  description: (description: string) => Next<Settings, T, ActionDescription>
-  option: <P extends string | undefined = undefined, Q extends string | undefined = undefined>(
-    ...values:
-      | [
-          Exclude<P, $.Values<T['state']['options']> | undefined>,
-          Exclude<
-            Exclude<Q, $.Values<T['state']['options']> | undefined>,
-            Exclude<P, $.Values<T['state']['options']> | undefined>
-          >,
-        ]
-      | [Exclude<P, $.Values<T['state']['options']> | undefined>]
-      | [undefined, Exclude<Q, $.Values<T['state']['options']> | undefined>]
-  ) => Next<Settings, T, ActionOption<P, Q>>
-  reference: <U extends Reference>(reference: U) => Next<Settings, T, ActionReference<U>>
+type InterfaceDefault<T extends Model<State, Actions>> = <U extends number>(
+  value: U,
+) => Next<Settings, T, ActionDefault<U>>
+
+type InterfaceDescription<T extends Model<State, Actions>> = (
+  description: string,
+) => Next<Settings, T, ActionDescription>
+
+type InterfaceOptionValue<
+  T extends string,
+  P extends string | undefined,
+  Q extends string | undefined,
+> =
+  | [Exclude<P, T | undefined>, Exclude<Exclude<Q, T | undefined>, Exclude<P, T | undefined>>]
+  | [Exclude<P, T | undefined>]
+  | [undefined, Exclude<Q, T | undefined>]
+
+type InterfaceOption<T extends Model<State, Actions>> = <
+  P extends string | undefined = undefined,
+  Q extends string | undefined = undefined,
+>(
+  ...values: InterfaceOptionValue<$.Values<T['state']['options']>, P, Q>
+) => Next<Settings, T, ActionOption<P, Q>>
+
+type InterfaceReference<T extends Model<State, Actions>> = <U extends Reference>(
+  reference: U,
+) => Next<Settings, T, ActionReference<U>>
+
+interface Interface<T extends Model<State, Actions>> extends FluentInterface<T> {
+  default: InterfaceDefault<T>
+  description: InterfaceDescription<T>
+  option: InterfaceOption<T>
+  reference: InterfaceReference<T>
 }
 
 export interface Settings {
@@ -96,14 +112,14 @@ export interface State extends SharedState {
   type: typeof SYMBOL_INPUT_COUNT
 }
 
-export interface InitialState extends SharedInitialState {
+interface InitialState extends SharedInitialState {
   default: 0
   reducer: GenericInputCountReducer<number>
   table: Record<string, number>
   type: typeof SYMBOL_INPUT_COUNT
 }
 
-export interface Specification<_ extends Model<State>> {
+interface Specification<_ extends Model<State>> {
   [TypeAction.Reference]: {
     [Options.Conflicts]: never
     [Options.Dependencies]: never
@@ -143,22 +159,26 @@ export interface Specification<_ extends Model<State>> {
 
 declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
-    [INPUT_COUNT_INTERFACE]: Interface<$.Cast<A, Model<State>>>
+    [INPUT_COUNT_INTERFACE]: Interface<$.Cast<A, Model<State, Action[]>>>
     [INPUT_COUNT_REDUCER]: Reducer<$.Cast<A, Action[]>>
-    [INPUT_COUNT_SPECIFICATION]: Specification<$.Cast<A, Model<State>>>
+    [INPUT_COUNT_SPECIFICATION]: Specification<$.Cast<A, Model<State, Action[]>>>
   }
 }
 
-export interface Reducer<T extends Action[]> {
+type PayloadActionDefault<T extends Action[]> = Payload<$.Values<T>, TypeAction.Default>
+type PayloadActionOption<T extends Action[]> = Payload<$.Values<T>, TypeAction.Option>
+type PayloadActionReference<T extends Action[]> = Payload<$.Values<T>, TypeAction.Reference>
+
+interface Reducer<T extends Action[]> {
   [TypeAction.Default]: {
-    default: Payload<$.Values<T>, TypeAction.Default>
+    default: PayloadActionDefault<T>
   }
   [TypeAction.Description]: {
     description: string
   }
   [TypeAction.Option]: {
     isEmpty: false
-    options: Payload<$.Values<T>, TypeAction.Option> extends {
+    options: PayloadActionOption<T> extends {
       decrease: infer Q
       increase: infer P
     }
@@ -166,7 +186,7 @@ export interface Reducer<T extends Action[]> {
       : []
   }
   [TypeAction.Reference]: {
-    reference: Payload<$.Values<T>, TypeAction.Reference>
+    reference: PayloadActionReference<T>
   }
 }
 
@@ -176,19 +196,7 @@ export interface InputCountState extends State {
 
 export interface InputCount extends FluentInterface<Model<InputCountState, Actions>> {}
 
-// type Values<T extends Model<State, Actions>> = Array<
-//   $.If<
-//     $.Is.Never<$.Values<T['state']['options']>>,
-//     never,
-//     {
-//       name: $.Values<T['state']['options']>
-//       type: InputType.Option
-//       value: number
-//     }
-//   >
-// >
-
-export interface ModelInputCount {
+interface ModelInputCount {
   readonly log: InputCount[typeof SYMBOL_LOG]
   readonly state: InputCount[typeof SYMBOL_STATE]
 }
@@ -197,12 +205,12 @@ export interface PropertiesInputCount extends PropertiesInputShared {
   readonly model: ModelInputCount
 }
 
-export type GenericInputCountReducer<T = unknown, U = any> = (
+type GenericInputCountReducer<T = unknown, U = any> = (
   values: U,
   properties: PropertiesInputCount,
 ) => T
 
 export type DefaultInputCountReducer = GenericInputCountReducer<
   number,
-  Array<GenericConfiguration<any> | GenericOption<number>>
+  Array<GenericOption<number>>
 >

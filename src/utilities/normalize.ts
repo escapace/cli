@@ -3,13 +3,11 @@ import type { PropertiesInputChoice } from '../input/choice/types'
 import type { PropertiesInputString } from '../input/string/types'
 import {
   type DeNormalizedStringValue,
-  type GenericConfiguration,
   type GenericOption,
   type GenericVariable,
   InputType,
   type NormalizedStringValue,
 } from '../types'
-import { assert } from './assert'
 
 export function normalizeString(
   previousValues: DeNormalizedStringValue[],
@@ -28,7 +26,7 @@ export function normalizeString(
             }),
           )
         : (previousValue as GenericOption<string>)
-    } else if (previousValue.type === InputType.Variable) {
+    } /* (previousValue.type === InputType.Variable) */ else {
       return repeat
         ? map(
             split(previousValue.value, properties.settings.split),
@@ -38,24 +36,6 @@ export function normalizeString(
             }),
           )
         : previousValue
-    } else {
-      if (repeat) {
-        // TODO: error handling assert or message?
-        assert.strings(previousValue.value)
-
-        return map(
-          previousValue.value,
-          (value): GenericConfiguration<string> => ({
-            ...previousValue,
-            value,
-          }),
-        )
-      } else {
-        // TODO: error handling assert or message?
-        assert.string(previousValue.value)
-
-        return previousValue as GenericConfiguration<string>
-      }
     }
   })
 }

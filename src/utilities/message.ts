@@ -1,15 +1,8 @@
-import {
-  type GenericConfiguration,
-  type GenericOption,
-  type GenericVariable,
-  InputType,
-} from '../types'
-import { map, includes, join } from 'lodash-es'
+import { includes, map } from 'lodash-es'
+import { type GenericOption, type GenericVariable, InputType } from '../types'
 
 export const message = (
-  array: Array<
-    GenericConfiguration<any> | GenericOption<string | string[]> | GenericVariable<string>
-  >,
+  array: Array<GenericOption<string | string[]> | GenericVariable<string>>,
   // Array<{
   //   type: InputType.Option | InputType.Variable
   //   name: string
@@ -19,7 +12,7 @@ export const message = (
 
   return [
     ...map(array, (value, index) => {
-      const name = value.type === InputType.Configuration ? join(value.name, '.') : value.name
+      const name = value.name
 
       if (includes(seen, name)) {
         return ''
@@ -29,7 +22,6 @@ export const message = (
         return `${
           /* (index === 0 ? capitalize : identity)( */
           {
-            [InputType.Configuration]: 'configuration path',
             [InputType.Option]: 'option',
             [InputType.Variable]: 'variable',
           }[value.type]

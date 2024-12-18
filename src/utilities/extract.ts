@@ -12,8 +12,7 @@ import {
 import { isArray, isObject } from 'lodash-es'
 
 // TODO: move this into @escapace/fluent
-
-export type FunctionalFluentInterface<I extends FluentInterface<Model>> =
+type FunctionalFluentInterface<I extends FluentInterface<Model>> =
   I extends FluentInterface<Model<infer U, infer T>> ? FluentInterface<Model<U, T>> : never
 
 export const extract = <I extends FluentInterface<Model>>(
