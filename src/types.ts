@@ -14,7 +14,7 @@ import type {
 import type {
   InputString,
   InputStringEmpty,
-  LookupValues as InputStringLookupValues,
+  InputStringValuesLookup as InputStringLookupValues,
 } from './input/string/types'
 
 import type {

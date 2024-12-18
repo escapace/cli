@@ -6,7 +6,7 @@ import { type LookupValues, SYMBOL_COMMAND } from '../types'
 import { extract } from '../utilities/extract'
 import { command } from './domain-language'
 import { reducer } from './reducer'
-import { type CommandProperties, TypeAction } from './types'
+import { type CommandProperties, CommandTypeAction } from './types'
 // import { TypeAction } from './types'
 
 describe('command', () => {
@@ -41,7 +41,7 @@ describe('command', () => {
     assert.deepEqual(log(test1), [
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: CommandTypeAction.Reference,
       },
     ])
 
@@ -65,15 +65,15 @@ describe('command', () => {
     assert.deepEqual(log(test2), [
       {
         payload: 'qwe',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: 'abc',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: CommandTypeAction.Reference,
       },
     ])
 
@@ -97,19 +97,19 @@ describe('command', () => {
     assert.deepEqual(log(test3), [
       {
         payload: 'desc',
-        type: TypeAction.Description,
+        type: CommandTypeAction.Description,
       },
       {
         payload: 'qwe',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: 'abc',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: CommandTypeAction.Reference,
       },
     ])
 
@@ -141,27 +141,27 @@ describe('command', () => {
     assert.deepEqual(log(test4), [
       {
         payload: extract(countA),
-        type: TypeAction.Input,
+        type: CommandTypeAction.Input,
       },
       {
         payload: extract(booleanA),
-        type: TypeAction.Input,
+        type: CommandTypeAction.Input,
       },
       {
         payload: 'desc',
-        type: TypeAction.Description,
+        type: CommandTypeAction.Description,
       },
       {
         payload: 'qwe',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: 'abc',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: CommandTypeAction.Reference,
       },
     ])
 
@@ -187,31 +187,31 @@ describe('command', () => {
     assert.deepEqual(log(test5), [
       {
         payload: inputReducer,
-        type: TypeAction.Reducer,
+        type: CommandTypeAction.Reducer,
       },
       {
         payload: extract(countA),
-        type: TypeAction.Input,
+        type: CommandTypeAction.Input,
       },
       {
         payload: extract(booleanA),
-        type: TypeAction.Input,
+        type: CommandTypeAction.Input,
       },
       {
         payload: 'desc',
-        type: TypeAction.Description,
+        type: CommandTypeAction.Description,
       },
       {
         payload: 'qwe',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: 'abc',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: CommandTypeAction.Reference,
       },
     ])
 
@@ -247,27 +247,27 @@ describe('command', () => {
     assert.deepEqual(log(test6), [
       {
         payload: extract(commandB),
-        type: TypeAction.Subcommand,
+        type: CommandTypeAction.Subcommand,
       },
       {
         payload: extract(commandA),
-        type: TypeAction.Subcommand,
+        type: CommandTypeAction.Subcommand,
       },
       {
         payload: 'desc',
-        type: TypeAction.Description,
+        type: CommandTypeAction.Description,
       },
       {
         payload: 'qwe',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: 'abc',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: CommandTypeAction.Reference,
       },
     ])
 
@@ -293,31 +293,31 @@ describe('command', () => {
     assert.deepEqual(log(test7), [
       {
         payload: subcommandReducer,
-        type: TypeAction.Reducer,
+        type: CommandTypeAction.Reducer,
       },
       {
         payload: extract(commandB),
-        type: TypeAction.Subcommand,
+        type: CommandTypeAction.Subcommand,
       },
       {
         payload: extract(commandA),
-        type: TypeAction.Subcommand,
+        type: CommandTypeAction.Subcommand,
       },
       {
         payload: 'desc',
-        type: TypeAction.Description,
+        type: CommandTypeAction.Description,
       },
       {
         payload: 'qwe',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: 'abc',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: CommandTypeAction.Reference,
       },
     ])
 
@@ -343,23 +343,23 @@ describe('command', () => {
     assert.deepEqual(log(test8), [
       {
         payload: simpleReducer,
-        type: TypeAction.Reducer,
+        type: CommandTypeAction.Reducer,
       },
       {
         payload: 'desc',
-        type: TypeAction.Description,
+        type: CommandTypeAction.Description,
       },
       {
         payload: 'qwe',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: 'abc',
-        type: TypeAction.Name,
+        type: CommandTypeAction.Name,
       },
       {
         payload: reference,
-        type: TypeAction.Reference,
+        type: CommandTypeAction.Reference,
       },
     ])
 

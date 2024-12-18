@@ -3,7 +3,7 @@ import type { InputBooleanState } from '../input/boolean/types'
 import type { InputChoiceState } from '../input/choice/types'
 import type { InputCountState } from '../input/count/types'
 import type { InputGroupState } from '../input/group/types'
-import type { InputStringState } from '../input/string/types'
+import type { InputStringStateInitial } from '../input/string/types'
 import { type GenericOption, type GenericVariable, InputType, type Match } from '../types'
 
 export const getOptionsVariables = (
@@ -12,7 +12,7 @@ export const getOptionsVariables = (
     | InputChoiceState
     | InputCountState
     | InputGroupState
-    | InputStringState,
+    | InputStringStateInitial,
   match: Match,
 ) => {
   const options: Array<GenericOption<boolean | number | string | number[] | string[]>> =

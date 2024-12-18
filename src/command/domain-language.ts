@@ -17,12 +17,12 @@ import {
   type CommandReducer,
   type CommandSettings,
   type CommandState,
-  TypeAction,
+  CommandTypeAction,
 } from './types'
 
 const fluentReducer = (log: CommandActions): CommandState => {
   const reference = (
-    find(log, (action) => action.type === TypeAction.Reference) as
+    find(log, (action) => action.type === CommandTypeAction.Reference) as
       | CommandActionReference
       | undefined
   )?.payload
@@ -30,26 +30,26 @@ const fluentReducer = (log: CommandActions): CommandState => {
   const rlog = reverse([...log])
 
   const names = map(
-    filter(rlog, (action) => action.type === TypeAction.Name) as CommandActionName[],
+    filter(rlog, (action) => action.type === CommandTypeAction.Name) as CommandActionName[],
     ({ payload }) => payload,
   )
 
-  const description = find(log, (action) => action.type === TypeAction.Description)?.payload
+  const description = find(log, (action) => action.type === CommandTypeAction.Description)?.payload
 
   const isEmpty =
     log.length === 0 ||
     !some(
       log,
       (action) =>
-        action.type === TypeAction.Input ||
-        action.type === TypeAction.Subcommand ||
-        action.type === TypeAction.Reducer,
+        action.type === CommandTypeAction.Input ||
+        action.type === CommandTypeAction.Subcommand ||
+        action.type === CommandTypeAction.Reducer,
     )
 
   const { options, variables } = reduce(
     filter(
       rlog,
-      ({ type }) => type === TypeAction.Subcommand || type === TypeAction.Input,
+      ({ type }) => type === CommandTypeAction.Subcommand || type === CommandTypeAction.Input,
     ) as Array<CommandActionInput | CommandActionSubcommand>,
     (accumulator: { options: string[]; variables: string[] }, n) => {
       accumulator.variables = union(accumulator.variables, n.payload[SYMBOL_STATE].variables)
@@ -61,19 +61,25 @@ const fluentReducer = (log: CommandActions): CommandState => {
   )
 
   const inputs = map(
-    filter(rlog, (action) => action.type === TypeAction.Input) as CommandActionInput[],
+    filter(rlog, (action) => action.type === CommandTypeAction.Input) as CommandActionInput[],
     ({ payload }) => payload,
   )
 
   const commands = map(
-    filter(rlog, (action) => action.type === TypeAction.Subcommand) as CommandActionSubcommand[],
+    filter(
+      rlog,
+      (action) => action.type === CommandTypeAction.Subcommand,
+    ) as CommandActionSubcommand[],
     ({ payload }) => payload,
   )
 
   const _reducer: CommandReducer = fallback(
     reducer,
-    (find(log, (action) => action.type === TypeAction.Reducer) as CommandActionReducer | undefined)
-      ?.payload,
+    (
+      find(log, (action) => action.type === CommandTypeAction.Reducer) as
+        | CommandActionReducer
+        | undefined
+    )?.payload,
   )
 
   return {
@@ -98,53 +104,53 @@ export const command = builder<CommandSettings>([
 
         return dispatch<CommandActionReference>({
           payload: reference,
-          type: TypeAction.Reference,
+          type: CommandTypeAction.Reference,
         })
       },
     }),
     [Options.Keys]: ['reference'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Reference,
+    [Options.Type]: CommandTypeAction.Reference,
   },
   {
-    [Options.Conflicts]: [TypeAction.Description],
-    [Options.Dependencies]: [TypeAction.Reference],
+    [Options.Conflicts]: [CommandTypeAction.Description],
+    [Options.Dependencies]: [CommandTypeAction.Reference],
     [Options.Interface]: (dispatch) => ({
       name(name: string) {
         assert.commandName(name)
 
         return dispatch<CommandActionName>({
           payload: name,
-          type: TypeAction.Name,
+          type: CommandTypeAction.Name,
         })
       },
     }),
     [Options.Keys]: ['name'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Name,
+    [Options.Type]: CommandTypeAction.Name,
   },
   {
-    [Options.Dependencies]: [TypeAction.Name],
+    [Options.Dependencies]: [CommandTypeAction.Name],
     [Options.Interface]: (dispatch) => ({
       description(description: string) {
         assert.string(description)
 
         return dispatch<CommandActionDescription>({
           payload: description,
-          type: TypeAction.Description,
+          type: CommandTypeAction.Description,
         })
       },
     }),
     [Options.Keys]: ['description'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Description,
+    [Options.Type]: CommandTypeAction.Description,
   },
   {
-    [Options.Conflicts]: [TypeAction.Subcommand, TypeAction.Reducer],
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Conflicts]: [CommandTypeAction.Subcommand, CommandTypeAction.Reducer],
+    [Options.Dependencies]: [CommandTypeAction.Description],
     [Options.Interface]: (dispatch, log, state) => ({
       input(value: Input) {
         assert.input(value, { log, state })
@@ -153,18 +159,18 @@ export const command = builder<CommandSettings>([
 
         return dispatch<CommandActionInput>({
           payload,
-          type: TypeAction.Input,
+          type: CommandTypeAction.Input,
         })
       },
     }),
     [Options.Keys]: ['input'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Input,
+    [Options.Type]: CommandTypeAction.Input,
   },
   {
-    [Options.Conflicts]: [TypeAction.Input, TypeAction.Reducer],
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Conflicts]: [CommandTypeAction.Input, CommandTypeAction.Reducer],
+    [Options.Dependencies]: [CommandTypeAction.Description],
     [Options.Interface]: (dispatch, log, state) => ({
       subcommand(value: Command) {
         assert.command(value, { log, state })
@@ -173,18 +179,18 @@ export const command = builder<CommandSettings>([
 
         return dispatch<CommandActionSubcommand>({
           payload,
-          type: TypeAction.Subcommand,
+          type: CommandTypeAction.Subcommand,
         })
       },
     }),
     [Options.Keys]: ['subcommand'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Subcommand,
+    [Options.Type]: CommandTypeAction.Subcommand,
   },
   {
-    [Options.Dependencies]: [TypeAction.Description],
-    [Options.Type]: TypeAction.Reducer,
+    [Options.Dependencies]: [CommandTypeAction.Description],
+    [Options.Type]: CommandTypeAction.Reducer,
     // [Options.Enabled]: (_, { isEmpty }) => !isEmpty,
     [Options.Interface]: (dispatch) => ({
       reducer(value: CommandReducer) {
@@ -192,7 +198,7 @@ export const command = builder<CommandSettings>([
 
         return dispatch<CommandActionReducer>({
           payload: value,
-          type: TypeAction.Reducer,
+          type: CommandTypeAction.Reducer,
         })
       },
     }),

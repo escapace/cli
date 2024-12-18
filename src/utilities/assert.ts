@@ -22,7 +22,7 @@ import {
   type CommandActionSubcommand,
   type Command,
   type CommandState,
-  TypeAction as CommandTypeAction,
+  CommandTypeAction,
 } from '../command/types'
 
 import type { Actions as InputGroupActions, State as InputGroupState } from '../input/group/types'

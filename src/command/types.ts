@@ -17,8 +17,8 @@ import type {
   LookupModel,
   PropertiesShared,
   Reference,
-  StateSharedInitial,
   StateShared,
+  StateSharedInitial,
   SYMBOL_COMMAND,
   UnionMerge,
   Unwrap,
@@ -28,7 +28,7 @@ export declare const COMMAND_INTERFACE: unique symbol
 export declare const COMMAND_SPECIFICATION: unique symbol
 export declare const COMMAND_REDUCER: unique symbol
 
-export enum TypeAction {
+export enum CommandTypeAction {
   Description,
   Input,
   Name,
@@ -37,9 +37,12 @@ export enum TypeAction {
   Subcommand,
 }
 
-type PayloadActionInput<T extends Action[]> = Payload<$.Values<T>, TypeAction.Input>
-type PayloadActionReducer<T extends Action[]> = Payload<$.Values<T>, TypeAction.Reducer>
-type PayloadActionSubcommand<T extends Action[]> = Payload<$.Values<T>, TypeAction.Subcommand>
+type PayloadActionInput<T extends Action[]> = Payload<$.Values<T>, CommandTypeAction.Input>
+type PayloadActionReducer<T extends Action[]> = Payload<$.Values<T>, CommandTypeAction.Reducer>
+type PayloadActionSubcommand<T extends Action[]> = Payload<
+  $.Values<T>,
+  CommandTypeAction.Subcommand
+>
 
 type CastPayloadActionSubcommand<T extends Action[]> = $.Cast<PayloadActionSubcommand<T>, Command>
 type CastPayloadInput<T extends Action[]> = $.Cast<PayloadActionInput<T>, Input>
@@ -77,32 +80,32 @@ export type CommandReducer<
 
 export interface CommandActionReference<T extends Reference = Reference> {
   payload: T
-  type: TypeAction.Reference
+  type: CommandTypeAction.Reference
 }
 
 export interface CommandActionDescription {
   payload: string
-  type: TypeAction.Description
+  type: CommandTypeAction.Description
 }
 
 export interface CommandActionName<T extends string = string> {
   payload: T
-  type: TypeAction.Name
+  type: CommandTypeAction.Name
 }
 
 export interface CommandActionSubcommand<T extends Command = Command> {
   payload: T
-  type: TypeAction.Subcommand
+  type: CommandTypeAction.Subcommand
 }
 
 export interface CommandActionInput<T extends Input = Input> {
   payload: T
-  type: TypeAction.Input
+  type: CommandTypeAction.Input
 }
 
 export interface CommandActionReducer<T = unknown> {
   payload: CommandGenericReducer<T>
-  type: TypeAction.Reducer
+  type: CommandTypeAction.Reducer
 }
 
 export type CommandActions = Array<
@@ -209,58 +212,58 @@ interface InitialState extends StateSharedInitial {
 }
 
 interface Specification<_ extends Model<CommandState, Action[]>> {
-  [TypeAction.Reference]: {
+  [CommandTypeAction.Reference]: {
     [Options.Conflicts]: never
     [Options.Dependencies]: never
     [Options.Enabled]: $.True
     [Options.Keys]: 'reference'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Reference
+    [Options.Type]: typeof CommandTypeAction.Reference
   }
 
-  [TypeAction.Name]: {
-    [Options.Conflicts]: typeof TypeAction.Description
-    [Options.Dependencies]: typeof TypeAction.Reference
+  [CommandTypeAction.Name]: {
+    [Options.Conflicts]: typeof CommandTypeAction.Description
+    [Options.Dependencies]: typeof CommandTypeAction.Reference
     [Options.Enabled]: $.True
     [Options.Keys]: 'name'
     [Options.Once]: $.False
-    [Options.Type]: typeof TypeAction.Name
+    [Options.Type]: typeof CommandTypeAction.Name
   }
 
-  [TypeAction.Description]: {
+  [CommandTypeAction.Description]: {
     [Options.Conflicts]: never
-    [Options.Dependencies]: typeof TypeAction.Name
+    [Options.Dependencies]: typeof CommandTypeAction.Name
     [Options.Enabled]: $.True
     [Options.Keys]: 'description'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Description
+    [Options.Type]: typeof CommandTypeAction.Description
   }
 
-  [TypeAction.Input]: {
-    [Options.Conflicts]: typeof TypeAction.Reducer | typeof TypeAction.Subcommand
-    [Options.Dependencies]: typeof TypeAction.Description
+  [CommandTypeAction.Input]: {
+    [Options.Conflicts]: typeof CommandTypeAction.Reducer | typeof CommandTypeAction.Subcommand
+    [Options.Dependencies]: typeof CommandTypeAction.Description
     [Options.Enabled]: $.True
     [Options.Keys]: 'input'
     [Options.Once]: $.False
-    [Options.Type]: typeof TypeAction.Input
+    [Options.Type]: typeof CommandTypeAction.Input
   }
 
-  [TypeAction.Subcommand]: {
-    [Options.Conflicts]: typeof TypeAction.Input | typeof TypeAction.Reducer
-    [Options.Dependencies]: typeof TypeAction.Description
+  [CommandTypeAction.Subcommand]: {
+    [Options.Conflicts]: typeof CommandTypeAction.Input | typeof CommandTypeAction.Reducer
+    [Options.Dependencies]: typeof CommandTypeAction.Description
     [Options.Enabled]: $.True
     [Options.Keys]: 'subcommand'
     [Options.Once]: $.False
-    [Options.Type]: typeof TypeAction.Subcommand
+    [Options.Type]: typeof CommandTypeAction.Subcommand
   }
 
-  [TypeAction.Reducer]: {
+  [CommandTypeAction.Reducer]: {
     [Options.Conflicts]: never
-    [Options.Dependencies]: typeof TypeAction.Description
+    [Options.Dependencies]: typeof CommandTypeAction.Description
     [Options.Enabled]: $.True
     [Options.Keys]: 'reducer'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Reducer
+    [Options.Type]: typeof CommandTypeAction.Reducer
   }
 }
 
@@ -325,27 +328,27 @@ type ReducerSubcommandVariables<T extends Action[]> = Array<
 >
 
 interface Reducer<T extends Action[]> {
-  [TypeAction.Description]: {
+  [CommandTypeAction.Description]: {
     description: string
   }
-  [TypeAction.Input]: {
+  [CommandTypeAction.Input]: {
     inputs: ReducerInputInputs<T>
     isEmpty: false
     options: ReducerInputOptions<T>
     reducer: ReducerInputReducer<T>
     variables: ReducerInputVariables<T>
   }
-  [TypeAction.Name]: {
-    names: Array<Payload<$.Values<T>, TypeAction.Name>>
+  [CommandTypeAction.Name]: {
+    names: Array<Payload<$.Values<T>, CommandTypeAction.Name>>
   }
-  [TypeAction.Reducer]: {
+  [CommandTypeAction.Reducer]: {
     isEmpty: false
     reducer: PayloadActionReducer<T>
   }
-  [TypeAction.Reference]: {
-    reference: Payload<$.Values<T>, TypeAction.Reference>
+  [CommandTypeAction.Reference]: {
+    reference: Payload<$.Values<T>, CommandTypeAction.Reference>
   }
-  [TypeAction.Subcommand]: {
+  [CommandTypeAction.Subcommand]: {
     commands: ReducerSubcommandCommands<T>
     isEmpty: false
     options: ReducerSubcommandOptions<T>

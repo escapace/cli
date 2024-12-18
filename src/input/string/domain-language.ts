@@ -4,44 +4,59 @@ import { type Reference, SYMBOL_INPUT_STRING } from '../../types'
 import { assert } from '../../utilities/assert'
 import { reducer } from './reducer'
 import {
-  type ActionDefault,
-  type ActionDescription,
-  type ActionOption,
-  type ActionReference,
-  type ActionRepeat,
-  type Actions,
-  type ActionVariable,
-  type Settings,
-  type State,
-  TypeAction,
+  type InputStringActionDefault,
+  type InputStringActionDescription,
+  type InputStringActionOption,
+  type InputStringActionReference,
+  type InputStringActionRepeat,
+  type InputStringActions,
+  type InputStringActionVariable,
+  type InputStringSettings,
+  type InputStringState,
+  InputStringTypeAction,
 } from './types'
 
-const fluentReducer = (log: Actions): State => {
+const fluentReducer = (log: InputStringActions): InputStringState => {
   const reference = (
-    find(log, (action) => action.type === TypeAction.Reference) as ActionReference | undefined
+    find(log, (action) => action.type === InputStringTypeAction.Reference) as
+      | InputStringActionReference
+      | undefined
   )?.payload
 
-  const description = find(log, (action) => action.type === TypeAction.Description)?.payload
+  const description = find(
+    log,
+    (action) => action.type === InputStringTypeAction.Description,
+  )?.payload
 
   const _default = (
-    find(log, (action) => action.type === TypeAction.Default) as ActionDefault | undefined
+    find(log, (action) => action.type === InputStringTypeAction.Default) as
+      | InputStringActionDefault
+      | undefined
   )?.payload
 
-  const repeat = Boolean(find(log, ({ type }) => type === TypeAction.Repeat))
+  const repeat = Boolean(find(log, ({ type }) => type === InputStringTypeAction.Repeat))
 
   const isEmpty =
     log.length === 0 ||
-    !some(log, (action) => action.type === TypeAction.Option || action.type === TypeAction.Variable)
+    !some(
+      log,
+      (action) =>
+        action.type === InputStringTypeAction.Option ||
+        action.type === InputStringTypeAction.Variable,
+    )
 
   const rlog = reverse([...log])
 
   const options = map(
-    filter(rlog, ({ type }) => type === TypeAction.Option) as ActionOption[],
+    filter(rlog, ({ type }) => type === InputStringTypeAction.Option) as InputStringActionOption[],
     ({ payload }) => payload.name,
   )
 
   const variables = map(
-    filter(rlog, ({ type }) => type === TypeAction.Variable) as ActionVariable[],
+    filter(
+      rlog,
+      ({ type }) => type === InputStringTypeAction.Variable,
+    ) as InputStringActionVariable[],
     ({ payload }) => payload,
   )
 
@@ -58,111 +73,111 @@ const fluentReducer = (log: Actions): State => {
   }
 }
 
-export const string = builder<Settings>([
+export const string = builder<InputStringSettings>([
   {
     [Options.Interface]: (dispatch) => ({
       reference(reference: Reference) {
         assert.reference(reference)
 
-        return dispatch<ActionReference>({
+        return dispatch<InputStringActionReference>({
           payload: reference,
-          type: TypeAction.Reference,
+          type: InputStringTypeAction.Reference,
         })
       },
     }),
     [Options.Keys]: ['reference'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Reference,
+    [Options.Type]: InputStringTypeAction.Reference,
   },
   {
-    [Options.Dependencies]: [TypeAction.Reference],
+    [Options.Dependencies]: [InputStringTypeAction.Reference],
     [Options.Interface]: (dispatch) => ({
       description(description: string) {
         assert.string(description)
 
-        return dispatch<ActionDescription>({
+        return dispatch<InputStringActionDescription>({
           payload: description,
-          type: TypeAction.Description,
+          type: InputStringTypeAction.Description,
         })
       },
     }),
     [Options.Keys]: ['description'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Description,
+    [Options.Type]: InputStringTypeAction.Description,
   },
   {
-    [Options.Conflicts]: [TypeAction.Option, TypeAction.Variable],
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Conflicts]: [InputStringTypeAction.Option, InputStringTypeAction.Variable],
+    [Options.Dependencies]: [InputStringTypeAction.Description],
     [Options.Interface]: (dispatch) => ({
       repeat() {
-        return dispatch<ActionRepeat>({
+        return dispatch<InputStringActionRepeat>({
           payload: undefined,
-          type: TypeAction.Repeat,
+          type: InputStringTypeAction.Repeat,
         })
       },
     }),
     [Options.Keys]: ['repeat'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Repeat,
+    [Options.Type]: InputStringTypeAction.Repeat,
   },
   {
-    [Options.Conflicts]: [TypeAction.Default],
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Conflicts]: [InputStringTypeAction.Default],
+    [Options.Dependencies]: [InputStringTypeAction.Description],
     [Options.Interface]: (dispatch, _, { options }) => ({
       option(value: string) {
         assert.option(value, options)
 
-        return dispatch<ActionOption>({
+        return dispatch<InputStringActionOption>({
           payload: {
             name: value,
           },
-          type: TypeAction.Option,
+          type: InputStringTypeAction.Option,
         })
       },
     }),
     [Options.Keys]: ['option'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Option,
+    [Options.Type]: InputStringTypeAction.Option,
   },
   {
-    [Options.Conflicts]: [TypeAction.Default],
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Conflicts]: [InputStringTypeAction.Default],
+    [Options.Dependencies]: [InputStringTypeAction.Description],
     [Options.Interface]: (dispatch, _, { variables }) => ({
       variable(value: string) {
         assert.variable(value, variables)
 
-        return dispatch<ActionVariable>({
+        return dispatch<InputStringActionVariable>({
           payload: value,
-          type: TypeAction.Variable,
+          type: InputStringTypeAction.Variable,
         })
       },
     }),
     [Options.Keys]: ['variable'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Variable,
+    [Options.Type]: InputStringTypeAction.Variable,
   },
   {
     [Options.Conflicts]: [],
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Dependencies]: [InputStringTypeAction.Description],
     [Options.Enabled]: (_, state) => !state.isEmpty,
     [Options.Interface]: (dispatch, _, { repeat }) => ({
       default(value: string | string[]) {
         assert.inputStringDefault(value, repeat)
 
-        return dispatch<ActionDefault>({
+        return dispatch<InputStringActionDefault>({
           payload: value,
-          type: TypeAction.Default,
+          type: InputStringTypeAction.Default,
         })
       },
     }),
     [Options.Keys]: ['default'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Default,
+    [Options.Type]: InputStringTypeAction.Default,
   },
 ])

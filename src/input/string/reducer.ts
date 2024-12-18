@@ -1,8 +1,8 @@
 import { isEmpty, map, uniq } from 'lodash-es'
 import { normalizeString } from '../../utilities/normalize'
-import type { DefaultInputStringReducer } from './types'
+import type { InputStringReducerDefault } from './types'
 
-export const reducer: DefaultInputStringReducer = (_values, properties) => {
+export const reducer: InputStringReducerDefault = (_values, properties) => {
   const values = normalizeString(_values, properties)
   const strings = uniq(map(values, ({ value }) => value))
 

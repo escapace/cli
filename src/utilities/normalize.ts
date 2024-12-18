@@ -1,6 +1,6 @@
 import { flatMap, map, split } from 'lodash-es'
 import type { PropertiesInputChoice } from '../input/choice/types'
-import type { PropertiesInputString } from '../input/string/types'
+import type { InputStringProperties } from '../input/string/types'
 import {
   type DeNormalizedStringValue,
   type GenericOption,
@@ -11,7 +11,7 @@ import {
 
 export function normalizeString(
   previousValues: DeNormalizedStringValue[],
-  properties: PropertiesInputChoice | PropertiesInputString,
+  properties: InputStringProperties | PropertiesInputChoice,
 ): NormalizedStringValue[] {
   const { repeat } = properties.model.state
 

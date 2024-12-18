@@ -1,7 +1,7 @@
 import { SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
 import arg from 'arg'
 import { assign, filter, flatMap, map } from 'lodash-es'
-import { type CommandActionInput, type Command, TypeAction } from '../command/types'
+import { type CommandActionInput, type Command, CommandTypeAction } from '../command/types'
 import type { InputGroup } from '../input/group/types'
 import {
   type Input,
@@ -48,7 +48,7 @@ export const getSpecification = (command: Command): Specification => {
   return assign(
     {},
     ...map(
-      filter(log, ({ type }) => type === TypeAction.Input) as CommandActionInput[],
+      filter(log, ({ type }) => type === CommandTypeAction.Input) as CommandActionInput[],
       ({ payload }) => assign({}, ...next(payload)) as Specification,
     ),
   ) as Specification

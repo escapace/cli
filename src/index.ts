@@ -17,7 +17,7 @@ export { group } from './input/group/domain-language'
 export type { PropertiesInputGroup } from './input/group/types'
 
 export { string } from './input/string/domain-language'
-export type { PropertiesInputString } from './input/string/types'
+export type { InputStringProperties as PropertiesInputString } from './input/string/types'
 
 export type {
   Compose,

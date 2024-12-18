@@ -1,6 +1,6 @@
 import { intersection, slice, findIndex } from 'lodash-es'
 import { SYMBOL_STATE, SYMBOL_LOG } from '@escapace/fluent'
-import { type Command, TypeAction } from '../command/types'
+import { type Command, CommandTypeAction } from '../command/types'
 import { placeholderInputHelpGroup } from './placeholder-input-help-group'
 
 export const addPlaceholder = (command: Command): Command => {
@@ -12,12 +12,12 @@ export const addPlaceholder = (command: Command): Command => {
     return command
   }
 
-  const index = findIndex(command[SYMBOL_LOG], ({ type }) => type === TypeAction.Input)
+  const index = findIndex(command[SYMBOL_LOG], ({ type }) => type === CommandTypeAction.Input)
 
   return {
     [SYMBOL_LOG]: [
       ...slice(command[SYMBOL_LOG], 0, index),
-      { payload: placeholderInputHelpGroup, type: TypeAction.Input },
+      { payload: placeholderInputHelpGroup, type: CommandTypeAction.Input },
       ...slice(command[SYMBOL_LOG], index, command[SYMBOL_LOG].length),
     ],
     [SYMBOL_STATE]: {
