@@ -1,11 +1,11 @@
 import { filter, isEmpty, map, uniq } from 'lodash-es'
 import { InputType } from '../../types'
-import type { DefaultInputBooleanReducer } from './types'
+import type { InputBooleanReducerDefault } from './types'
 
 const invert = (value: boolean, pass: boolean) => (value ? pass : !pass)
 const toBool = (value: string) => /^(?:[1ty]|on|true|yes)$/i.test(value)
 
-export const reducer: DefaultInputBooleanReducer = (values, properties) => {
+export const reducer: InputBooleanReducerDefault = (values, properties) => {
   const product = uniq(
     filter(
       map(values, (value) =>

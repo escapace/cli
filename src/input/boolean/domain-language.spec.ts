@@ -3,7 +3,7 @@ import { assert, describe, it } from 'vitest'
 import { SYMBOL_INPUT_BOOLEAN } from '../../types'
 import { boolean } from './domain-language'
 import { reducer } from './reducer'
-import { TypeAction } from './types'
+import { InputBooleanTypeAction } from './types'
 
 describe('input/boolean', () => {
   it('domain-language', () => {
@@ -51,7 +51,7 @@ describe('input/boolean', () => {
       variables: [],
     })
 
-    assert.deepEqual(log(test1), [{ payload: reference, type: TypeAction.Reference }])
+    assert.deepEqual(log(test1), [{ payload: reference, type: InputBooleanTypeAction.Reference }])
 
     const test2 = test1.description('ABC')
 
@@ -73,8 +73,8 @@ describe('input/boolean', () => {
     })
 
     assert.deepEqual(log(test2), [
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: 'ABC', type: InputBooleanTypeAction.Description },
+      { payload: reference, type: InputBooleanTypeAction.Reference },
     ])
 
     const test3 = test2.variable('VARIABLE', 'NO_VARIABLE').option('--option', '--no-option')
@@ -108,17 +108,17 @@ describe('input/boolean', () => {
           false: '--no-option',
           true: '--option',
         },
-        type: TypeAction.Option,
+        type: InputBooleanTypeAction.Option,
       },
       {
         payload: {
           false: 'NO_VARIABLE',
           true: 'VARIABLE',
         },
-        type: TypeAction.Variable,
+        type: InputBooleanTypeAction.Variable,
       },
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: 'ABC', type: InputBooleanTypeAction.Description },
+      { payload: reference, type: InputBooleanTypeAction.Reference },
     ])
 
     const test4 = test3.default(false)
@@ -147,23 +147,23 @@ describe('input/boolean', () => {
     })
 
     assert.deepEqual(log(test4), [
-      { payload: false, type: TypeAction.Default },
+      { payload: false, type: InputBooleanTypeAction.Default },
       {
         payload: {
           false: '--no-option',
           true: '--option',
         },
-        type: TypeAction.Option,
+        type: InputBooleanTypeAction.Option,
       },
       {
         payload: {
           false: 'NO_VARIABLE',
           true: 'VARIABLE',
         },
-        type: TypeAction.Variable,
+        type: InputBooleanTypeAction.Variable,
       },
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: 'ABC', type: InputBooleanTypeAction.Description },
+      { payload: reference, type: InputBooleanTypeAction.Reference },
     ])
   })
 })

@@ -3,7 +3,7 @@ import { assert, describe, it } from 'vitest'
 import { SYMBOL_INPUT_CHOICE } from '../../types'
 import { choice } from './domain-language'
 import { reducer } from './reducer'
-import { TypeAction } from './types'
+import { InputChoiceTypeAction } from './types'
 
 describe('input/choice', () => {
   it('domain-language', () => {
@@ -34,7 +34,7 @@ describe('input/choice', () => {
 
     assert.hasAllKeys(test1, [SYMBOL_LOG, SYMBOL_STATE, 'description'])
 
-    assert.deepEqual(log(test1), [{ payload: reference, type: TypeAction.Reference }])
+    assert.deepEqual(log(test1), [{ payload: reference, type: InputChoiceTypeAction.Reference }])
 
     assert.deepEqual(state(test1), {
       choices: [],
@@ -54,8 +54,8 @@ describe('input/choice', () => {
     assert.hasAllKeys(test2, [SYMBOL_LOG, SYMBOL_STATE, 'choices'])
 
     assert.deepEqual(log(test2), [
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: 'ABC', type: InputChoiceTypeAction.Description },
+      { payload: reference, type: InputChoiceTypeAction.Reference },
     ])
 
     assert.deepEqual(state(test2), {
@@ -76,9 +76,9 @@ describe('input/choice', () => {
     assert.hasAllKeys(test3, [SYMBOL_LOG, SYMBOL_STATE, 'option', 'repeat', 'variable'])
 
     assert.deepEqual(log(test3), [
-      { payload: ['A', 'B'], type: TypeAction.Choices },
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: ['A', 'B'], type: InputChoiceTypeAction.Choices },
+      { payload: 'ABC', type: InputChoiceTypeAction.Description },
+      { payload: reference, type: InputChoiceTypeAction.Reference },
     ])
 
     assert.deepEqual(state(test3), {
@@ -99,10 +99,10 @@ describe('input/choice', () => {
     assert.hasAllKeys(test4, [SYMBOL_LOG, SYMBOL_STATE, 'option', 'variable'])
 
     assert.deepEqual(log(test4), [
-      { payload: undefined, type: TypeAction.Repeat },
-      { payload: ['A', 'B'], type: TypeAction.Choices },
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: undefined, type: InputChoiceTypeAction.Repeat },
+      { payload: ['A', 'B'], type: InputChoiceTypeAction.Choices },
+      { payload: 'ABC', type: InputChoiceTypeAction.Description },
+      { payload: reference, type: InputChoiceTypeAction.Reference },
     ])
 
     assert.deepEqual(state(test4), {
@@ -127,12 +127,12 @@ describe('input/choice', () => {
         payload: {
           name: '--option',
         },
-        type: TypeAction.Option,
+        type: InputChoiceTypeAction.Option,
       },
-      { payload: undefined, type: TypeAction.Repeat },
-      { payload: ['A', 'B'], type: TypeAction.Choices },
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: undefined, type: InputChoiceTypeAction.Repeat },
+      { payload: ['A', 'B'], type: InputChoiceTypeAction.Choices },
+      { payload: 'ABC', type: InputChoiceTypeAction.Description },
+      { payload: reference, type: InputChoiceTypeAction.Reference },
     ])
 
     assert.deepEqual(state(test5), {
@@ -155,18 +155,18 @@ describe('input/choice', () => {
     assert.deepEqual(log(test6), [
       {
         payload: 'VARIABLE',
-        type: TypeAction.Variable,
+        type: InputChoiceTypeAction.Variable,
       },
       {
         payload: {
           name: '--option',
         },
-        type: TypeAction.Option,
+        type: InputChoiceTypeAction.Option,
       },
-      { payload: undefined, type: TypeAction.Repeat },
-      { payload: ['A', 'B'], type: TypeAction.Choices },
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: undefined, type: InputChoiceTypeAction.Repeat },
+      { payload: ['A', 'B'], type: InputChoiceTypeAction.Choices },
+      { payload: 'ABC', type: InputChoiceTypeAction.Description },
+      { payload: reference, type: InputChoiceTypeAction.Reference },
     ])
 
     assert.deepEqual(state(test6), {
@@ -187,21 +187,21 @@ describe('input/choice', () => {
     assert.hasAllKeys(test7, [SYMBOL_LOG, SYMBOL_STATE])
 
     assert.deepEqual(log(test7), [
-      { payload: ['B'], type: TypeAction.Default },
+      { payload: ['B'], type: InputChoiceTypeAction.Default },
       {
         payload: 'VARIABLE',
-        type: TypeAction.Variable,
+        type: InputChoiceTypeAction.Variable,
       },
       {
         payload: {
           name: '--option',
         },
-        type: TypeAction.Option,
+        type: InputChoiceTypeAction.Option,
       },
-      { payload: undefined, type: TypeAction.Repeat },
-      { payload: ['A', 'B'], type: TypeAction.Choices },
-      { payload: 'ABC', type: TypeAction.Description },
-      { payload: reference, type: TypeAction.Reference },
+      { payload: undefined, type: InputChoiceTypeAction.Repeat },
+      { payload: ['A', 'B'], type: InputChoiceTypeAction.Choices },
+      { payload: 'ABC', type: InputChoiceTypeAction.Description },
+      { payload: reference, type: InputChoiceTypeAction.Reference },
     ])
 
     assert.deepEqual(state(test7), {

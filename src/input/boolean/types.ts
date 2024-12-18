@@ -24,7 +24,7 @@ export declare const INPUT_BOOLEAN_INTERFACE: unique symbol
 export declare const INPUT_BOOLEAN_SPECIFICATION: unique symbol
 export declare const INPUT_BOOLEAN_REDUCER: unique symbol
 
-export enum TypeAction {
+export enum InputBooleanTypeAction {
   Default,
   Description,
   Option,
@@ -32,19 +32,19 @@ export enum TypeAction {
   Variable,
 }
 
-export interface ActionReference<T extends Reference = Reference> {
+export interface InputBooleanActionReference<T extends Reference = Reference> {
   payload: T
-  type: TypeAction.Reference
+  type: InputBooleanTypeAction.Reference
 }
 
-export interface ActionDescription {
+export interface InputBooleanActionDescription {
   payload: string
-  type: TypeAction.Description
+  type: InputBooleanTypeAction.Description
 }
 
-export interface ActionDefault<T extends boolean = boolean> {
+export interface InputBooleanActionDefault<T extends boolean = boolean> {
   payload: T
-  type: TypeAction.Default
+  type: InputBooleanTypeAction.Default
 }
 
 interface TruthTable<
@@ -55,33 +55,39 @@ interface TruthTable<
   true: T
 }
 
-export interface ActionVariable<
+export interface InputBooleanActionVariable<
   T extends string | undefined = string | undefined,
   U extends string | undefined = string | undefined,
 > {
   payload: TruthTable<T, U>
-  type: TypeAction.Variable
+  type: InputBooleanTypeAction.Variable
 }
 
-export interface ActionOption<
+export interface InputBooleanActionOption<
   T extends string | undefined = string | undefined,
   U extends string | undefined = string | undefined,
 > {
   payload: TruthTable<T, U>
-  type: TypeAction.Option
+  type: InputBooleanTypeAction.Option
 }
 
-export type Actions = Array<
-  ActionDefault | ActionDescription | ActionOption | ActionReference | ActionVariable
+export type InputBooleanActions = Array<
+  | InputBooleanActionDefault
+  | InputBooleanActionDescription
+  | InputBooleanActionOption
+  | InputBooleanActionReference
+  | InputBooleanActionVariable
 >
 
-type InterfaceDefault<T extends Model<State, Actions>> = <U extends boolean>(
+type InterfaceDefault<T extends Model<InputBooleanState, InputBooleanActions>> = <
+  U extends boolean,
+>(
   value: U,
-) => Next<Settings, T, ActionDefault<U>>
+) => Next<InputBooleanSettings, T, InputBooleanActionDefault<U>>
 
-type InterfaceDescription<T extends Model<State, Actions>> = (
+type InterfaceDescription<T extends Model<InputBooleanState, InputBooleanActions>> = (
   description: string,
-) => Next<Settings, T, ActionDescription>
+) => Next<InputBooleanSettings, T, InputBooleanActionDescription>
 
 type InterfaceOptionOrVariableValues<
   T extends string,
@@ -92,25 +98,28 @@ type InterfaceOptionOrVariableValues<
   | [Exclude<P, T | undefined>]
   | [undefined, Exclude<Q, T | undefined>]
 
-type InterfaceOption<T extends Model<State, Actions>> = <
+type InterfaceOption<T extends Model<InputBooleanState, InputBooleanActions>> = <
   P extends string | undefined = undefined,
   Q extends string | undefined = undefined,
 >(
   ...values: InterfaceOptionOrVariableValues<$.Values<T['state']['options']>, P, Q>
-) => Next<Settings, T, ActionOption<P, Q>>
+) => Next<InputBooleanSettings, T, InputBooleanActionOption<P, Q>>
 
-type InterfaceReference<T extends Model<State, Actions>> = <U extends Reference>(
+type InterfaceReference<T extends Model<InputBooleanState, InputBooleanActions>> = <
+  U extends Reference,
+>(
   reference: U,
-) => Next<Settings, T, ActionReference<U>>
+) => Next<InputBooleanSettings, T, InputBooleanActionReference<U>>
 
-type InterfaceVariable<T extends Model<State, Actions>> = <
+type InterfaceVariable<T extends Model<InputBooleanState, InputBooleanActions>> = <
   P extends string | undefined = undefined,
   Q extends string | undefined = undefined,
 >(
   ...values: InterfaceOptionOrVariableValues<$.Values<T['state']['variables']>, P, Q>
-) => Next<Settings, T, ActionVariable<P, Q>>
+) => Next<InputBooleanSettings, T, InputBooleanActionVariable<P, Q>>
 
-interface Interface<T extends Model<State, Actions>> extends FluentInterface<T> {
+interface Interface<T extends Model<InputBooleanState, InputBooleanActions>>
+  extends FluentInterface<T> {
   default: InterfaceDefault<T>
   description: InterfaceDescription<T>
   option: InterfaceOption<T>
@@ -118,17 +127,17 @@ interface Interface<T extends Model<State, Actions>> extends FluentInterface<T> 
   variable: InterfaceVariable<T>
 }
 
-export interface Settings {
+export interface InputBooleanSettings {
   [Options.InitialState]: InitialState
   [Options.Interface]: typeof INPUT_BOOLEAN_INTERFACE
   [Options.Reducer]: typeof INPUT_BOOLEAN_REDUCER
   [Options.Specification]: typeof INPUT_BOOLEAN_SPECIFICATION
-  [Options.State]: State
+  [Options.State]: InputBooleanState
 }
 
-export interface State extends StateShared {
+export interface InputBooleanState extends StateShared {
   default: boolean | undefined
-  reducer: GenericInputBooleanReducer<boolean | undefined>
+  reducer: InputBooleanReducerGeneric<boolean | undefined>
   table: {
     options: Record<string, boolean>
     variables: Record<string, boolean>
@@ -138,7 +147,7 @@ export interface State extends StateShared {
 
 interface InitialState extends StateSharedInitial {
   default: undefined
-  reducer: GenericInputBooleanReducer<boolean | undefined>
+  reducer: InputBooleanReducerGeneric<boolean | undefined>
   table: {
     options: Record<string, boolean>
     variables: Record<string, boolean>
@@ -146,76 +155,84 @@ interface InitialState extends StateSharedInitial {
   type: typeof SYMBOL_INPUT_BOOLEAN
 }
 
-interface Specification<T extends Model<State, Action[]>> {
-  [TypeAction.Reference]: {
+interface Specification<T extends Model<InputBooleanState, Action[]>> {
+  [InputBooleanTypeAction.Reference]: {
     [Options.Conflicts]: never
     [Options.Dependencies]: never
     [Options.Enabled]: $.True
     [Options.Keys]: 'reference'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Reference
+    [Options.Type]: typeof InputBooleanTypeAction.Reference
   }
 
-  [TypeAction.Description]: {
+  [InputBooleanTypeAction.Description]: {
     [Options.Conflicts]: never
-    [Options.Dependencies]: typeof TypeAction.Reference
+    [Options.Dependencies]: typeof InputBooleanTypeAction.Reference
     [Options.Enabled]: $.True
     [Options.Keys]: 'description'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Description
+    [Options.Type]: typeof InputBooleanTypeAction.Description
   }
 
-  [TypeAction.Option]: {
-    [Options.Conflicts]: typeof TypeAction.Default
-    [Options.Dependencies]: typeof TypeAction.Description
+  [InputBooleanTypeAction.Option]: {
+    [Options.Conflicts]: typeof InputBooleanTypeAction.Default
+    [Options.Dependencies]: typeof InputBooleanTypeAction.Description
     [Options.Enabled]: $.True
     [Options.Keys]: 'option'
     [Options.Once]: $.False
-    [Options.Type]: typeof TypeAction.Option
+    [Options.Type]: typeof InputBooleanTypeAction.Option
   }
 
-  [TypeAction.Variable]: {
-    [Options.Conflicts]: typeof TypeAction.Default
-    [Options.Dependencies]: typeof TypeAction.Description
+  [InputBooleanTypeAction.Variable]: {
+    [Options.Conflicts]: typeof InputBooleanTypeAction.Default
+    [Options.Dependencies]: typeof InputBooleanTypeAction.Description
     [Options.Enabled]: $.True
     [Options.Keys]: 'variable'
     [Options.Once]: $.False
-    [Options.Type]: typeof TypeAction.Variable
+    [Options.Type]: typeof InputBooleanTypeAction.Variable
   }
 
-  [TypeAction.Default]: {
+  [InputBooleanTypeAction.Default]: {
     [Options.Conflicts]: never
-    [Options.Dependencies]: typeof TypeAction.Description
+    [Options.Dependencies]: typeof InputBooleanTypeAction.Description
     // TODO: use conflict?
-    [Options.Enabled]: $.Not<$.Is.Never<Extract<$.Values<T['log']>, ActionOption | ActionVariable>>>
+    [Options.Enabled]: $.Not<
+      $.Is.Never<Extract<$.Values<T['log']>, InputBooleanActionOption | InputBooleanActionVariable>>
+    >
     [Options.Keys]: 'default'
     [Options.Once]: $.True
-    [Options.Type]: typeof TypeAction.Default
+    [Options.Type]: typeof InputBooleanTypeAction.Default
   }
 }
 
 declare module '@escapace/typelevel/hkt' {
   interface URI2HKT<A> {
-    [INPUT_BOOLEAN_INTERFACE]: Interface<$.Cast<A, Model<State>>>
+    [INPUT_BOOLEAN_INTERFACE]: Interface<$.Cast<A, Model<InputBooleanState>>>
     [INPUT_BOOLEAN_REDUCER]: Reducer<$.Cast<A, Action[]>>
-    [INPUT_BOOLEAN_SPECIFICATION]: Specification<$.Cast<A, Model<State>>>
+    [INPUT_BOOLEAN_SPECIFICATION]: Specification<$.Cast<A, Model<InputBooleanState>>>
   }
 }
 
-type PayloadActionDefault<T extends Action[]> = Payload<$.Values<T>, TypeAction.Default>
-type PayloadActionOption<T extends Action[]> = Payload<$.Values<T>, TypeAction.Option>
-type PayloadActionReference<T extends Action[]> = Payload<$.Values<T>, TypeAction.Reference>
-type PayloadActionVariable<T extends Action[]> = Payload<$.Values<T>, TypeAction.Variable>
+type PayloadActionDefault<T extends Action[]> = Payload<$.Values<T>, InputBooleanTypeAction.Default>
+type PayloadActionOption<T extends Action[]> = Payload<$.Values<T>, InputBooleanTypeAction.Option>
+type PayloadActionReference<T extends Action[]> = Payload<
+  $.Values<T>,
+  InputBooleanTypeAction.Reference
+>
+type PayloadActionVariable<T extends Action[]> = Payload<
+  $.Values<T>,
+  InputBooleanTypeAction.Variable
+>
 
 interface Reducer<T extends Action[]> {
-  [TypeAction.Default]: {
+  [InputBooleanTypeAction.Default]: {
     default: PayloadActionDefault<T>
-    reducer: GenericInputBooleanReducer<boolean>
+    reducer: InputBooleanReducerGeneric<boolean>
   }
-  [TypeAction.Description]: {
+  [InputBooleanTypeAction.Description]: {
     description: string
   }
-  [TypeAction.Option]: {
+  [InputBooleanTypeAction.Option]: {
     isEmpty: false
     options: PayloadActionOption<T> extends {
       false: infer Q
@@ -224,10 +241,10 @@ interface Reducer<T extends Action[]> {
       ? Array<Exclude<P, undefined> | Exclude<Q, undefined>>
       : []
   }
-  [TypeAction.Reference]: {
+  [InputBooleanTypeAction.Reference]: {
     reference: PayloadActionReference<T>
   }
-  [TypeAction.Variable]: {
+  [InputBooleanTypeAction.Variable]: {
     isEmpty: false
     variables: PayloadActionVariable<T> extends {
       false: infer Q
@@ -258,32 +275,33 @@ type ValuesVariables<T extends string> = $.If<
   }
 >
 
-type Values<T extends Model<State, Actions>> = Array<
+type Values<T extends Model<InputBooleanState, InputBooleanActions>> = Array<
   | ValuesOptions<$.Values<T['state']['options']>>
   | ValuesVariables<$.Values<T['state']['variables']>>
 >
 
-export interface InputBooleanState extends State {
+export interface InputBooleanStateInitial extends InputBooleanState {
   isEmpty: false
 }
 
-export interface InputBoolean extends FluentInterface<Model<InputBooleanState, Actions>> {}
+export interface InputBoolean
+  extends FluentInterface<Model<InputBooleanStateInitial, InputBooleanActions>> {}
 
 interface ModelInputBoolean {
   readonly log: InputBoolean[typeof SYMBOL_LOG]
   readonly state: InputBoolean[typeof SYMBOL_STATE]
 }
 
-export interface PropertiesInputBoolean extends InputPropertiesShared {
+export interface InputBooleanProperties extends InputPropertiesShared {
   readonly model: ModelInputBoolean
 }
 
-type GenericInputBooleanReducer<T = unknown, U = any> = (
+type InputBooleanReducerGeneric<T = unknown, U = any> = (
   values: U,
-  properties: PropertiesInputBoolean,
+  properties: InputBooleanProperties,
 ) => T
 
-export type DefaultInputBooleanReducer = GenericInputBooleanReducer<
+export type InputBooleanReducerDefault = InputBooleanReducerGeneric<
   any,
-  Values<Model<State, Actions>>
+  Values<Model<InputBooleanState, InputBooleanActions>>
 >

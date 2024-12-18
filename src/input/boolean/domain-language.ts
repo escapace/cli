@@ -5,31 +5,43 @@ import { type Reference, SYMBOL_INPUT_BOOLEAN } from '../../types'
 import { assert } from '../../utilities/assert'
 import { reducer } from './reducer'
 import {
-  type ActionDefault,
-  type ActionDescription,
-  type ActionOption,
-  type ActionReference,
-  type Actions,
-  type ActionVariable,
-  type Settings,
-  type State,
-  TypeAction,
+  type InputBooleanActionDefault,
+  type InputBooleanActionDescription,
+  type InputBooleanActionOption,
+  type InputBooleanActionReference,
+  type InputBooleanActions,
+  type InputBooleanActionVariable,
+  type InputBooleanSettings,
+  type InputBooleanState,
+  InputBooleanTypeAction,
 } from './types'
 
-const fluentReducer = (log: Actions): State => {
+const fluentReducer = (log: InputBooleanActions): InputBooleanState => {
   const reference = (
-    find(log, (action) => action.type === TypeAction.Reference) as ActionReference | undefined
+    find(log, (action) => action.type === InputBooleanTypeAction.Reference) as
+      | InputBooleanActionReference
+      | undefined
   )?.payload
 
-  const description = find(log, (action) => action.type === TypeAction.Description)?.payload
+  const description = find(
+    log,
+    (action) => action.type === InputBooleanTypeAction.Description,
+  )?.payload
 
   const _default = (
-    find(log, (action) => action.type === TypeAction.Default) as ActionDefault | undefined
+    find(log, (action) => action.type === InputBooleanTypeAction.Default) as
+      | InputBooleanActionDefault
+      | undefined
   )?.payload
 
   const isEmpty =
     log.length === 0 ||
-    !some(log, (action) => action.type === TypeAction.Option || action.type === TypeAction.Variable)
+    !some(
+      log,
+      (action) =>
+        action.type === InputBooleanTypeAction.Option ||
+        action.type === InputBooleanTypeAction.Variable,
+    )
 
   const rlog = reverse([...log])
 
@@ -37,7 +49,10 @@ const fluentReducer = (log: Actions): State => {
     options: assign(
       {},
       ...map(
-        filter(rlog, ({ type }) => type === TypeAction.Option) as ActionOption[],
+        filter(
+          rlog,
+          ({ type }) => type === InputBooleanTypeAction.Option,
+        ) as InputBooleanActionOption[],
         ({ payload }): { [key: string]: boolean } =>
           assign(
             {},
@@ -49,7 +64,10 @@ const fluentReducer = (log: Actions): State => {
     variables: assign(
       {},
       ...map(
-        filter(rlog, ({ type }) => type === TypeAction.Variable) as ActionVariable[],
+        filter(
+          rlog,
+          ({ type }) => type === InputBooleanTypeAction.Variable,
+        ) as InputBooleanActionVariable[],
         ({ payload }): { [key: string]: boolean } =>
           assign(
             {},
@@ -73,102 +91,104 @@ const fluentReducer = (log: Actions): State => {
   }
 }
 
-export const boolean = builder<Settings>([
+export const boolean = builder<InputBooleanSettings>([
   {
     [Options.Interface]: (dispatch) => ({
       reference(reference: Reference) {
         assert.reference(reference)
 
-        return dispatch<ActionReference>({
+        return dispatch<InputBooleanActionReference>({
           payload: reference,
-          type: TypeAction.Reference,
+          type: InputBooleanTypeAction.Reference,
         })
       },
     }),
     [Options.Keys]: ['reference'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Reference,
+    [Options.Type]: InputBooleanTypeAction.Reference,
   },
   {
-    [Options.Dependencies]: [TypeAction.Reference],
+    [Options.Dependencies]: [InputBooleanTypeAction.Reference],
     [Options.Interface]: (dispatch) => ({
       description(description: string) {
         assert.string(description)
 
-        return dispatch<ActionDescription>({
+        return dispatch<InputBooleanActionDescription>({
           payload: description,
-          type: TypeAction.Description,
+          type: InputBooleanTypeAction.Description,
         })
       },
     }),
     [Options.Keys]: ['description'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Description,
+    [Options.Type]: InputBooleanTypeAction.Description,
   },
   {
-    [Options.Conflicts]: [TypeAction.Default],
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Conflicts]: [InputBooleanTypeAction.Default],
+    [Options.Dependencies]: [InputBooleanTypeAction.Description],
     [Options.Interface]: (dispatch, _, state) => ({
       option(...value: [string | undefined, string | undefined]) {
         assert.inputDichotomousOption(value, state.options)
 
-        return dispatch<ActionOption>({
+        return dispatch<InputBooleanActionOption>({
           payload: {
             false: value[1],
             true: value[0],
           },
-          type: TypeAction.Option,
+          type: InputBooleanTypeAction.Option,
         })
       },
     }),
     [Options.Keys]: ['option'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Option,
+    [Options.Type]: InputBooleanTypeAction.Option,
   },
   {
-    [Options.Conflicts]: [TypeAction.Default],
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Conflicts]: [InputBooleanTypeAction.Default],
+    [Options.Dependencies]: [InputBooleanTypeAction.Description],
     [Options.Interface]: (dispatch, _, state) => ({
       variable(...value: [string | undefined, string | undefined]) {
         assert.inputBooleanVariable(value, state.variables)
 
-        return dispatch<ActionVariable>({
+        return dispatch<InputBooleanActionVariable>({
           payload: {
             false: value[1],
             true: value[0],
           },
-          type: TypeAction.Variable,
+          type: InputBooleanTypeAction.Variable,
         })
       },
     }),
     [Options.Keys]: ['variable'],
     [Options.Once]: false,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Variable,
+    [Options.Type]: InputBooleanTypeAction.Variable,
   },
   {
-    [Options.Dependencies]: [TypeAction.Description],
+    [Options.Dependencies]: [InputBooleanTypeAction.Description],
     [Options.Enabled]: (log) =>
       some(
         log,
-        (action) => action.type === TypeAction.Option || action.type === TypeAction.Variable,
+        (action) =>
+          action.type === InputBooleanTypeAction.Option ||
+          action.type === InputBooleanTypeAction.Variable,
       ),
     [Options.Interface]: (dispatch) => ({
       default(value: boolean) {
         assert.boolean(value)
 
-        return dispatch<ActionDefault>({
+        return dispatch<InputBooleanActionDefault>({
           payload: value,
-          type: TypeAction.Default,
+          type: InputBooleanTypeAction.Default,
         })
       },
     }),
     [Options.Keys]: ['default'],
     [Options.Once]: true,
     [Options.Reducer]: fluentReducer,
-    [Options.Type]: TypeAction.Default,
+    [Options.Type]: InputBooleanTypeAction.Default,
   },
 ])

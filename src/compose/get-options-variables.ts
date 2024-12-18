@@ -1,6 +1,6 @@
 import { compact, intersection, keys } from 'lodash-es'
-import type { InputBooleanState } from '../input/boolean/types'
-import type { InputChoiceState } from '../input/choice/types'
+import type { InputBooleanStateInitial } from '../input/boolean/types'
+import type { InputChoiceStateInitial } from '../input/choice/types'
 import type { InputCountState } from '../input/count/types'
 import type { InputGroupState } from '../input/group/types'
 import type { InputStringStateInitial } from '../input/string/types'
@@ -8,8 +8,8 @@ import { type GenericOption, type GenericVariable, InputType, type Match } from 
 
 export const getOptionsVariables = (
   state:
-    | InputBooleanState
-    | InputChoiceState
+    | InputBooleanStateInitial
+    | InputChoiceStateInitial
     | InputCountState
     | InputGroupState
     | InputStringStateInitial,
