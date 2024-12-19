@@ -77,6 +77,25 @@ describe('input/string/reducer', () => {
   })
 
   it('...', async () => {
+    const { cmd, spy } = withRepeat()
+
+    await cmd({ argv: [], env: {} })
+
+    assert.deepEqual(spy.mock.calls[0][0], {
+      string: ['picture'],
+    })
+
+    await cmd({
+      argv: ['--str', '!', '--str', 'ABC'],
+      env: { STRING: '"Hello:Hello":"World"' },
+    })
+
+    assert.deepEqual(spy.mock.calls[1][0], {
+      string: ['!', 'ABC', 'Hello:Hello', 'World'],
+    })
+  })
+
+  it('...', async () => {
     const { cmd, spy } = withoutRepeat()
 
     await cmd({ argv: [], env: {} })

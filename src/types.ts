@@ -1,5 +1,3 @@
-/* eslint-disable typescript/no-unsafe-function-type */
-
 import type { FluentInterface, Model, SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
 import type $ from '@escapace/typelevel'
 import type { InputBoolean } from './input/boolean/types'
@@ -97,9 +95,8 @@ export type UnionMerge<T extends object> =
     : never
 
 export interface Settings {
-  // TODO: custom help function
-  help: boolean | Function
-  split: string
+  quotes: string[]
+  separator: string
 }
 
 interface Console {

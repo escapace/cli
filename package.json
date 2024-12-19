@@ -10,6 +10,7 @@
   "dependencies": {
     "arg": "^5.0.2",
     "lodash-es": "^4.17.21",
+    "split-string": "^6.1.0",
     "string-width": "^7.2.0",
     "wrap-ansi": "^9.0.0"
   },

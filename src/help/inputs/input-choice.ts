@@ -30,7 +30,7 @@ export const usageInputChoice = (
             choices.length === 1
               ? choices[0]
               : `(${join(
-                  map(choices, (choice) => `${properties.settings.split}${choice}`),
+                  map(choices, (choice) => `${properties.settings.separator}${choice}`),
                   HELP_SIGN_OR,
                 )})`
           }${repeat ? `${HELP_SIGN_REPEAT}` : ''}`,

@@ -26,7 +26,7 @@ export const usageInputString = (
         ? undefined
         : `${enclose(variables)}=${
             repeat
-              ? `<string>[${properties.settings.split}<string>]${HELP_SIGN_REPEAT}`
+              ? `<string>[${properties.settings.separator}<string>]${HELP_SIGN_REPEAT}`
               : '<string>'
           }`,
   }

@@ -56,13 +56,17 @@ export const composeFactory =
   <T extends Command>(command: T, _settings: Partial<Settings> = {}) => {
     assert.command(command)
 
-    const settings: Settings = defaults({ ..._settings }, { help: true, split: ':' })
+    // TODO: validate settings
+    const settings: Settings = defaults({ ..._settings }, {
+      // help: true,
+      quotes: ['"', "'"],
+      separator: ':',
+    } satisfies Settings)
 
     const intents = listIntent(extract(command))
 
     return async (userContext = {}): Promise<void> => {
       // TODO: assert user context
-
       const context = defaultContext(presetContext, userContext)
 
       try {
