@@ -1,10 +1,10 @@
-import { isEmpty, map, uniq } from 'lodash-es'
+import { isEmpty, map } from 'lodash-es'
 import { normalizeString } from '../../utilities/normalize'
 import type { InputStringReducerDefault } from './types'
 
 export const reducer: InputStringReducerDefault = (_values, properties) => {
   const values = normalizeString(_values, properties)
-  const strings = uniq(map(values, ({ value }) => value))
+  const strings = map(values, ({ value }) => value)
 
   if (isEmpty(strings)) {
     return properties.model.state.default

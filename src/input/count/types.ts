@@ -13,8 +13,8 @@ import type {
   GenericOption,
   InputPropertiesShared,
   Reference,
-  StateSharedInitial,
   StateShared,
+  StateSharedInitial,
   SYMBOL_INPUT_COUNT,
 } from '../../types'
 
@@ -213,7 +213,7 @@ interface InputCountModel {
   readonly state: InputCount[typeof SYMBOL_STATE]
 }
 
-export interface InputCountProperties extends InputPropertiesShared {
+interface InputCountProperties extends InputPropertiesShared {
   readonly model: InputCountModel
 }
 

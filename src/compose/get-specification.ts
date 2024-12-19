@@ -1,7 +1,7 @@
 import { SYMBOL_LOG, SYMBOL_STATE } from '@escapace/fluent'
 import arg from 'arg'
 import { assign, filter, flatMap, map } from 'lodash-es'
-import { type CommandActionInput, type Command, CommandTypeAction } from '../command/types'
+import { type Command, type CommandActionInput, CommandTypeAction } from '../command/types'
 import type { InputGroup } from '../input/group/types'
 import {
   type Input,
@@ -11,6 +11,7 @@ import {
   SYMBOL_INPUT_CHOICE,
   SYMBOL_INPUT_COUNT,
   SYMBOL_INPUT_GROUP,
+  SYMBOL_INPUT_NUMBER,
   SYMBOL_INPUT_STRING,
 } from '../types'
 
@@ -26,6 +27,8 @@ const match = (
       return state.repeat ? [String] : String
     case SYMBOL_INPUT_COUNT:
       return arg.COUNT
+    case SYMBOL_INPUT_NUMBER:
+      return state.repeat ? [Number] : Number
     case SYMBOL_INPUT_STRING:
       return state.repeat ? [String] : String
   }

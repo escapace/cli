@@ -12,11 +12,11 @@ import type {
 } from '@escapace/fluent'
 
 import type {
-  InputType,
   InputPropertiesShared,
+  InputType,
   Reference,
-  StateSharedInitial,
   StateShared,
+  StateSharedInitial,
   SYMBOL_INPUT_BOOLEAN,
 } from '../../types'
 
@@ -292,7 +292,7 @@ interface ModelInputBoolean {
   readonly state: InputBoolean[typeof SYMBOL_STATE]
 }
 
-export interface InputBooleanProperties extends InputPropertiesShared {
+interface InputBooleanProperties extends InputPropertiesShared {
   readonly model: ModelInputBoolean
 }
 

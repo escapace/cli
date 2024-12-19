@@ -10,12 +10,14 @@ import type { InputString } from './input/string/types'
 import type { Command, CommandEmpty, CommandLookupValues } from './command/types'
 
 import type { Spec as Specification } from 'arg'
+import type { InputNumber } from './input/number/types'
 export type { Spec as Specification, Handler as SpecificationHandler } from 'arg'
 
 export const SYMBOL_INPUT_BOOLEAN = Symbol.for('ESCAPACE_CLI_INPUT_BOOLEAN')
 export const SYMBOL_INPUT_CHOICE = Symbol.for('ESCAPACE_CLI_INPUT_CHOICE')
 export const SYMBOL_INPUT_COUNT = Symbol.for('ESCAPACE_CLI_INPUT_COUNT')
 export const SYMBOL_INPUT_STRING = Symbol.for('ESCAPACE_CLI_INPUT_STRING')
+export const SYMBOL_INPUT_NUMBER = Symbol.for('ESCAPACE_CLI_INPUT_NUMBER')
 export const SYMBOL_INPUT_GROUP = Symbol.for('ESCAPACE_CLI_INPUT_GROUP')
 export const SYMBOL_COMMAND = Symbol.for('ESCAPACE_CLI_COMMAND')
 
@@ -24,6 +26,7 @@ export type InputTypes =
   | typeof SYMBOL_INPUT_CHOICE
   | typeof SYMBOL_INPUT_COUNT
   | typeof SYMBOL_INPUT_GROUP
+  | typeof SYMBOL_INPUT_NUMBER
   | typeof SYMBOL_INPUT_STRING
 
 export type Reference = number | string
@@ -52,7 +55,7 @@ export interface StateSharedInitial {
 export type LookupModel<T extends FluentInterface<Model>> =
   T extends FluentInterface<Model<infer S, infer L>> ? Model<S, L> : never
 
-export type Input = InputBoolean | InputChoice | InputCount | InputGroup | InputString
+export type Input = InputBoolean | InputChoice | InputCount | InputGroup | InputNumber | InputString
 
 export interface GenericOption<T> {
   name: string
@@ -67,18 +70,10 @@ export interface GenericVariable<T> {
 }
 
 export type DeNormalizedStringValue = GenericOption<string | string[]> | GenericVariable<string>
-
-// export type DeNormalizedNumberValue =
-//   | GenericConfiguration<any>
-//   | GenericOption<number | number[]>
-//   | GenericVariable<string>
-
 export type NormalizedStringValue = GenericOption<string> | GenericVariable<string>
 
-// export type NormalizedNumberValue =
-//   | GenericConfiguration<number>
-//   | GenericOption<number>
-//   | GenericVariable<number>
+export type DeNormalizedNumberValue = GenericOption<number | number[]> | GenericVariable<string>
+export type NormalizedNumberValue = GenericOption<number> | GenericVariable<number>
 
 export type Unwrap<T> = T extends (...arguments_: any[]) => infer U ? Awaited<U> : never
 

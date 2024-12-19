@@ -8,19 +8,19 @@ import {
   includes,
   intersection,
   isArray,
-  isPlainObject,
   isBoolean,
   isFunction,
   isNumber,
+  isPlainObject,
   isString,
   isUndefined,
   map,
 } from 'lodash-es'
 
 import {
+  type Command,
   type CommandActions,
   type CommandActionSubcommand,
-  type Command,
   type CommandState,
   CommandTypeAction,
 } from '../command/types'
@@ -34,8 +34,9 @@ import {
   SYMBOL_INPUT_BOOLEAN,
   SYMBOL_INPUT_CHOICE,
   SYMBOL_INPUT_COUNT,
-  SYMBOL_INPUT_STRING,
   SYMBOL_INPUT_GROUP,
+  SYMBOL_INPUT_NUMBER,
+  SYMBOL_INPUT_STRING,
 } from '../types'
 
 import { extract } from './extract'
@@ -124,6 +125,7 @@ const assertions = {
           SYMBOL_INPUT_CHOICE,
           SYMBOL_INPUT_COUNT,
           SYMBOL_INPUT_STRING,
+          SYMBOL_INPUT_NUMBER,
           SYMBOL_INPUT_GROUP,
         ],
         state.type,
@@ -176,6 +178,12 @@ const assertions = {
     ok(
       isCondTuple(values) && intersection(values, options).length === 0,
       // TODO: write a better error message
+      'Assertion Error',
+    )
+  },
+  inputNumberDefault(value: unknown, repeat: boolean): asserts value is string | string[] {
+    ok(
+      repeat ? isArray(value) && every(value, (v) => isNumber(v)) : isNumber(value),
       'Assertion Error',
     )
   },

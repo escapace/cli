@@ -4,6 +4,7 @@ import type { InputChoiceStateInitial } from '../input/choice/types'
 import type { InputCountStateInitial } from '../input/count/types'
 import type { InputGroupStateInitial } from '../input/group/types'
 import type { InputStringStateInitial } from '../input/string/types'
+import type { InputNumberStateInitial } from '../input/number/types'
 import { type GenericOption, type GenericVariable, InputType, type Match } from '../types'
 
 export const getOptionsVariables = (
@@ -12,6 +13,7 @@ export const getOptionsVariables = (
     | InputChoiceStateInitial
     | InputCountStateInitial
     | InputGroupStateInitial
+    | InputNumberStateInitial
     | InputStringStateInitial,
   match: Match,
 ) => {

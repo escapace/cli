@@ -11,12 +11,10 @@ import type {
 import type $ from '@escapace/typelevel'
 import type {
   DeNormalizedStringValue,
-  InputType,
-  LookupModel,
   InputPropertiesShared,
   Reference,
-  StateSharedInitial,
   StateShared,
+  StateSharedInitial,
   SYMBOL_INPUT_STRING,
 } from '../../types'
 
@@ -255,30 +253,30 @@ export interface InputStringStateInitial extends InputStringState {
 export interface InputString
   extends FluentInterface<Model<InputStringStateInitial, InputStringActions>> {}
 
-type ValuesOptions<T extends string> = $.If<
-  $.Is.Never<T>,
-  never,
-  {
-    name: T
-    type: InputType.Option
-    value: string
-  }
->
+// type ValuesOptions<T extends string> = $.If<
+//   $.Is.Never<T>,
+//   never,
+//   {
+//     name: T
+//     type: InputType.Option
+//     value: string
+//   }
+// >
+//
+// type ValuesVariables<T extends string> = $.If<
+//   $.Is.Never<T>,
+//   never,
+//   {
+//     name: T
+//     type: InputType.Variable
+//     value: string
+//   }
+// >
 
-type ValuesVariables<T extends string> = $.If<
-  $.Is.Never<T>,
-  never,
-  {
-    name: T
-    type: InputType.Variable
-    value: string
-  }
->
-
-type Values<T extends Model<InputStringState, InputStringActions>> = Array<
-  | ValuesOptions<$.Values<T['state']['options']>>
-  | ValuesVariables<$.Values<T['state']['variables']>>
->
+// type Values<T extends Model<InputStringState, InputStringActions>> = Array<
+//   | ValuesOptions<$.Values<T['state']['options']>>
+//   | ValuesVariables<$.Values<T['state']['variables']>>
+// >
 
 interface InputStringModel {
   readonly log: InputString[typeof SYMBOL_LOG]
@@ -296,7 +294,7 @@ type InputStringReducerGeneric<T = unknown, U = any> = (
 
 export type InputStringReducerDefault = InputStringReducerGeneric<any, DeNormalizedStringValue[]>
 
-export interface InputStringEmpty
-  extends FluentInterface<Model<InputStringState, InputStringActions>> {}
+// interface InputStringEmpty
+//   extends FluentInterface<Model<InputStringState, InputStringActions>> {}
 
-export type InputStringValuesLookup<T extends InputStringEmpty> = Values<LookupModel<T>>
+// type InputStringValuesLookup<T extends InputStringEmpty> = Values<LookupModel<T>>

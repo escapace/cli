@@ -1,12 +1,15 @@
 import { map } from 'lodash-es'
 import split from 'split-string'
 import type { InputChoiceProperties } from '../input/choice/types'
+import type { InputNumberProperties } from '../input/number/types'
 import type { InputStringProperties } from '../input/string/types'
 import {
+  type DeNormalizedNumberValue,
   type DeNormalizedStringValue,
   type GenericOption,
   type GenericVariable,
   InputType,
+  type NormalizedNumberValue,
   type NormalizedStringValue,
   type Settings,
 } from '../types'
@@ -49,6 +52,28 @@ const normalizeVariableString = (
   )
 }
 
+const normalizeVariableNumber = (
+  value: string,
+  options: {
+    repeat: boolean
+  } & Pick<Settings, 'quotes' | 'separator'>,
+): number[] => {
+  const initial = value.replaceAll(/\p{Z}/gu, '')
+
+  const numbers = (
+    options.repeat
+      ? split(initial, {
+          quotes: options.quotes,
+          separator: options.separator,
+        })
+      : [initial]
+  )
+    .map((value) => unquote(value, options.quotes).replaceAll(/[^\p{N}.]/gu, ''))
+    .map((value) => (value.includes('.') ? parseFloat(value) : parseInt(value, 10)))
+
+  return numbers
+}
+
 export function normalizeString(
   previousValues: DeNormalizedStringValue[],
   properties: InputChoiceProperties | InputStringProperties,
@@ -67,7 +92,7 @@ export function normalizeString(
           )
         : (previousValue as GenericOption<string>)
     } /* (previousValue.type === InputType.Variable) */ else {
-      const asd: Array<GenericVariable<string>> = normalizeVariableString(previousValue.value, {
+      const result: Array<GenericVariable<string>> = normalizeVariableString(previousValue.value, {
         quotes: properties.settings.quotes,
         repeat,
         separator: properties.settings.separator,
@@ -78,7 +103,41 @@ export function normalizeString(
         }),
       )
 
-      return asd
+      return result
+    }
+  }).flat()
+}
+
+export function normalizeNumber(
+  previousValues: DeNormalizedNumberValue[],
+  properties: InputChoiceProperties | InputNumberProperties,
+): NormalizedNumberValue[] {
+  const { repeat } = properties.model.state
+
+  return map(previousValues, (previousValue) => {
+    if (previousValue.type === InputType.Option) {
+      return repeat
+        ? map(
+            previousValue.value as number[],
+            (value): GenericOption<number> => ({
+              ...previousValue,
+              value,
+            }),
+          )
+        : (previousValue as GenericOption<number>)
+    } /* (previousValue.type === InputType.Variable) */ else {
+      const result: Array<GenericVariable<number>> = normalizeVariableNumber(previousValue.value, {
+        quotes: properties.settings.quotes,
+        repeat,
+        separator: properties.settings.separator,
+      }).map(
+        (value): GenericVariable<number> => ({
+          ...previousValue,
+          value,
+        }),
+      )
+
+      return result
     }
   }).flat()
 }

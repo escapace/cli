@@ -5,6 +5,7 @@ import { choice } from './input/choice/domain-language'
 import { count } from './input/count/domain-language'
 import { group } from './input/group/domain-language'
 import { string } from './input/string/domain-language'
+import { number } from './input/number/domain-language'
 
 export const grant = string()
   .reference('GRANT')
@@ -28,7 +29,7 @@ export const retrace = count()
   .option('-r', '-d')
   .default(2)
 
-export const pummel = string()
+export const pummel = number()
   .reference('PUMMEL')
   .description(
     'Furlong furlong focal for the genuflect profound of the motif aloof and offers. Gnome gnome gondola for the impugn logos',
@@ -37,7 +38,7 @@ export const pummel = string()
   .option('--pummel')
   .option('-p')
   .variable('PUMMEL')
-  .default(['bison', 'tunnel'])
+  .default([1024, 512])
 
 export const wick = choice()
   .reference('WICK')
