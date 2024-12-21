@@ -3,6 +3,7 @@ export { boolean } from './input/boolean/domain-language'
 export { choice } from './input/choice/domain-language'
 export { count } from './input/count/domain-language'
 export { group } from './input/group/domain-language'
+export { number } from './input/number/domain-language'
 export { string } from './input/string/domain-language'
 
 export type {
@@ -20,6 +21,7 @@ export type * from './input/boolean/types'
 export type * from './input/choice/types'
 export type * from './input/count/types'
 export type * from './input/group/types'
+export type * from './input/number/types'
 export type * from './input/string/types'
 
 import { noop } from 'lodash-es'
